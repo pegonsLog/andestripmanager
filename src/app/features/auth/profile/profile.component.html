@@ -1,0 +1,219 @@
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>Meu Perfil</h1>
+        <p>Gerencie suas informações pessoais e dados da motocicleta</p>
+    </div>
+
+    <!-- Seção de Foto de Perfil -->
+    <mat-card class="photo-section">
+        <mat-card-header>
+            <mat-card-title>Foto de Perfil</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <div class="photo-container">
+                <div class="photo-preview">
+                    @if (fotoPreview) {
+                    <img [src]="fotoPreview" alt="Foto de perfil" class="profile-photo">
+                    } @else {
+                    <div class="no-photo">
+                        <mat-icon>person</mat-icon>
+                        <span>Nenhuma foto</span>
+                    </div>
+                    }
+
+                    @if (isUploadingPhoto) {
+                    <div class="upload-overlay">
+                        <mat-spinner diameter="40"></mat-spinner>
+                    </div>
+                    }
+                </div>
+
+                <div class="photo-actions">
+                    <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)"
+                        style="display: none">
+
+                    <button mat-raised-button color="primary" (click)="fileInput.click()" [disabled]="isUploadingPhoto">
+                        <mat-icon>photo_camera</mat-icon>
+                        Alterar Foto
+                    </button>
+
+                    @if (fotoPreview) {
+                    <button mat-stroked-button color="warn" (click)="removeFoto()" [disabled]="isUploadingPhoto">
+                        <mat-icon>delete</mat-icon>
+                        Remover
+                    </button>
+                    }
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Seção de Dados Pessoais -->
+    <mat-card class="form-section">
+        <mat-card-header>
+            <mat-card-title>Dados Pessoais</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="perfilForm" (ngSubmit)="onSalvarPerfil()">
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Nome Completo</mat-label>
+                        <input matInput formControlName="nome" placeholder="Digite seu nome completo">
+                        <mat-icon matSuffix>person</mat-icon>
+                        @if (perfilForm.get('nome')?.invalid && perfilForm.get('nome')?.touched) {
+                        <mat-error>{{ getErrorMessage(perfilForm, 'nome') }}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Email</mat-label>
+                        <input matInput formControlName="email" readonly>
+                        <mat-icon matSuffix>email</mat-icon>
+                        <mat-hint>O email não pode ser alterado</mat-hint>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>CPF</mat-label>
+                        <input matInput formControlName="cpf" placeholder="000.000.000-00">
+                        <mat-icon matSuffix>badge</mat-icon>
+                        @if (perfilForm.get('cpf')?.invalid && perfilForm.get('cpf')?.touched) {
+                        <mat-error>{{ getErrorMessage(perfilForm, 'cpf') }}</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>Telefone</mat-label>
+                        <input matInput formControlName="telefone" placeholder="(00) 00000-0000">
+                        <mat-icon matSuffix>phone</mat-icon>
+                        @if (perfilForm.get('telefone')?.invalid && perfilForm.get('telefone')?.touched) {
+                        <mat-error>{{ getErrorMessage(perfilForm, 'telefone') }}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                    <button mat-raised-button color="primary" type="submit" [disabled]="perfilForm.invalid || isSaving">
+                        @if (isSaving) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                        Salvando...
+                        } @else {
+                        <ng-container>
+                            <mat-icon>save</mat-icon>
+                            Salvar Dados Pessoais
+                        </ng-container>
+                        }
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-divider></mat-divider>
+
+    <!-- Seção de Dados da Motocicleta -->
+    <mat-card class="form-section">
+        <mat-card-header>
+            <mat-card-title>Dados da Motocicleta</mat-card-title>
+            <mat-card-subtitle>Informações sobre sua motocicleta para melhor planejamento das
+                viagens</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="motocicletaForm" (ngSubmit)="onSalvarMotocicleta()">
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>Marca</mat-label>
+                        <input matInput formControlName="marca" placeholder="Ex: Honda, Yamaha, BMW">
+                        <mat-icon matSuffix>motorcycle</mat-icon>
+                        @if (motocicletaForm.get('marca')?.invalid && motocicletaForm.get('marca')?.touched) {
+                        <mat-error>{{ getErrorMessage(motocicletaForm, 'marca') }}</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>Modelo</mat-label>
+                        <input matInput formControlName="modelo" placeholder="Ex: CB 600F, MT-07, F 850 GS">
+                        @if (motocicletaForm.get('modelo')?.invalid && motocicletaForm.get('modelo')?.touched) {
+                        <mat-error>{{ getErrorMessage(motocicletaForm, 'modelo') }}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="third-width">
+                        <mat-label>Ano</mat-label>
+                        <input matInput type="number" formControlName="ano" placeholder="2020">
+                        <mat-icon matSuffix>calendar_today</mat-icon>
+                        @if (motocicletaForm.get('ano')?.invalid && motocicletaForm.get('ano')?.touched) {
+                        <mat-error>{{ getErrorMessage(motocicletaForm, 'ano') }}</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="third-width">
+                        <mat-label>Placa</mat-label>
+                        <input matInput formControlName="placa" placeholder="ABC-1234">
+                        <mat-icon matSuffix>confirmation_number</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="third-width">
+                        <mat-label>Cor</mat-label>
+                        <input matInput formControlName="cor" placeholder="Azul, Preta, Vermelha">
+                        <mat-icon matSuffix>palette</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="third-width">
+                        <mat-label>Cilindrada (cc)</mat-label>
+                        <input matInput type="number" formControlName="cilindrada" placeholder="600">
+                        <mat-icon matSuffix>speed</mat-icon>
+                        @if (motocicletaForm.get('cilindrada')?.invalid && motocicletaForm.get('cilindrada')?.touched) {
+                        <mat-error>{{ getErrorMessage(motocicletaForm, 'cilindrada') }}</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="third-width">
+                        <mat-label>Capacidade do Tanque (L)</mat-label>
+                        <input matInput type="number" formControlName="capacidadeTanque" placeholder="17.3">
+                        <mat-icon matSuffix>local_gas_station</mat-icon>
+                        @if (motocicletaForm.get('capacidadeTanque')?.invalid &&
+                        motocicletaForm.get('capacidadeTanque')?.touched) {
+                        <mat-error>{{ getErrorMessage(motocicletaForm, 'capacidadeTanque') }}</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="third-width">
+                        <mat-label>Consumo Médio (km/L)</mat-label>
+                        <input matInput type="number" formControlName="consumoMedio" placeholder="18.5">
+                        <mat-icon matSuffix>eco</mat-icon>
+                        @if (motocicletaForm.get('consumoMedio')?.invalid &&
+                        motocicletaForm.get('consumoMedio')?.touched) {
+                        <mat-error>{{ getErrorMessage(motocicletaForm, 'consumoMedio') }}</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                    <button mat-raised-button color="primary" type="submit"
+                        [disabled]="motocicletaForm.invalid || isSaving">
+                        @if (isSaving) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                        Salvando...
+                        } @else {
+                        <ng-container>
+                            <mat-icon>save</mat-icon>
+                            Salvar Dados da Motocicleta
+                        </ng-container>
+                        }
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

@@ -1,0 +1,297 @@
+<div class="dashboard-container">
+    <!-- Header com boas-vindas -->
+    <div class="dashboard-header">
+        <div class="welcome-section">
+            <h1 class="font-bold">Dashboard</h1>
+            <p class="font-regular subtitle" *ngIf="usuario$ | async as usuario">
+                Bem-vindo, {{ usuario.nome }}! Gerencie suas viagens de motocicleta.
+            </p>
+        </div>
+
+        <div class="header-actions">
+            <button mat-raised-button color="primary" class="font-medium" (click)="criarNovaViagem()">
+                <mat-icon>add</mat-icon>
+                Nova Viagem
+            </button>
+
+            <button mat-icon-button (click)="recarregarDados()" [disabled]="isLoading$ | async">
+                <mat-icon>refresh</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading$ | async">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p class="font-regular">Carregando dados...</p>
+    </div>
+
+    <!-- Error State -->
+    <mat-card class="error-card" *ngIf="error$ | async as error">
+        <mat-card-content>
+            <div class="error-content">
+                <mat-icon color="warn">error</mat-icon>
+                <p class="font-regular">{{ error }}</p>
+                <button mat-button color="primary" (click)="recarregarDados()">
+                    Tentar Novamente
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content" *ngIf="!(isLoading$ | async) && !(error$ | async)">
+
+        <!-- Estatísticas -->
+        <div class="statistics-section">
+            <h2 class="font-semibold section-title">Estatísticas</h2>
+
+            <mat-grid-list cols="4" rowHeight="120px" gutterSize="16px" class="statistics-grid">
+                <mat-grid-tile>
+                    <mat-card class="stat-card">
+                        <mat-card-content>
+                            <div class="stat-content">
+                                <mat-icon class="stat-icon primary">map</mat-icon>
+                                <div class="stat-info">
+                                    <span class="stat-number font-bold">{{ (estatisticas$ | async)?.totalViagens || 0
+                                        }}</span>
+                                    <span class="stat-label font-regular">Total de Viagens</span>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-card class="stat-card">
+                        <mat-card-content>
+                            <div class="stat-content">
+                                <mat-icon class="stat-icon accent">directions_bike</mat-icon>
+                                <div class="stat-info">
+                                    <span class="stat-number font-bold">{{ (estatisticas$ | async)?.viagensEmAndamento
+                                        || 0 }}</span>
+                                    <span class="stat-label font-regular">Em Andamento</span>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-card class="stat-card">
+                        <mat-card-content>
+                            <div class="stat-content">
+                                <mat-icon class="stat-icon warn">route</mat-icon>
+                                <div class="stat-info">
+                                    <span class="stat-number font-bold">{{ formatarDistancia((estatisticas$ |
+                                        async)?.distanciaTotal || 0) }}</span>
+                                    <span class="stat-label font-regular">Distância Total</span>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-card class="stat-card">
+                        <mat-card-content>
+                            <div class="stat-content">
+                                <mat-icon class="stat-icon success">attach_money</mat-icon>
+                                <div class="stat-info">
+                                    <span class="stat-number font-bold">{{ formatarMoeda((estatisticas$ |
+                                        async)?.custoTotal || 0) }}</span>
+                                    <span class="stat-label font-regular">Custo Total</span>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </mat-grid-tile>
+            </mat-grid-list>
+        </div>
+
+        <!-- Viagens Recentes -->
+        <div class="recent-trips-section">
+            <div class="section-header">
+                <h2 class="font-semibold section-title">Viagens Recentes</h2>
+                <button mat-button color="primary" (click)="verTodasViagens()" class="font-medium">
+                    Ver Todas
+                    <mat-icon>arrow_forward</mat-icon>
+                </button>
+            </div>
+
+            <!-- Lista de viagens recentes -->
+            <div class="trips-grid" *ngIf="(viagensRecentes$ | async)?.length; else noTrips">
+                <app-viagem-card *ngFor="let viagem of viagensRecentes$ | async; trackBy: trackByViagemId"
+                    [viagem]="viagem" [compact]="true" [showActions]="true" (visualizar)="verDetalhesViagem($event)"
+                    (editar)="onEditarViagem($event)" (excluir)="onExcluirViagem($event)"
+                    (duplicar)="onDuplicarViagem($event)"></app-viagem-card>
+            </div>
+
+            <!-- Estado vazio -->
+            <ng-template #noTrips>
+                <mat-card class="empty-state">
+                    <mat-card-content>
+                        <div class="empty-content">
+                            <mat-icon class="empty-icon">map</mat-icon>
+                            <h3 class="font-semibold">Nenhuma viagem encontrada</h3>
+                            <p class="font-regular">Comece criando sua primeira viagem de motocicleta!</p>
+                            <button mat-raised-button color="primary" class="font-medium" (click)="criarNovaViagem()">
+                                <mat-icon>add</mat-icon>
+                                Criar Primeira Viagem
+                            </button>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </ng-template>
+        </div>
+
+        <!-- Todas as Viagens com Filtros -->
+        <div class="all-trips-section" *ngIf="(viagens$ | async)?.length">
+            <div class="section-header">
+                <h2 class="font-semibold section-title">Todas as Viagens</h2>
+                <div class="header-controls">
+                    <button mat-stroked-button color="primary" (click)="limparFiltros()" *ngIf="hasFiltrosAtivos()"
+                        class="font-medium">
+                        <mat-icon>clear</mat-icon>
+                        Limpar Filtros
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controles de Filtro e Busca -->
+            <div class="filters-section">
+                <mat-card class="filters-card">
+                    <mat-card-content>
+                        <div class="filters-grid">
+                            <!-- Campo de Busca -->
+                            <mat-form-field appearance="outline" class="search-field">
+                                <mat-label>Buscar viagens</mat-label>
+                                <input matInput [formControl]="searchControl" placeholder="Nome, origem ou destino...">
+                                <mat-icon matSuffix>search</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Filtro por Status -->
+                            <mat-form-field appearance="outline" class="status-filter">
+                                <mat-label>Status</mat-label>
+                                <mat-select [value]="statusFilter$ | async"
+                                    (selectionChange)="alterarFiltroStatus($event.value)">
+                                    <mat-option value="todas">Todas</mat-option>
+                                    <mat-option [value]="StatusViagem.PLANEJADA">Planejadas</mat-option>
+                                    <mat-option [value]="StatusViagem.EM_ANDAMENTO">Em Andamento</mat-option>
+                                    <mat-option [value]="StatusViagem.FINALIZADA">Finalizadas</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <!-- Ordenação -->
+                            <div class="sort-controls">
+                                <span class="sort-label font-regular">Ordenar por:</span>
+                                <mat-button-toggle-group [value]="sortBy$ | async"
+                                    (change)="alterarOrdenacao($event.value)" class="sort-toggle">
+                                    <mat-button-toggle value="dataInicio">Data Início</mat-button-toggle>
+                                    <mat-button-toggle value="nome">Nome</mat-button-toggle>
+                                    <mat-button-toggle value="custoTotal">Custo</mat-button-toggle>
+                                </mat-button-toggle-group>
+
+                                <button mat-icon-button (click)="alterarOrdenacao((sortBy$ | async)!)"
+                                    [matTooltip]="(sortDirection$ | async) === 'asc' ? 'Crescente' : 'Decrescente'">
+                                    <mat-icon>{{ (sortDirection$ | async) === 'asc' ? 'arrow_upward' : 'arrow_downward'
+                                        }}</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Resumo dos Filtros -->
+                        <div class="filter-summary" *ngIf="hasFiltrosAtivos()">
+                            <div class="summary-chips">
+                                <mat-chip *ngIf="searchControl.value" removable (removed)="searchControl.setValue('')">
+                                    Busca: "{{ searchControl.value }}"
+                                    <mat-icon matChipRemove>cancel</mat-icon>
+                                </mat-chip>
+
+                                <mat-chip *ngIf="(statusFilter$ | async) !== 'todas'" removable
+                                    (removed)="alterarFiltroStatus('todas')">
+                                    Status: {{ getTextoFiltroStatus((statusFilter$ | async)!) }}
+                                    <mat-icon matChipRemove>cancel</mat-icon>
+                                </mat-chip>
+                            </div>
+
+                            <span class="results-count font-regular">
+                                {{ (totalItems$ | async) || 0 }} viagem(ns) encontrada(s)
+                            </span>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Lista de Viagens Filtradas -->
+            <div class="filtered-trips-grid" *ngIf="(viagensPaginadas$ | async)?.length; else noFilteredTrips">
+                <app-viagem-card *ngFor="let viagem of viagensPaginadas$ | async; trackBy: trackByViagemId"
+                    [viagem]="viagem" [compact]="false" [showActions]="true" (visualizar)="verDetalhesViagem($event)"
+                    (editar)="onEditarViagem($event)" (excluir)="onExcluirViagem($event)"
+                    (duplicar)="onDuplicarViagem($event)"></app-viagem-card>
+            </div>
+
+            <!-- Estado vazio para filtros -->
+            <ng-template #noFilteredTrips>
+                <mat-card class="empty-state">
+                    <mat-card-content>
+                        <div class="empty-content">
+                            <mat-icon class="empty-icon">filter_list_off</mat-icon>
+                            <h3 class="font-semibold">Nenhuma viagem encontrada</h3>
+                            <p class="font-regular">
+                                Tente ajustar os filtros ou criar uma nova viagem.
+                            </p>
+                            <div class="empty-actions">
+                                <button mat-button color="primary" (click)="limparFiltros()" *ngIf="hasFiltrosAtivos()">
+                                    Limpar Filtros
+                                </button>
+                                <button mat-raised-button color="primary" (click)="criarNovaViagem()">
+                                    <mat-icon>add</mat-icon>
+                                    Nova Viagem
+                                </button>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </ng-template>
+
+            <!-- Paginação -->
+            <div class="pagination-section" *ngIf="(totalItems$ | async)! > pageSize">
+                <mat-paginator [length]="totalItems$ | async" [pageSize]="pageSize" [pageIndex]="currentPage$ | async"
+                    [pageSizeOptions]="[6, 12, 24]" (page)="onPageChange($event)" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+        </div>
+
+        <!-- Ações Rápidas -->
+        <div class="quick-actions-section">
+            <h2 class="font-semibold section-title">Ações Rápidas</h2>
+
+            <div class="actions-grid">
+                <mat-card class="action-card" (click)="criarNovaViagem()">
+                    <mat-card-content>
+                        <mat-icon class="action-icon">add_location</mat-icon>
+                        <h3 class="font-semibold">Nova Viagem</h3>
+                        <p class="font-regular">Planeje sua próxima aventura</p>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card class="action-card" (click)="verTodasViagens()">
+                    <mat-card-content>
+                        <mat-icon class="action-icon">list</mat-icon>
+                        <h3 class="font-semibold">Todas as Viagens</h3>
+                        <p class="font-regular">Visualize e gerencie suas viagens</p>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card class="action-card">
+                    <mat-card-content>
+                        <mat-icon class="action-icon">settings</mat-icon>
+                        <h3 class="font-semibold">Configurações</h3>
+                        <p class="font-regular">Ajuste suas preferências</p>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

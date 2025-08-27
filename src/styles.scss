@@ -1,0 +1,51 @@
+/* You can add global styles to this file, and also import other style files */
+
+// Importar tema pré-construído do Angular Material
+@import "@angular/material/prebuilt-themes/indigo-pink.css";
+
+// Estilos globais
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+}
+
+// Classes utilitárias para diferentes pesos da fonte Montserrat
+.font-light {
+  font-weight: 300;
+}
+.font-regular {
+  font-weight: 400;
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.font-bold {
+  font-weight: 700;
+}
+
+// Customizações para o tema brasileiro
+.primary-bg {
+  background-color: #1976d2;
+  color: white;
+}
+
+.accent-bg {
+  background-color: #4caf50;
+  color: white;
+}
+
+// Estilos para snackbar
+.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.error-snackbar {
+  background-color: #f44336 !important;
+  color: white !important;
+}

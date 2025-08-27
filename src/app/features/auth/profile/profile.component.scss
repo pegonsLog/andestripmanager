@@ -1,0 +1,226 @@
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  gap: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 32px;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+.photo-section {
+  margin-bottom: 24px;
+
+  .photo-container {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  .photo-preview {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .profile-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .no-photo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #999;
+      font-size: 0.875rem;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 8px;
+      }
+    }
+
+    .upload-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .photo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    button {
+      min-width: 140px;
+    }
+  }
+}
+
+.form-section {
+  margin-bottom: 24px;
+
+  mat-card-header {
+    margin-bottom: 24px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  .full-width {
+    flex: 1;
+    min-width: 100%;
+  }
+
+  .half-width {
+    flex: 1;
+    min-width: 280px;
+
+    @media (max-width: 600px) {
+      min-width: 100%;
+    }
+  }
+
+  .third-width {
+    flex: 1;
+    min-width: 200px;
+
+    @media (max-width: 900px) {
+      min-width: 280px;
+    }
+
+    @media (max-width: 600px) {
+      min-width: 100%;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+    gap: 12px;
+
+    @media (max-width: 600px) {
+      justify-content: stretch;
+
+      button {
+        flex: 1;
+      }
+    }
+
+    button {
+      min-width: 160px;
+      height: 48px;
+
+      mat-spinner {
+        margin-right: 8px;
+      }
+
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+// Estilos para campos de formulário
+mat-form-field {
+  width: 100%;
+
+  &.readonly {
+    .mat-mdc-form-field-input-control input {
+      color: #666;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Estilos para o divider
+mat-divider {
+  margin: 32px 0;
+}
+
+// Animações
+.profile-container {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Estados de loading
+.loading-state {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+// Responsividade adicional
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 16px;
+  }
+
+  .profile-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .photo-section .photo-preview {
+    width: 100px;
+    height: 100px;
+  }
+}

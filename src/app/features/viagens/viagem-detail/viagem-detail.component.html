@@ -1,0 +1,379 @@
+<!-- Loading Spinner -->
+<div *ngIf="isLoading()" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Carregando dados da viagem...</p>
+</div>
+
+<!-- Conteúdo Principal -->
+<div *ngIf="!isLoading() && viagem()" class="viagem-detail-container">
+
+    <!-- Cabeçalho da Viagem -->
+    <mat-card class="header-card">
+        <mat-card-header>
+            <div mat-card-avatar class="avatar-icon">
+                <mat-icon [color]="getCorStatus(viagem()!.status)">{{ getIconeStatus(viagem()!.status) }}</mat-icon>
+            </div>
+
+            <mat-card-title>{{ viagem()!.nome }}</mat-card-title>
+
+            <mat-card-subtitle>
+                <div class="subtitle-info">
+                    <span>{{ viagem()!.origem }} → {{ viagem()!.destino }}</span>
+                    <mat-chip [color]="getCorStatus(viagem()!.status)" selected>
+                        {{ getTextoStatus(viagem()!.status) }}
+                    </mat-chip>
+                </div>
+            </mat-card-subtitle>
+
+            <!-- Ações do Cabeçalho -->
+            <div class="header-actions">
+                <button mat-icon-button (click)="onVoltar()" matTooltip="Voltar para lista">
+                    <mat-icon>arrow_back</mat-icon>
+                </button>
+
+                <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Mais ações">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+
+                <mat-menu #actionsMenu="matMenu">
+                    <button mat-menu-item (click)="onEditar()" [disabled]="!podeEditar()">
+                        <mat-icon>edit</mat-icon>
+                        <span>Editar Viagem</span>
+                    </button>
+
+                    <button mat-menu-item (click)="onDuplicar()">
+                        <mat-icon>content_copy</mat-icon>
+                        <span>Duplicar Viagem</span>
+                    </button>
+
+                    <mat-divider></mat-divider>
+
+                    <button mat-menu-item (click)="onAtualizarStatus(StatusViagem.EM_ANDAMENTO)"
+                        [disabled]="!podeIniciar()">
+                        <mat-icon>play_arrow</mat-icon>
+                        <span>Iniciar Viagem</span>
+                    </button>
+
+                    <button mat-menu-item (click)="onAtualizarStatus(StatusViagem.FINALIZADA)"
+                        [disabled]="!podeFinalizar()">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Finalizar Viagem</span>
+                    </button>
+
+                    <button mat-menu-item (click)="onAtualizarStatus(StatusViagem.CANCELADA)"
+                        [disabled]="viagem()!.status === StatusViagem.FINALIZADA || viagem()!.status === StatusViagem.CANCELADA">
+                        <mat-icon>cancel</mat-icon>
+                        <span>Cancelar Viagem</span>
+                    </button>
+
+                    <mat-divider></mat-divider>
+
+                    <button mat-menu-item (click)="onExcluir()" class="delete-action">
+                        <mat-icon>delete</mat-icon>
+                        <span>Excluir Viagem</span>
+                    </button>
+                </mat-menu>
+            </div>
+        </mat-card-header>
+
+        <!-- Informações Resumidas -->
+        <mat-card-content>
+            <div class="info-grid">
+                <div class="info-item">
+                    <mat-icon>date_range</mat-icon>
+                    <div class="info-content">
+                        <span class="info-label">Período</span>
+                        <span class="info-value">
+                            {{ formatarData(viagem()!.dataInicio) }} - {{ formatarData(viagem()!.dataFim) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <mat-icon>schedule</mat-icon>
+                    <div class="info-content">
+                        <span class="info-label">Duração</span>
+                        <span class="info-value">{{ calcularDuracao(viagem()!) }} dias</span>
+                    </div>
+                </div>
+
+                <div class="info-item" *ngIf="viagem()!.distanciaTotal">
+                    <mat-icon>straighten</mat-icon>
+                    <div class="info-content">
+                        <span class="info-label">Distância</span>
+                        <span class="info-value">{{ formatarDistancia(viagem()!.distanciaTotal!) }}</span>
+                    </div>
+                </div>
+
+                <div class="info-item" *ngIf="viagem()!.custoTotal">
+                    <mat-icon>attach_money</mat-icon>
+                    <div class="info-content">
+                        <span class="info-label">Custo Total</span>
+                        <span class="info-value">{{ formatarMoeda(viagem()!.custoTotal!) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descrição -->
+            <div *ngIf="viagem()!.descricao" class="description">
+                <h4>Descrição</h4>
+                <p>{{ viagem()!.descricao }}</p>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Modo de Edição -->
+    <mat-card *ngIf="isEditMode()" class="edit-card">
+        <mat-card-header>
+            <mat-card-title>Editar Viagem</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <app-viagem-form [viagem]="viagem()!" (viagemSalva)="onViagemSalva($event)" (cancelar)="onCancelarEdicao()">
+            </app-viagem-form>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Abas de Conteúdo -->
+    <mat-card *ngIf="!isEditMode()" class="tabs-card">
+        <mat-tab-group [selectedIndex]="selectedTabIndex()" (selectedTabChange)="onTabChange($event.index)"
+            animationDuration="300ms">
+
+            <!-- Aba Resumo -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">info</mat-icon>
+                    Resumo
+                </ng-template>
+
+                <div class="tab-content">
+                    <div class="resumo-container">
+
+                        <!-- Estatísticas Gerais -->
+                        <div class="stats-section">
+                            <h3>Estatísticas da Viagem</h3>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <mat-icon>calendar_today</mat-icon>
+                                    <div class="stat-info">
+                                        <span class="stat-value">{{ calcularDuracao(viagem()!) }}</span>
+                                        <span class="stat-label">Dias</span>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card" *ngIf="viagem()!.distanciaTotal">
+                                    <mat-icon>straighten</mat-icon>
+                                    <div class="stat-info">
+                                        <span class="stat-value">{{ viagem()!.distanciaTotal }}</span>
+                                        <span class="stat-label">km</span>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card" *ngIf="viagem()!.custoTotal">
+                                    <mat-icon>attach_money</mat-icon>
+                                    <div class="stat-info">
+                                        <span class="stat-value">{{ formatarMoeda(viagem()!.custoTotal!) }}</span>
+                                        <span class="stat-label">Custo Total</span>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card">
+                                    <mat-icon>place</mat-icon>
+                                    <div class="stat-info">
+                                        <span class="stat-value">0</span>
+                                        <span class="stat-label">Paradas</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="observacoes-section" *ngIf="viagem()!.observacoes">
+                            <h3>Observações</h3>
+                            <div class="observacoes-content">
+                                <p>{{ viagem()!.observacoes }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Ações Rápidas -->
+                        <div class="quick-actions">
+                            <h3>Ações Rápidas</h3>
+                            <div class="actions-grid">
+                                <button mat-raised-button color="primary" (click)="selectedTabIndex.set(1)">
+                                    <mat-icon>calendar_today</mat-icon>
+                                    Gerenciar Dias
+                                </button>
+
+                                <button mat-raised-button color="accent" (click)="selectedTabIndex.set(2)">
+                                    <mat-icon>place</mat-icon>
+                                    Adicionar Paradas
+                                </button>
+
+                                <button mat-raised-button (click)="selectedTabIndex.set(4)">
+                                    <mat-icon>attach_money</mat-icon>
+                                    Controlar Custos
+                                </button>
+
+                                <button mat-raised-button (click)="selectedTabIndex.set(7)">
+                                    <mat-icon>book</mat-icon>
+                                    Diário de Bordo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba Dias -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">calendar_today</mat-icon>
+                    Dias
+                </ng-template>
+
+                <div class="tab-content">
+                    <div class="placeholder-content">
+                        <mat-icon class="placeholder-icon">calendar_today</mat-icon>
+                        <h3>Planejamento de Dias</h3>
+                        <p>Organize cada dia da sua viagem com rotas, distâncias e tempo estimado.</p>
+                        <button mat-raised-button color="primary">
+                            <mat-icon>add</mat-icon>
+                            Adicionar Dia
+                        </button>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba Paradas -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">place</mat-icon>
+                    Paradas
+                </ng-template>
+
+                <div class="tab-content">
+                    <div class="placeholder-content">
+                        <mat-icon class="placeholder-icon">place</mat-icon>
+                        <h3>Paradas da Viagem</h3>
+                        <p>Registre abastecimentos, refeições e pontos de interesse.</p>
+                        <button mat-raised-button color="primary">
+                            <mat-icon>add</mat-icon>
+                            Adicionar Parada
+                        </button>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba Hospedagens -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">hotel</mat-icon>
+                    Hospedagens
+                </ng-template>
+
+                <div class="tab-content">
+                    <div class="placeholder-content">
+                        <mat-icon class="placeholder-icon">hotel</mat-icon>
+                        <h3>Hospedagens</h3>
+                        <p>Gerencie reservas, custos e avaliações das hospedagens.</p>
+                        <button mat-raised-button color="primary">
+                            <mat-icon>add</mat-icon>
+                            Adicionar Hospedagem
+                        </button>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba Custos -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">attach_money</mat-icon>
+                    Custos
+                </ng-template>
+
+                <div class="tab-content">
+                    <div class="placeholder-content">
+                        <mat-icon class="placeholder-icon">attach_money</mat-icon>
+                        <h3>Controle de Custos</h3>
+                        <p>Acompanhe todos os gastos da viagem por categoria.</p>
+                        <button mat-raised-button color="primary">
+                            <mat-icon>add</mat-icon>
+                            Adicionar Custo
+                        </button>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba Clima -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">wb_sunny</mat-icon>
+                    Clima
+                </ng-template>
+
+                <div class="tab-content">
+                    <div class="placeholder-content">
+                        <mat-icon class="placeholder-icon">wb_sunny</mat-icon>
+                        <h3>Informações Climáticas</h3>
+                        <p>Acompanhe a previsão do tempo e registre condições observadas.</p>
+                        <button mat-raised-button color="primary">
+                            <mat-icon>refresh</mat-icon>
+                            Atualizar Previsão
+                        </button>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba Manutenção -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">build</mat-icon>
+                    Manutenção
+                </ng-template>
+
+                <div class="tab-content">
+                    <div class="placeholder-content">
+                        <mat-icon class="placeholder-icon">build</mat-icon>
+                        <h3>Controle de Manutenção</h3>
+                        <p>Registre manutenções preventivas e corretivas da motocicleta.</p>
+                        <button mat-raised-button color="primary">
+                            <mat-icon>add</mat-icon>
+                            Registrar Manutenção
+                        </button>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba Diário -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">book</mat-icon>
+                    Diário
+                </ng-template>
+
+                <div class="tab-content">
+                    <div class="placeholder-content">
+                        <mat-icon class="placeholder-icon">book</mat-icon>
+                        <h3>Diário de Bordo</h3>
+                        <p>Documente suas experiências, fotos e memórias da viagem.</p>
+                        <button mat-raised-button color="primary">
+                            <mat-icon>add</mat-icon>
+                            Nova Entrada
+                        </button>
+                    </div>
+                </div>
+            </mat-tab>
+
+        </mat-tab-group>
+    </mat-card>
+</div>
+
+<!-- Estado de Erro -->
+<div *ngIf="!isLoading() && !viagem()" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h2>Viagem não encontrada</h2>
+    <p>A viagem solicitada não foi encontrada ou você não tem permissão para visualizá-la.</p>
+    <button mat-raised-button color="primary" (click)="onVoltar()">
+        <mat-icon>arrow_back</mat-icon>
+        Voltar para Lista
+    </button>
+</div>

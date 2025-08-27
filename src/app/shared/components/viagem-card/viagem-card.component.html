@@ -1,0 +1,136 @@
+<mat-card class="viagem-card" [class.compact]="compact" [class.atrasada]="isAtrasada()" (click)="onVisualizar()">
+    <!-- Header do Card -->
+    <mat-card-header>
+        <div mat-card-avatar class="status-avatar">
+            <mat-icon [color]="getCorStatus(viagem.status)">{{ getIconeStatus(viagem.status) }}</mat-icon>
+        </div>
+
+        <mat-card-title class="font-semibold viagem-titulo">
+            {{ viagem.nome }}
+        </mat-card-title>
+
+        <mat-card-subtitle class="font-regular">
+            {{ formatarData(viagem.dataInicio) }} - {{ formatarData(viagem.dataFim) }}
+        </mat-card-subtitle>
+
+        <!-- Menu de ações -->
+        <div class="card-menu" *ngIf="showActions">
+            <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()"
+                matTooltip="Mais opções">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="onEditar($event)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar</span>
+                </button>
+                <button mat-menu-item (click)="onDuplicar($event)">
+                    <mat-icon>content_copy</mat-icon>
+                    <span>Duplicar</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="onExcluir($event)" class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    <span>Excluir</span>
+                </button>
+            </mat-menu>
+        </div>
+    </mat-card-header>
+
+    <!-- Conteúdo do Card -->
+    <mat-card-content>
+        <!-- Rota da viagem -->
+        <div class="viagem-rota" *ngIf="viagem.origem && viagem.destino">
+            <div class="rota-info font-regular">
+                <mat-icon class="rota-icon">place</mat-icon>
+                <span class="origem">{{ viagem.origem }}</span>
+                <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                <span class="destino">{{ viagem.destino }}</span>
+            </div>
+        </div>
+
+        <!-- Descrição (se não for compact) -->
+        <div class="viagem-descricao font-regular" *ngIf="!compact && viagem.descricao">
+            <p>{{ viagem.descricao }}</p>
+        </div>
+
+        <!-- Informações da viagem -->
+        <div class="viagem-info">
+            <div class="info-grid">
+                <!-- Duração -->
+                <div class="info-item" matTooltip="Duração da viagem">
+                    <mat-icon class="info-icon">event</mat-icon>
+                    <span class="info-text font-regular">{{ calcularDuracao() }} dias</span>
+                </div>
+
+                <!-- Distância -->
+                <div class="info-item" *ngIf="viagem.distanciaTotal" matTooltip="Distância total">
+                    <mat-icon class="info-icon">straighten</mat-icon>
+                    <span class="info-text font-regular">{{ formatarDistancia(viagem.distanciaTotal) }}</span>
+                </div>
+
+                <!-- Custo -->
+                <div class="info-item" *ngIf="viagem.custoTotal" matTooltip="Custo total">
+                    <mat-icon class="info-icon">attach_money</mat-icon>
+                    <span class="info-text font-regular">{{ formatarMoeda(viagem.custoTotal) }}</span>
+                </div>
+
+                <!-- Número de dias planejados -->
+                <div class="info-item" *ngIf="viagem.numeroDias" matTooltip="Dias planejados">
+                    <mat-icon class="info-icon">calendar_today</mat-icon>
+                    <span class="info-text font-regular">{{ viagem.numeroDias }} dias</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status e alertas -->
+        <div class="viagem-status">
+            <div class="status-section">
+                <mat-chip [color]="getCorStatus(viagem.status)" selected>
+                    <mat-icon matChipAvatar>{{ getIconeStatus(viagem.status) }}</mat-icon>
+                    {{ getTextoStatus(viagem.status) }}
+                </mat-chip>
+
+                <!-- Alerta de atraso -->
+                <mat-chip color="warn" selected *ngIf="isAtrasada()" matTooltip="Viagem atrasada">
+                    <mat-icon matChipAvatar>warning</mat-icon>
+                    Atrasada
+                </mat-chip>
+
+                <!-- Contador de dias restantes -->
+                <div class="dias-restantes" *ngIf="viagem.status === StatusViagem.PLANEJADA && !isAtrasada()">
+                    <span class="font-regular contador-texto">
+                        <mat-icon class="contador-icon">schedule</mat-icon>
+                        {{ diasRestantes() }} dias restantes
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Observações (se houver e não for compact) -->
+        <div class="viagem-observacoes" *ngIf="!compact && viagem.observacoes">
+            <mat-icon class="obs-icon">note</mat-icon>
+            <span class="font-regular obs-text">{{ viagem.observacoes }}</span>
+        </div>
+    </mat-card-content>
+
+    <!-- Ações do Card -->
+    <mat-card-actions align="end" *ngIf="showActions">
+        <button mat-button color="primary" class="font-medium" (click)="onVisualizar()">
+            <mat-icon>visibility</mat-icon>
+            Ver Detalhes
+        </button>
+
+        <button mat-stroked-button color="primary" class="font-medium" (click)="onEditar($event)"
+            *ngIf="viagem.status !== StatusViagem.FINALIZADA">
+            <mat-icon>edit</mat-icon>
+            Editar
+        </button>
+    </mat-card-actions>
+
+    <!-- Indicador de progresso (para viagens em andamento) -->
+    <div class="progress-indicator" *ngIf="viagem.status === StatusViagem.EM_ANDAMENTO">
+        <div class="progress-bar"></div>
+    </div>
+</mat-card>

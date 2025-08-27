@@ -1,0 +1,183 @@
+<div class="viagem-form-container">
+    <mat-card class="form-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+                {{ isEditMode ? 'Editar Viagem' : 'Nova Viagem' }}
+            </mat-card-title>
+            <mat-card-subtitle>
+                {{ isEditMode ? 'Atualize os dados da sua viagem' : 'Planeje sua próxima aventura' }}
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <!-- Loading Spinner -->
+            <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner diameter="50"></mat-spinner>
+                <p>Carregando dados da viagem...</p>
+            </div>
+
+            <!-- Formulário -->
+            <form [formGroup]="viagemForm" (ngSubmit)="onSalvar()" *ngIf="!isLoading">
+                <div class="form-row">
+                    <!-- Nome da Viagem -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Nome da Viagem</mat-label>
+                        <input matInput formControlName="nome" placeholder="Ex: Viagem para Campos do Jordão"
+                            maxlength="100">
+                        <mat-icon matSuffix>title</mat-icon>
+                        <mat-hint>Dê um nome marcante para sua viagem</mat-hint>
+                        <mat-error *ngIf="hasError('nome')">
+                            {{ getErrorMessage('nome') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Descrição -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Descrição</mat-label>
+                        <textarea matInput formControlName="descricao"
+                            placeholder="Descreva sua viagem, roteiro, objetivos..." rows="3" maxlength="500">
+            </textarea>
+                        <mat-icon matSuffix>description</mat-icon>
+                        <mat-hint>Opcional - Descreva os detalhes da sua viagem</mat-hint>
+                        <mat-error *ngIf="hasError('descricao')">
+                            {{ getErrorMessage('descricao') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Origem -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Cidade de Origem</mat-label>
+                        <input matInput formControlName="origem" placeholder="Ex: São Paulo, SP" maxlength="100">
+                        <mat-icon matSuffix>place</mat-icon>
+                        <mat-error *ngIf="hasError('origem')">
+                            {{ getErrorMessage('origem') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Destino -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Cidade de Destino</mat-label>
+                        <input matInput formControlName="destino" placeholder="Ex: Campos do Jordão, SP"
+                            maxlength="100">
+                        <mat-icon matSuffix>flag</mat-icon>
+                        <mat-error *ngIf="hasError('destino')">
+                            {{ getErrorMessage('destino') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Data de Início -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Data de Início</mat-label>
+                        <input matInput [matDatepicker]="pickerInicio" formControlName="dataInicio" readonly>
+                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerInicio></mat-datepicker>
+                        <mat-error *ngIf="hasError('dataInicio')">
+                            {{ getErrorMessage('dataInicio') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Data de Fim -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Data de Fim</mat-label>
+                        <input matInput [matDatepicker]="pickerFim" formControlName="dataFim" readonly>
+                        <mat-datepicker-toggle matSuffix [for]="pickerFim"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFim></mat-datepicker>
+                        <mat-error *ngIf="hasError('dataFim')">
+                            {{ getErrorMessage('dataFim') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Informações Calculadas -->
+                <div class="info-row" *ngIf="viagemForm.get('dataInicio')?.value && viagemForm.get('dataFim')?.value">
+                    <mat-card class="info-card">
+                        <mat-card-content>
+                            <div class="info-item">
+                                <mat-icon>event</mat-icon>
+                                <span>Duração: {{ calcularNumeroDias() }} dias</span>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Status (apenas para edição) -->
+                    <mat-form-field appearance="outline" *ngIf="isEditMode">
+                        <mat-label>Status</mat-label>
+                        <mat-select formControlName="status">
+                            <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                                {{ status.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matSuffix>flag</mat-icon>
+                        <mat-error *ngIf="hasError('status')">
+                            {{ getErrorMessage('status') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Distância Total (Opcional) -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Distância Total (km)</mat-label>
+                        <input matInput type="number" formControlName="distanciaTotal" placeholder="0" min="1">
+                        <mat-icon matSuffix>straighten</mat-icon>
+                        <mat-hint>Opcional - Distância estimada em quilômetros</mat-hint>
+                        <mat-error *ngIf="hasError('distanciaTotal')">
+                            {{ getErrorMessage('distanciaTotal') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Custo Estimado (Opcional) -->
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>Custo Estimado (R$)</mat-label>
+                        <input matInput type="number" formControlName="custoTotal" placeholder="0,00" min="0"
+                            step="0.01">
+                        <span matPrefix>R$&nbsp;</span>
+                        <mat-icon matSuffix>attach_money</mat-icon>
+                        <mat-hint>Opcional - Orçamento estimado para a viagem</mat-hint>
+                        <mat-error *ngIf="hasError('custoTotal')">
+                            {{ getErrorMessage('custoTotal') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Observações -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Observações</mat-label>
+                        <textarea matInput formControlName="observacoes"
+                            placeholder="Anotações gerais, lembretes, pontos importantes..." rows="3" maxlength="1000">
+            </textarea>
+                        <mat-icon matSuffix>note</mat-icon>
+                        <mat-hint>Opcional - Anotações gerais sobre a viagem</mat-hint>
+                        <mat-error *ngIf="hasError('observacoes')">
+                            {{ getErrorMessage('observacoes') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </form>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+            <button mat-button type="button" (click)="onCancelar()" [disabled]="isSaving">
+                <mat-icon>cancel</mat-icon>
+                Cancelar
+            </button>
+
+            <button mat-raised-button color="primary" type="submit" (click)="onSalvar()"
+                [disabled]="viagemForm.invalid || isSaving || isLoading">
+                <mat-spinner *ngIf="isSaving" diameter="20" class="button-spinner"></mat-spinner>
+                <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+                {{ isSaving ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Criar Viagem') }}
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>

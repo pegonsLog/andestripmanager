@@ -1,0 +1,59 @@
+<div class="login-container">
+    <mat-card class="login-card">
+        <mat-card-header>
+            <div class="header-content">
+                <div class="logo">
+                    <mat-icon class="logo-icon">motorcycle</mat-icon>
+                    <h1>Andes Trip Manager</h1>
+                </div>
+                <p class="subtitle">Faça login para continuar</p>
+            </div>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Email</mat-label>
+                    <input matInput type="email" formControlName="email" placeholder="seu@email.com"
+                        autocomplete="email" />
+                    <mat-icon matSuffix>email</mat-icon>
+                    <mat-error>{{ getErrorMessage('email') }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Senha</mat-label>
+                    <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="senha"
+                        placeholder="Sua senha" autocomplete="current-password" />
+                    <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword"
+                        [attr.aria-label]="'Ocultar senha'" [attr.aria-pressed]="hidePassword">
+                        <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                    <mat-error>{{ getErrorMessage('senha') }}</mat-error>
+                </mat-form-field>
+
+                <div class="form-actions">
+                    <button mat-raised-button color="primary" type="submit" class="login-button full-width"
+                        [disabled]="isLoading">
+                        <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
+                        <span *ngIf="!isLoading">Entrar</span>
+                        <span *ngIf="isLoading">Entrando...</span>
+                    </button>
+
+                    <button mat-button type="button" class="forgot-password-button" (click)="onForgotPassword()"
+                        [disabled]="isLoading">
+                        Esqueci minha senha
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+
+        <mat-card-actions class="card-actions">
+            <div class="register-section">
+                <span>Não tem uma conta?</span>
+                <button mat-button color="accent" (click)="onRegister()" [disabled]="isLoading">
+                    Criar conta
+                </button>
+            </div>
+        </mat-card-actions>
+    </mat-card>
+</div>
