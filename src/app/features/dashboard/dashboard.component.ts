@@ -17,9 +17,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 // Componentes compartilhados
-import { ViagemCardComponent } from '../../shared/components';
+import { ViagemCardComponent, ConfirmationDialogComponent, ConfirmationDialogData } from '../../shared/components';
 
 // Services e Models
 import { ViagensService } from '../../services/viagens.service';
@@ -52,6 +55,9 @@ interface EstatisticasDashboard {
         MatSelectModule,
         MatPaginatorModule,
         MatButtonToggleModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatTooltipModule,
         ViagemCardComponent
     ],
     templateUrl: './dashboard.component.html',
@@ -63,6 +69,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly viagensService = inject(ViagensService);
     private readonly authService = inject(AuthService);
+    private readonly dialog = inject(MatDialog);
+    private readonly snackBar = inject(MatSnackBar);
 
     // Estados do componente
     readonly isLoading$ = new BehaviorSubject<boolean>(true);
@@ -96,11 +104,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Dados do usuário
     readonly usuario$: Observable<Usuario | null>;
 
+    // Propriedades para template (evitar pipes em eventos)
+    currentSortBy: 'nome' | 'dataInicio' | 'dataFim' | 'custoTotal' = 'dataInicio';
+    currentSortDirection: 'asc' | 'desc' = 'desc';
+    currentStatusFilter: StatusViagem | 'todas' = 'todas';
+
     // Enums para template
     readonly StatusViagem = StatusViagem;
 
     constructor() {
-        this.usuario$ = this.authService.usuario$;
+        this.usuario$ = this.authService.currentUser$;
     }
 
     ngOnInit(): void {
@@ -144,6 +157,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
      * Configura os filtros e busca
      */
     private configurarFiltros(): void {
+        // Sincronizar propriedades locais com BehaviorSubjects
+        this.sortBy$.pipe(takeUntil(this.destroy$)).subscribe(sortBy => {
+            this.currentSortBy = sortBy;
+        });
+
+        this.sortDirection$.pipe(takeUntil(this.destroy$)).subscribe(direction => {
+            this.currentSortDirection = direction;
+        });
+
+        this.statusFilter$.pipe(takeUntil(this.destroy$)).subscribe(status => {
+            this.currentStatusFilter = status;
+        });
+
         // Combina todos os filtros para aplicar em tempo real
         combineLatest([
             this.viagens$,
@@ -267,7 +293,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             .sort((a, b) => {
                 const dataA = a.atualizadoEm || a.criadoEm;
                 const dataB = b.atualizadoEm || b.criadoEm;
-                return dataB?.toMillis() - dataA?.toMillis();
+                return (dataB?.toMillis() || 0) - (dataA?.toMillis() || 0);
             })
             .slice(0, 5);
 
@@ -375,10 +401,139 @@ export class DashboardComponent implements OnInit, OnDestroy {
     /**
      * Manipula evento de exclusão de viagem
      */
-    onExcluirViagem(viagemId: string): void {
-        // TODO: Implementar confirmação de exclusão
-        console.log('Excluir viagem:', viagemId);
-        // Aqui seria implementada a lógica de confirmação e exclusão
+    async onExcluirViagem(viagemId: string): Promise<void> {
+        const viagem = this.viagens$.value.find(v => v.id === viagemId);
+        if (!viagem) {
+            this.showError('Viagem não encontrada');
+            return;
+        }
+
+        try {
+            // Obter estatísticas detalhadas da viagem
+            const stats = await this.viagensService.obterEstatisticasViagem(viagemId);
+
+            const dialogData: ConfirmationDialogData = {
+                titulo: 'Excluir Viagem',
+                mensagem: `
+                    <div style="text-align: left;">
+                        <p><strong>Tem certeza que deseja excluir a viagem "${viagem.nome}"?</strong></p>
+                        
+                        <p style="color: #f44336; font-weight: 500; margin: 16px 0;">
+                            ⚠️ Esta ação não pode ser desfeita!
+                        </p>
+                        
+                        ${stats.temDadosRelacionados ? `
+                            <p>Os seguintes dados serão <strong>permanentemente removidos</strong>:</p>
+                            <ul style="margin: 12px 0; padding-left: 20px; line-height: 1.6;">
+                                ${stats.totalDias > 0 ? `<li><strong>${stats.totalDias}</strong> ${stats.totalDias === 1 ? 'dia planejado' : 'dias planejados'}</li>` : ''}
+                                ${stats.totalParadas > 0 ? `<li><strong>${stats.totalParadas}</strong> ${stats.totalParadas === 1 ? 'parada registrada' : 'paradas registradas'}</li>` : ''}
+                                ${stats.totalHospedagens > 0 ? `<li><strong>${stats.totalHospedagens}</strong> ${stats.totalHospedagens === 1 ? 'hospedagem' : 'hospedagens'}</li>` : ''}
+                                ${stats.totalCustos > 0 ? `<li><strong>${stats.totalCustos}</strong> ${stats.totalCustos === 1 ? 'registro de custo' : 'registros de custos'} (${this.formatarMoeda(stats.valorTotalCustos)})</li>` : ''}
+                            </ul>
+                            
+                            <div style="background-color: #ffebee; padding: 12px; border-radius: 4px; margin: 16px 0;">
+                                <p style="margin: 0; color: #c62828; font-weight: 500;">
+                                    🗑️ Todos estes dados serão perdidos permanentemente!
+                                </p>
+                            </div>
+                        ` : `
+                            <div style="background-color: #e8f5e8; padding: 12px; border-radius: 4px; margin: 16px 0;">
+                                <p style="margin: 0; color: #2e7d32;">
+                                    ℹ️ Esta viagem não possui dados relacionados.
+                                </p>
+                            </div>
+                        `}
+                    </div>
+                `,
+                textoConfirmar: 'Sim, Excluir Permanentemente',
+                textoCancelar: 'Cancelar',
+                tipo: 'danger',
+                icone: 'delete_forever'
+            };
+
+            const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+                width: '600px',
+                maxWidth: '95vw',
+                data: dialogData,
+                disableClose: true
+            });
+
+            dialogRef.afterClosed().subscribe(result => {
+                if (result === true) {
+                    this.executarExclusaoViagem(viagemId, viagem.nome);
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao obter estatísticas da viagem:', error);
+            this.showError('Erro ao carregar informações da viagem. Tente novamente.');
+        }
+    }
+
+    /**
+     * Executa a exclusão da viagem
+     */
+    private async executarExclusaoViagem(viagemId: string, nomeViagem: string): Promise<void> {
+        // Mostrar snackbar de progresso
+        const progressSnackBar = this.snackBar.open(
+            '🗑️ Excluindo viagem e dados relacionados...',
+            '',
+            {
+                duration: 0, // Não fecha automaticamente
+                panelClass: ['info-snackbar']
+            }
+        );
+
+        try {
+            console.log(`[INFO] Usuário iniciou exclusão da viagem ${viagemId} (${nomeViagem}) do dashboard`);
+
+            await this.viagensService.excluirViagemCompleta(viagemId);
+
+            // Fechar snackbar de progresso
+            progressSnackBar.dismiss();
+
+            // Mostrar sucesso
+            this.showSuccess(`✅ Viagem "${nomeViagem}" excluída com sucesso!`);
+
+            console.log(`[SUCESSO] Viagem ${viagemId} excluída com sucesso do dashboard`);
+
+            // Recarregar dados do dashboard
+            this.carregarDadosDashboard();
+        } catch (error) {
+            console.error(`[ERRO] Falha ao excluir viagem ${viagemId} do dashboard:`, error);
+
+            // Fechar snackbar de progresso
+            progressSnackBar.dismiss();
+
+            let mensagemErro = 'Erro inesperado ao excluir viagem. Tente novamente.';
+
+            if (error instanceof Error) {
+                if (error.message.includes('Usuário não autenticado')) {
+                    mensagemErro = 'Sessão expirada. Faça login novamente.';
+                    // Redirecionar para login após mostrar erro
+                    setTimeout(() => {
+                        this.router.navigate(['/auth/login']);
+                    }, 3000);
+                } else if (error.message.includes('não tem permissão')) {
+                    mensagemErro = 'Você não tem permissão para excluir esta viagem.';
+                } else if (error.message.includes('não encontrada')) {
+                    mensagemErro = 'Viagem não encontrada. Pode ter sido excluída por outro dispositivo.';
+                    // Recarregar dashboard
+                    this.carregarDadosDashboard();
+                } else if (error.message.includes('conexão') || error.message.includes('network')) {
+                    mensagemErro = 'Erro de conexão. Verifique sua internet e tente novamente.';
+                } else if (error.message.includes('indisponível')) {
+                    mensagemErro = 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.';
+                } else if (error.message.includes('Erro crítico')) {
+                    mensagemErro = error.message; // Já é uma mensagem amigável
+                } else {
+                    // Extrair mensagem limpa do erro
+                    const match = error.message.match(/Erro ao excluir viagem: (.+)/);
+                    mensagemErro = match ? match[1] : error.message;
+                }
+            }
+
+            this.showError(`❌ ${mensagemErro}`);
+        }
     }
 
     /**
@@ -451,5 +606,46 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.searchControl.value ||
             this.statusFilter$.value !== 'todas'
         );
+    }
+
+    /**
+     * Exibe mensagem de sucesso
+     */
+    private showSuccess(message: string): void {
+        this.snackBar.open(message, 'Fechar', {
+            duration: 5000,
+            panelClass: ['success-snackbar']
+        });
+    }
+
+    /**
+     * Exibe mensagem de erro
+     */
+    private showError(message: string): void {
+        this.snackBar.open(message, 'Fechar', {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+        });
+    }
+
+    /**
+     * Retorna tooltip para ordenação
+     */
+    getTooltipOrdenacao(): string {
+        return this.currentSortDirection === 'asc' ? 'Crescente' : 'Decrescente';
+    }
+
+    /**
+     * Retorna ícone para ordenação
+     */
+    getIconeOrdenacao(): string {
+        return this.currentSortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
+    }
+
+    /**
+     * Alterna direção da ordenação atual
+     */
+    alterarDirecaoOrdenacao(): void {
+        this.alterarOrdenacao(this.currentSortBy);
     }
 }

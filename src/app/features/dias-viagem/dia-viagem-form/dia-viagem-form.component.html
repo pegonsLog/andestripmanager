@@ -1,0 +1,140 @@
+<div class="dia-form-container">
+    <mat-card class="form-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+                {{ isEditMode ? 'Editar Dia' : 'Novo Dia' }}
+            </mat-card-title>
+            <mat-card-subtitle>
+                {{ isEditMode ? 'Edite as informações do dia da viagem' : 'Adicione um novo dia à sua viagem' }}
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <!-- Loading spinner -->
+        <div class="loading-container" *ngIf="isLoading$ | async">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Carregando dados...</p>
+        </div>
+
+        <!-- Formulário -->
+        <form [formGroup]="diaForm" (ngSubmit)="onSalvar()" *ngIf="!(isLoading$ | async)">
+            <mat-card-content>
+                <!-- Linha 1: Data e Número do Dia -->
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Data</mat-label>
+                        <input matInput [matDatepicker]="datePicker" formControlName="data" required>
+                        <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #datePicker></mat-datepicker>
+                        <mat-error>{{ getErrorMessage('data') }}</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Dia Nº</mat-label>
+                        <input matInput type="number" formControlName="numeroDia" min="1" required>
+                        <mat-error>{{ getErrorMessage('numeroDia') }}</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Linha 2: Origem e Destino -->
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Origem</mat-label>
+                        <input matInput formControlName="origem" placeholder="Cidade de origem" required>
+                        <mat-icon matSuffix>place</mat-icon>
+                        <mat-error>{{ getErrorMessage('origem') }}</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Destino</mat-label>
+                        <input matInput formControlName="destino" placeholder="Cidade de destino" required>
+                        <mat-icon matSuffix>flag</mat-icon>
+                        <mat-error>{{ getErrorMessage('destino') }}</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Linha 3: Distância e Tipo de Estrada -->
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Distância Planejada (km)</mat-label>
+                        <input matInput type="number" formControlName="distanciaPlanejada" min="0.1" step="0.1"
+                            (change)="onDistanciaChange()" required>
+                        <mat-icon matSuffix>route</mat-icon>
+                        <mat-error>{{ getErrorMessage('distanciaPlanejada') }}</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Tipo de Estrada</mat-label>
+                        <mat-select formControlName="tipoEstrada" (selectionChange)="onDistanciaChange()">
+                            <mat-option *ngFor="let tipo of tiposEstrada" [value]="tipo.value">
+                                {{ tipo.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matSuffix>road</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <!-- Linha 4: Horários -->
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Hora de Partida (Planejada)</mat-label>
+                        <input matInput type="time" formControlName="horaPartidaPlanejada">
+                        <mat-icon matSuffix>schedule</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Hora de Chegada (Planejada)</mat-label>
+                        <input matInput type="time" formControlName="horaChegadaPlanejada">
+                        <mat-icon matSuffix>flag</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <!-- Tempo Estimado (calculado automaticamente) -->
+                <div class="tempo-estimado-container" *ngIf="diaForm.get('tempoEstimado')?.value > 0">
+                    <mat-icon>timer</mat-icon>
+                    <div class="tempo-info">
+                        <span class="tempo-label">Tempo Estimado de Viagem</span>
+                        <span class="tempo-valor">{{ formatarTempo(diaForm.get('tempoEstimado')?.value) }}</span>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Observações</mat-label>
+                    <textarea matInput formControlName="observacoes" rows="3"
+                        placeholder="Observações sobre o dia (opcional)">
+          </textarea>
+                    <mat-icon matSuffix>note</mat-icon>
+                </mat-form-field>
+
+                <!-- Informações adicionais -->
+                <div class="info-container">
+                    <mat-icon class="info-icon">info</mat-icon>
+                    <div class="info-content">
+                        <p><strong>Dicas:</strong></p>
+                        <ul>
+                            <li>O tempo estimado é calculado automaticamente baseado na distância e tipo de estrada</li>
+                            <li>As datas devem seguir uma sequência lógica entre os dias</li>
+                            <li>Você pode ajustar os horários depois durante a viagem</li>
+                        </ul>
+                    </div>
+                </div>
+            </mat-card-content>
+
+            <!-- Ações -->
+            <mat-card-actions align="end">
+                <button mat-button type="button" (click)="onCancelar()" [disabled]="isSaving$ | async">
+                    <mat-icon>cancel</mat-icon>
+                    Cancelar
+                </button>
+
+                <button mat-raised-button color="primary" type="submit"
+                    [disabled]="diaForm.invalid || (isSaving$ | async)">
+                    <mat-spinner diameter="20" *ngIf="isSaving$ | async"></mat-spinner>
+                    <mat-icon *ngIf="!(isSaving$ | async)">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+                    {{ (isSaving$ | async) ? 'Salvando...' : (isEditMode ? 'Salvar' : 'Criar Dia') }}
+                </button>
+            </mat-card-actions>
+        </form>
+    </mat-card>
+</div>

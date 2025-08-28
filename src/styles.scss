@@ -3,12 +3,24 @@
 // Importar tema pré-construído do Angular Material
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
+// Importar estilos responsivos
+@import "./styles/responsive.scss";
+
 // Estilos globais
 html,
 body {
   height: 100%;
   margin: 0;
   font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+
+  // Otimizações para dispositivos móveis
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  // Melhorar scroll em dispositivos touch
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
 }
 
 // Classes utilitárias para diferentes pesos da fonte Montserrat
@@ -43,9 +55,170 @@ body {
 .success-snackbar {
   background-color: #4caf50 !important;
   color: white !important;
+
+  .mat-mdc-snack-bar-action {
+    color: white !important;
+  }
 }
 
 .error-snackbar {
   background-color: #f44336 !important;
   color: white !important;
+
+  .mat-mdc-snack-bar-action {
+    color: white !important;
+  }
+}
+
+.warning-snackbar {
+  background-color: #ff9800 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-action {
+    color: white !important;
+  }
+}
+
+.info-snackbar {
+  background-color: #2196f3 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-action {
+    color: white !important;
+  }
+}
+
+// Estilos para PWA e conectividade
+.update-snackbar {
+  background-color: #673ab7 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-action {
+    color: #ffeb3b !important;
+    font-weight: 600;
+  }
+}
+
+// Otimizações para dispositivos móveis
+@media (max-width: 768px) {
+  // Melhorar área de toque em botões
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-fab,
+  .mat-mdc-mini-fab {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  // Ajustar tamanho de inputs para evitar zoom no iOS
+  .mat-mdc-form-field input {
+    font-size: 16px !important;
+  }
+
+  // Melhorar espaçamento em cards
+  .mat-mdc-card {
+    margin: 8px;
+
+    .mat-mdc-card-content {
+      padding: 12px;
+    }
+  }
+
+  // Ajustar diálogos para mobile
+  .mat-mdc-dialog-container {
+    margin: 16px;
+    max-height: calc(100vh - 32px);
+
+    &.full-screen-mobile {
+      margin: 0;
+      max-height: 100vh;
+      height: 100vh;
+      width: 100vw;
+      max-width: 100vw;
+      border-radius: 0;
+    }
+  }
+
+  // Melhorar navegação em tabs
+  .mat-mdc-tab-group {
+    .mat-mdc-tab-label {
+      min-width: 0;
+      padding: 12px 8px;
+      font-size: 14px;
+    }
+  }
+}
+
+// Otimizações para dispositivos de baixo desempenho
+.low-performance {
+  // Simplificar Material Design
+  .mat-mdc-card {
+    box-shadow: none !important;
+    border: 1px solid #e0e0e0;
+  }
+
+  .mat-mdc-button,
+  .mat-mdc-raised-button {
+    box-shadow: none !important;
+  }
+
+  // Desabilitar animações do Material
+  .mat-mdc-progress-spinner circle,
+  .mat-mdc-progress-bar .mat-mdc-progress-bar-fill::after {
+    animation: none !important;
+  }
+}
+
+// Suporte a gestos touch
+.swipe-container {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+// Indicadores de conectividade
+.connectivity-status {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+
+  &.online {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  &.offline {
+    background-color: #f44336;
+    color: white;
+  }
+
+  &.poor-connection {
+    background-color: #ff9800;
+    color: white;
+  }
+}
+
+// Animações otimizadas para mobile
+@media (max-width: 768px) {
+  .mat-mdc-card,
+  .mat-mdc-button,
+  .mat-expansion-panel {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  // Reduzir animações em dispositivos lentos
+  @media (max-device-width: 768px) and (-webkit-max-device-pixel-ratio: 1) {
+    * {
+      animation-duration: 0.1s !important;
+      transition-duration: 0.1s !important;
+    }
+  }
 }

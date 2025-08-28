@@ -1,0 +1,153 @@
+<div class="paradas-list-container">
+
+    <!-- Header com ações -->
+    <div class="list-header">
+        <div class="header-info">
+            <h3>
+                <mat-icon>location_on</mat-icon>
+                Paradas ({{ paradas.length }})
+            </h3>
+        </div>
+
+        <div class="header-actions">
+            <button mat-raised-button color="primary" *ngIf="showAddButton" (click)="onAdicionarParada()">
+                <mat-icon>add</mat-icon>
+                Nova Parada
+            </button>
+        </div>
+    </div>
+
+    <!-- Conteúdo com abas -->
+    <mat-tab-group *ngIf="paradas.length > 0" class="content-tabs">
+
+        <!-- Aba Lista -->
+        <mat-tab label="Lista">
+            <ng-template matTabContent>
+                <div class="paradas-list">
+
+                    <!-- Loading State -->
+                    <div class="loading-container" *ngIf="loading">
+                        <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+                        <p>Carregando paradas...</p>
+                    </div>
+
+                    <!-- Lista de Paradas -->
+                    <div class="paradas-grid" *ngIf="!loading">
+                        <mat-card class="parada-card"
+                            *ngFor="let parada of getParadasOrdenadas(); trackBy: trackByParadaId"
+                            (click)="onParadaClick(parada)">
+
+                            <!-- Header do Card -->
+                            <mat-card-header>
+                                <div mat-card-avatar class="parada-avatar">
+                                    <mat-icon [style.color]="getTipoConfig(parada.tipo).color === 'primary' ? '#1976d2' : 
+                                         getTipoConfig(parada.tipo).color === 'warn' ? '#f44336' : '#9c27b0'">
+                                        {{ getTipoConfig(parada.tipo).icon }}
+                                    </mat-icon>
+                                </div>
+
+                                <mat-card-title>{{ parada.nome }}</mat-card-title>
+                                <mat-card-subtitle>{{ getResumoParada(parada) }}</mat-card-subtitle>
+                            </mat-card-header>
+
+                            <!-- Conteúdo do Card -->
+                            <mat-card-content>
+                                <div class="parada-info">
+
+                                    <!-- Tipo -->
+                                    <div class="info-row">
+                                        <mat-chip-set>
+                                            <mat-chip [color]="getTipoConfig(parada.tipo).color">
+                                                <mat-icon matChipAvatar>{{ getTipoConfig(parada.tipo).icon }}</mat-icon>
+                                                {{ getTipoConfig(parada.tipo).label }}
+                                            </mat-chip>
+                                        </mat-chip-set>
+                                    </div>
+
+                                    <!-- Horário -->
+                                    <div class="info-row" *ngIf="parada.horaChegada || parada.horaSaida">
+                                        <mat-icon class="info-icon">schedule</mat-icon>
+                                        <span>
+                                            {{ formatarHorario(parada.horaChegada) }}
+                                            <span *ngIf="parada.horaSaida"> - {{ formatarHorario(parada.horaSaida)
+                                                }}</span>
+                                        </span>
+                                    </div>
+
+                                    <!-- Endereço -->
+                                    <div class="info-row" *ngIf="parada.endereco">
+                                        <mat-icon class="info-icon">location_on</mat-icon>
+                                        <span class="endereco-text">{{ parada.endereco }}</span>
+                                    </div>
+
+                                    <!-- Custo -->
+                                    <div class="info-row" *ngIf="parada.custo">
+                                        <mat-icon class="info-icon">attach_money</mat-icon>
+                                        <span class="custo-text">{{ formatarValor(parada.custo) }}</span>
+                                    </div>
+
+                                    <!-- Observações -->
+                                    <div class="info-row observacoes" *ngIf="parada.observacoes">
+                                        <mat-icon class="info-icon">note</mat-icon>
+                                        <span class="observacoes-text">{{ parada.observacoes }}</span>
+                                    </div>
+
+                                    <!-- Fotos -->
+                                    <div class="info-row" *ngIf="parada.fotos && parada.fotos.length > 0">
+                                        <mat-icon class="info-icon">photo</mat-icon>
+                                        <span>{{ parada.fotos.length }} foto(s)</span>
+                                    </div>
+
+                                </div>
+                            </mat-card-content>
+
+                            <!-- Ações do Card -->
+                            <mat-card-actions align="end">
+                                <button mat-icon-button matTooltip="Ver no Mapa" *ngIf="temCoordenadas(parada)"
+                                    (click)="onCenterOnMap(parada, $event)">
+                                    <mat-icon>map</mat-icon>
+                                </button>
+
+                                <button mat-icon-button matTooltip="Editar" (click)="onEditarParada(parada, $event)">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+
+                                <button mat-icon-button matTooltip="Excluir" color="warn"
+                                    (click)="onExcluirParada(parada, $event)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </mat-card-actions>
+                        </mat-card>
+                    </div>
+                </div>
+            </ng-template>
+        </mat-tab>
+
+        <!-- Aba Mapa -->
+        <mat-tab label="Mapa" *ngIf="showMap">
+            <ng-template matTabContent>
+                <div class="map-container">
+                    <app-paradas-map [paradas]="paradas" [height]="'500px'" [showFilters]="true" [showLegend]="true"
+                        [clustered]="true" (paradaSelected)="onMapParadaSelected($event)">
+                    </app-paradas-map>
+                </div>
+            </ng-template>
+        </mat-tab>
+
+    </mat-tab-group>
+
+    <!-- Estado Vazio -->
+    <div class="empty-state" *ngIf="paradas.length === 0 && !loading">
+        <div class="empty-content">
+            <mat-icon class="empty-icon">location_off</mat-icon>
+            <h3>Nenhuma parada cadastrada</h3>
+            <p>Adicione paradas para visualizar informações e localização no mapa</p>
+
+            <button mat-raised-button color="primary" *ngIf="showAddButton" (click)="onAdicionarParada()">
+                <mat-icon>add</mat-icon>
+                Adicionar Primeira Parada
+            </button>
+        </div>
+    </div>
+
+</div>

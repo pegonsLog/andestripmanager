@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 
 // Models
 import { Viagem, StatusViagem } from '../../../models';
@@ -22,7 +23,8 @@ import { Viagem, StatusViagem } from '../../../models';
         MatIconModule,
         MatChipsModule,
         MatMenuModule,
-        MatTooltipModule
+        MatTooltipModule,
+        MatDividerModule
     ],
     templateUrl: './viagem-card.component.html',
     styleUrls: ['./viagem-card.component.scss'],

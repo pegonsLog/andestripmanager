@@ -1,0 +1,387 @@
+<mat-card class="parada-form-card">
+    <mat-card-header>
+        <mat-card-title>
+            <mat-icon>{{ getTipoIcon(paradaForm.get('tipo')?.value) }}</mat-icon>
+            {{ isEditMode ? 'Editar Parada' : 'Nova Parada' }}
+        </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Loading Spinner -->
+        <div *ngIf="isLoading" class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Carregando dados da parada...</p>
+        </div>
+
+        <!-- Formulário -->
+        <form [formGroup]="paradaForm" (ngSubmit)="onSalvar()" *ngIf="!isLoading">
+
+            <!-- Seção: Informações Básicas -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <mat-icon>info</mat-icon>
+                    Informações Básicas
+                </h3>
+
+                <div class="form-row">
+                    <!-- Tipo de Parada -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Tipo de Parada</mat-label>
+                        <mat-select formControlName="tipo" required>
+                            <mat-option *ngFor="let tipo of tiposParada" [value]="tipo.value">
+                                <mat-icon>{{ tipo.icon }}</mat-icon>
+                                {{ tipo.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="hasError('tipo')">
+                            {{ getErrorMessage('tipo') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Nome da Parada -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Nome da Parada</mat-label>
+                        <input matInput formControlName="nome" placeholder="Ex: Posto Shell, Restaurante do João">
+                        <mat-error *ngIf="hasError('nome')">
+                            {{ getErrorMessage('nome') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Endereço -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Endereço</mat-label>
+                        <input matInput formControlName="endereco" placeholder="Endereço completo (opcional)">
+                        <mat-icon matSuffix>location_on</mat-icon>
+                        <mat-error *ngIf="hasError('endereco')">
+                            {{ getErrorMessage('endereco') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Hora de Chegada -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Hora de Chegada</mat-label>
+                        <input matInput type="time" formControlName="horaChegada">
+                        <mat-icon matSuffix>schedule</mat-icon>
+                    </mat-form-field>
+
+                    <!-- Hora de Saída -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Hora de Saída</mat-label>
+                        <input matInput type="time" formControlName="horaSaida">
+                        <mat-icon matSuffix>schedule</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Custo -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Custo Total</mat-label>
+                        <input matInput type="number" formControlName="custo" step="0.01" min="0">
+                        <span matPrefix>R$ </span>
+                        <mat-error *ngIf="hasError('custo')">
+                            {{ getErrorMessage('custo') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Avaliação -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Avaliação</mat-label>
+                        <mat-select formControlName="avaliacao">
+                            <mat-option [value]="1">⭐ (1 estrela)</mat-option>
+                            <mat-option [value]="2">⭐⭐ (2 estrelas)</mat-option>
+                            <mat-option [value]="3">⭐⭐⭐ (3 estrelas)</mat-option>
+                            <mat-option [value]="4">⭐⭐⭐⭐ (4 estrelas)</mat-option>
+                            <mat-option [value]="5">⭐⭐⭐⭐⭐ (5 estrelas)</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Observações -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Observações</mat-label>
+                        <textarea matInput formControlName="observacoes" rows="3"
+                            placeholder="Observações gerais sobre a parada"></textarea>
+                        <mat-error *ngIf="hasError('observacoes')">
+                            {{ getErrorMessage('observacoes') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Seção: Dados Específicos de Abastecimento -->
+            <div class="form-section" *ngIf="shouldShowFields(TipoParada.ABASTECIMENTO)">
+                <h3 class="section-title">
+                    <mat-icon>local_gas_station</mat-icon>
+                    Dados do Abastecimento
+                </h3>
+
+                <div class="form-row">
+                    <!-- Tipo de Combustível -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Tipo de Combustível</mat-label>
+                        <mat-select formControlName="tipoCombustivel" required>
+                            <mat-option *ngFor="let tipo of tiposCombustivel" [value]="tipo.value">
+                                {{ tipo.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="hasError('tipoCombustivel')">
+                            {{ getErrorMessage('tipoCombustivel') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row three-columns">
+                    <!-- Quantidade -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Quantidade</mat-label>
+                        <input matInput type="number" formControlName="quantidade" step="0.1" min="0.1">
+                        <span matSuffix>L</span>
+                        <mat-error *ngIf="hasError('quantidade')">
+                            {{ getErrorMessage('quantidade') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Preço por Litro -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Preço por Litro</mat-label>
+                        <input matInput type="number" formControlName="precoPorLitro" step="0.01" min="0.01">
+                        <span matPrefix>R$ </span>
+                        <mat-error *ngIf="hasError('precoPorLitro')">
+                            {{ getErrorMessage('precoPorLitro') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Quilometragem -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Quilometragem</mat-label>
+                        <input matInput type="number" formControlName="quilometragem" min="0">
+                        <span matSuffix>km</span>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Nome do Posto -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Nome do Posto</mat-label>
+                        <input matInput formControlName="nomePosto" placeholder="Ex: Posto Shell Centro">
+                    </mat-form-field>
+
+                    <!-- Bandeira do Posto -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Bandeira</mat-label>
+                        <input matInput formControlName="bandeiraPosto" placeholder="Ex: Shell, Petrobras, Ipiranga">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Seção: Dados Específicos de Refeição -->
+            <div class="form-section" *ngIf="shouldShowFields(TipoParada.REFEICAO)">
+                <h3 class="section-title">
+                    <mat-icon>restaurant</mat-icon>
+                    Dados da Refeição
+                </h3>
+
+                <div class="form-row two-columns">
+                    <!-- Tipo de Refeição -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Tipo de Refeição</mat-label>
+                        <mat-select formControlName="tipoRefeicao" required>
+                            <mat-option *ngFor="let tipo of tiposRefeicao" [value]="tipo.value">
+                                {{ tipo.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="hasError('tipoRefeicao')">
+                            {{ getErrorMessage('tipoRefeicao') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Tipo de Estabelecimento -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Tipo de Estabelecimento</mat-label>
+                        <mat-select formControlName="tipoEstabelecimento">
+                            <mat-option *ngFor="let tipo of tiposEstabelecimento" [value]="tipo.value">
+                                {{ tipo.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Nome do Estabelecimento -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Nome do Estabelecimento</mat-label>
+                        <input matInput formControlName="nomeEstabelecimento" placeholder="Ex: Restaurante do João">
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Valor Gasto -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Valor Gasto</mat-label>
+                        <input matInput type="number" formControlName="valorGasto" step="0.01" min="0">
+                        <span matPrefix>R$ </span>
+                    </mat-form-field>
+
+                    <!-- Número de Pessoas -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Número de Pessoas</mat-label>
+                        <input matInput type="number" formControlName="numeroPessoas" min="1" max="20">
+                        <mat-icon matSuffix>people</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Pratos -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Pratos Consumidos</mat-label>
+                        <input matInput formControlName="pratos" placeholder="Separe os pratos por vírgula">
+                        <mat-hint>Ex: Feijoada, Caipirinha, Pudim</mat-hint>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Qualidade da Comida -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Qualidade da Comida</mat-label>
+                        <mat-select formControlName="qualidadeComida">
+                            <mat-option [value]="1">⭐ Ruim</mat-option>
+                            <mat-option [value]="2">⭐⭐ Regular</mat-option>
+                            <mat-option [value]="3">⭐⭐⭐ Boa</mat-option>
+                            <mat-option [value]="4">⭐⭐⭐⭐ Muito Boa</mat-option>
+                            <mat-option [value]="5">⭐⭐⭐⭐⭐ Excelente</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Qualidade do Atendimento -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Qualidade do Atendimento</mat-label>
+                        <mat-select formControlName="qualidadeAtendimento">
+                            <mat-option [value]="1">⭐ Ruim</mat-option>
+                            <mat-option [value]="2">⭐⭐ Regular</mat-option>
+                            <mat-option [value]="3">⭐⭐⭐ Bom</mat-option>
+                            <mat-option [value]="4">⭐⭐⭐⭐ Muito Bom</mat-option>
+                            <mat-option [value]="5">⭐⭐⭐⭐⭐ Excelente</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Seção: Dados Específicos de Ponto de Interesse -->
+            <div class="form-section" *ngIf="shouldShowFields(TipoParada.PONTO_INTERESSE)">
+                <h3 class="section-title">
+                    <mat-icon>place</mat-icon>
+                    Dados do Ponto de Interesse
+                </h3>
+
+                <div class="form-row">
+                    <!-- Categoria -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Categoria</mat-label>
+                        <mat-select formControlName="categoria" required>
+                            <mat-option *ngFor="let categoria of categoriasPontoInteresse" [value]="categoria.value">
+                                {{ categoria.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="hasError('categoria')">
+                            {{ getErrorMessage('categoria') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Valor da Entrada -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Valor da Entrada</mat-label>
+                        <input matInput type="number" formControlName="valorEntrada" step="0.01" min="0">
+                        <span matPrefix>R$ </span>
+                    </mat-form-field>
+
+                    <!-- Tempo de Visita -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Tempo de Visita</mat-label>
+                        <input matInput type="number" formControlName="tempoVisita" min="1">
+                        <span matSuffix>min</span>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Horário de Funcionamento -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Horário de Funcionamento</mat-label>
+                        <input matInput formControlName="horarioFuncionamento"
+                            placeholder="Ex: Segunda a Sexta: 8h às 18h">
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                    <!-- Site Oficial -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Site Oficial</mat-label>
+                        <input matInput formControlName="siteOficial" type="url" placeholder="https://exemplo.com">
+                        <mat-icon matSuffix>link</mat-icon>
+                    </mat-form-field>
+
+                    <!-- Telefone -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Telefone</mat-label>
+                        <input matInput formControlName="telefone" placeholder="(11) 99999-9999">
+                        <mat-icon matSuffix>phone</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Recomendações -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Recomendações</mat-label>
+                        <input matInput formControlName="recomendacoes"
+                            placeholder="Separe as recomendações por vírgula">
+                        <mat-hint>Ex: Levar protetor solar, Chegar cedo, Usar sapato confortável</mat-hint>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Melhor Época -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Melhor Época para Visitar</mat-label>
+                        <input matInput formControlName="melhorEpoca"
+                            placeholder="Ex: Primavera e Verão, Manhã, Fins de semana">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Seção: Fotos da Parada -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <mat-icon>photo_camera</mat-icon>
+                    Fotos da Parada
+                </h3>
+
+                <app-photo-upload [photos]="fotos" [maxPhotos]="8" [uploadPath]="getUploadPath()" [allowMultiple]="true"
+                    [disabled]="isSaving" [showGallery]="true" [compactMode]="false"
+                    (photosChange)="onFotosChange($event)">
+                </app-photo-upload>
+            </div>
+
+        </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+        <button mat-button type="button" (click)="onCancelar()" [disabled]="isSaving">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+        </button>
+
+        <button mat-raised-button color="primary" (click)="onSalvar()" [disabled]="paradaForm.invalid || isSaving">
+            <mat-spinner diameter="20" *ngIf="isSaving"></mat-spinner>
+            <mat-icon *ngIf="!isSaving">save</mat-icon>
+            {{ isSaving ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Salvar') }}
+        </button>
+    </mat-card-actions>
+</mat-card>

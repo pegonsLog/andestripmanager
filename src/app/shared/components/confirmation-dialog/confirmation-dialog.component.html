@@ -1,0 +1,33 @@
+<div class="confirmation-dialog" [ngClass]="getTipoClass()">
+    <div mat-dialog-title class="dialog-header">
+        <mat-icon class="dialog-icon">{{ data.icone }}</mat-icon>
+        <h2>{{ data.titulo }}</h2>
+    </div>
+
+    <div mat-dialog-content class="dialog-content">
+        <div [innerHTML]="data.mensagem"></div>
+
+        <!-- Campo de confirmação por texto (se necessário) -->
+        <div class="confirmacao-texto" *ngIf="data.requerConfirmacaoTexto">
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Digite "{{ data.textoParaConfirmar }}" para confirmar</mat-label>
+                <input matInput [formControl]="confirmacaoTextoControl" placeholder="{{ data.textoParaConfirmar }}"
+                    autocomplete="off">
+                <mat-error *ngIf="confirmacaoTextoControl.invalid && confirmacaoTextoControl.touched">
+                    {{ getMensagemErroConfirmacao() }}
+                </mat-error>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div mat-dialog-actions class="dialog-actions">
+        <button mat-button type="button" (click)="onCancelar()" class="btn-cancelar">
+            {{ data.textoCancelar }}
+        </button>
+
+        <button mat-raised-button [color]="getCorBotaoConfirmar()" type="button" (click)="onConfirmar()"
+            [disabled]="!podeConfirmar()" class="btn-confirmar">
+            {{ data.textoConfirmar }}
+        </button>
+    </div>
+</div>

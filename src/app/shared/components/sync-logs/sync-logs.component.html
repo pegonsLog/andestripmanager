@@ -1,0 +1,119 @@
+<div class="sync-logs">
+    <!-- Cabeçalho com estatísticas -->
+    <mat-card class="stats-card" *ngIf="getLogStats() | async as stats">
+        <mat-card-header>
+            <mat-icon mat-card-avatar>analytics</mat-icon>
+            <mat-card-title>Estatísticas de Sincronização</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.total }}</span>
+                    <span class="stat-label">Total de Logs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.recentErrors }}</span>
+                    <span class="stat-label">Erros Recentes (24h)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.byOperation['sync_complete'] || 0 }}</span>
+                    <span class="stat-label">Sincronizações Completas</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.byOperation['conflict_resolved'] || 0 }}</span>
+                    <span class="stat-label">Conflitos Resolvidos</span>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Filtros -->
+    <mat-card class="filters-card">
+        <mat-card-content>
+            <div class="filters-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Operação</mat-label>
+                    <mat-select [value]="currentFilter.operation || ''"
+                        (selectionChange)="onOperationFilterChange($event.value)">
+                        <mat-option *ngFor="let option of operationOptions" [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Tipo de Entidade</mat-label>
+                    <mat-select [value]="currentFilter.entityType || ''"
+                        (selectionChange)="onEntityTypeFilterChange($event.value)">
+                        <mat-option *ngFor="let option of entityTypeOptions" [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="filter-actions">
+                    <button mat-button (click)="clearFilters()">
+                        <mat-icon>clear</mat-icon>
+                        Limpar Filtros
+                    </button>
+                    <button mat-button (click)="exportLogs()">
+                        <mat-icon>download</mat-icon>
+                        Exportar
+                    </button>
+                    <button mat-button color="warn" (click)="clearOldLogs()">
+                        <mat-icon>delete_sweep</mat-icon>
+                        Limpar Antigos
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Lista de logs -->
+    <div class="logs-list">
+        <mat-card *ngFor="let log of filteredLogs$ | async; trackBy: trackByLogId" class="log-card">
+            <mat-card-header>
+                <mat-icon mat-card-avatar [color]="getOperationColor(log.operation)">
+                    {{ getOperationIcon(log.operation) }}
+                </mat-icon>
+                <mat-card-title>{{ getLogSummary(log) }}</mat-card-title>
+                <mat-card-subtitle>{{ formatTimestamp(log.timestamp) }}</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="log-info">
+                    <mat-chip-set>
+                        <mat-chip [color]="getOperationColor(log.operation)">
+                            {{ getOperationText(log.operation) }}
+                        </mat-chip>
+                        <mat-chip *ngIf="log.entityType" color="accent">
+                            {{ log.entityType }}
+                        </mat-chip>
+                        <mat-chip *ngIf="log.duration" color="primary">
+                            {{ formatDuration(log.duration) }}
+                        </mat-chip>
+                    </mat-chip-set>
+
+                    <!-- Detalhes expandíveis -->
+                    <mat-expansion-panel *ngIf="hasDetails(log.details)" class="details-panel">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>Detalhes</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <pre class="log-details">{{ formatDetails(log.details) }}</pre>
+                    </mat-expansion-panel>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Mensagem quando não há logs -->
+        <div *ngIf="(filteredLogs$ | async)?.length === 0" class="no-logs">
+            <mat-icon>info</mat-icon>
+            <p>Nenhum log encontrado com os filtros aplicados.</p>
+        </div>
+    </div>
+
+    <!-- Paginação -->
+    <mat-paginator [length]="totalLogs" [pageSize]="currentFilter.pageSize" [pageIndex]="currentFilter.pageIndex"
+        [pageSizeOptions]="[10, 20, 50, 100]" (page)="onPageChange($event)" showFirstLastButtons>
+    </mat-paginator>
+</div>

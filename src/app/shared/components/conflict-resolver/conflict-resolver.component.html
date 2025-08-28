@@ -1,0 +1,184 @@
+<div class="conflict-resolver">
+    <!-- Cabeçalho do conflito -->
+    <div class="conflict-header">
+        <div class="conflict-info">
+            <mat-icon [color]="getSeverityColor()" class="severity-icon">
+                {{ getSeverityIcon() }}
+            </mat-icon>
+            <div class="conflict-details">
+                <h2 mat-dialog-title>Conflito de Dados Detectado</h2>
+                <p class="conflict-description">
+                    {{ getConflictTypeText() }} em {{ conflict.entityType }}
+                </p>
+                <mat-chip-set>
+                    <mat-chip [color]="getSeverityColor()">
+                        Severidade: {{ getSeverityText() }}
+                    </mat-chip>
+                    <mat-chip color="accent" *ngIf="conflict.autoResolvable">
+                        Auto-resolvível
+                    </mat-chip>
+                </mat-chip-set>
+            </div>
+        </div>
+
+        <!-- Informações de timestamp -->
+        <div class="timestamp-info">
+            <div class="timestamp-item">
+                <mat-icon>smartphone</mat-icon>
+                <span>Local: {{ formatTimestamp(conflict.localTimestamp) }}</span>
+            </div>
+            <div class="timestamp-item">
+                <mat-icon>cloud</mat-icon>
+                <span>Remoto: {{ formatTimestamp(conflict.remoteTimestamp) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <mat-dialog-content>
+        <mat-tab-group>
+            <!-- Aba de comparação -->
+            <mat-tab label="Comparar Dados">
+                <div class="data-comparison">
+                    <div class="comparison-header">
+                        <h3>Campos em Conflito</h3>
+                        <mat-chip-set>
+                            <mat-chip *ngFor="let field of conflict.conflictedFields" color="warn">
+                                {{ field }}
+                            </mat-chip>
+                        </mat-chip-set>
+                    </div>
+
+                    <div class="comparison-table">
+                        <div class="comparison-row header">
+                            <div class="field-name">Campo</div>
+                            <div class="local-value">
+                                <mat-icon>smartphone</mat-icon>
+                                Versão Local
+                            </div>
+                            <div class="remote-value">
+                                <mat-icon>cloud</mat-icon>
+                                Versão Remota
+                            </div>
+                        </div>
+
+                        <div *ngFor="let field of getAllFields()" class="comparison-row"
+                            [class.conflicted]="isFieldInConflict(field)">
+                            <div class="field-name">
+                                <strong>{{ field }}</strong>
+                                <mat-icon *ngIf="isFieldInConflict(field)" color="warn" class="conflict-indicator">
+                                    warning
+                                </mat-icon>
+                            </div>
+                            <div class="local-value">
+                                <pre>{{ formatValue(getLocalValue(field)) }}</pre>
+                            </div>
+                            <div class="remote-value">
+                                <pre>{{ formatValue(getRemoteValue(field)) }}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba de resolução -->
+            <mat-tab label="Resolver Conflito">
+                <form [formGroup]="resolutionForm" class="resolution-form">
+                    <h3>Escolha como resolver este conflito:</h3>
+
+                    <!-- Resolução sugerida -->
+                    <mat-card *ngIf="conflict.suggestedResolution" class="suggested-resolution">
+                        <mat-card-header>
+                            <mat-icon mat-card-avatar color="accent">auto_fix_high</mat-icon>
+                            <mat-card-title>Resolução Sugerida</mat-card-title>
+                            <mat-card-subtitle>
+                                Confiança: {{ (conflict.suggestedResolution.confidence * 100).toFixed(0) }}%
+                            </mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>{{ conflict.suggestedResolution.reasoning }}</p>
+                            <button mat-raised-button color="accent" (click)="applySuggestedResolution()">
+                                Aplicar Sugestão
+                            </button>
+                        </mat-card-content>
+                    </mat-card>
+
+                    <!-- Opções de resolução manual -->
+                    <mat-radio-group formControlName="strategy" class="resolution-options">
+                        <mat-card *ngFor="let option of resolutionOptions" class="resolution-option"
+                            [class.disabled]="!isStrategyAvailable(option.value)">
+                            <mat-card-content>
+                                <mat-radio-button [value]="option.value"
+                                    [disabled]="!isStrategyAvailable(option.value)">
+                                    <div class="option-content">
+                                        <div class="option-header">
+                                            <mat-icon>{{ option.icon }}</mat-icon>
+                                            <span class="option-label">{{ option.label }}</span>
+                                        </div>
+                                        <p class="option-description">{{ option.description }}</p>
+                                    </div>
+                                </mat-radio-button>
+                            </mat-card-content>
+                        </mat-card>
+                    </mat-radio-group>
+                </form>
+            </mat-tab>
+
+            <!-- Aba de preview -->
+            <mat-tab label="Visualizar Resultado">
+                <div class="resolution-preview">
+                    <h3>Preview da Resolução</h3>
+                    <p>Estratégia selecionada: <strong>{{ resolutionForm.value.strategy }}</strong></p>
+
+                    <mat-card class="preview-card">
+                        <mat-card-header>
+                            <mat-icon mat-card-avatar>preview</mat-icon>
+                            <mat-card-title>Dados Resultantes</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <pre class="preview-data">{{ formatValue(getResolutionPreview()) }}</pre>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </mat-tab>
+
+            <!-- Aba de detalhes técnicos -->
+            <mat-tab label="Detalhes Técnicos">
+                <div class="technical-details">
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>Informações do Conflito</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="detail-item">
+                            <strong>ID do Conflito:</strong> {{ conflict.id }}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Tipo de Entidade:</strong> {{ conflict.entityType }}
+                        </div>
+                        <div class="detail-item">
+                            <strong>ID da Entidade:</strong> {{ conflict.entityId }}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Detectado em:</strong> {{ formatTimestamp(conflict.timestamp) }}
+                        </div>
+                    </mat-expansion-panel>
+
+                    <mat-expansion-panel *ngIf="conflict.baseData">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>Dados Base (Versão Original)</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <pre class="base-data">{{ formatValue(conflict.baseData) }}</pre>
+                    </mat-expansion-panel>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="cancel()">
+            Cancelar
+        </button>
+        <button mat-raised-button color="primary" (click)="resolveConflict()" [disabled]="!resolutionForm.valid">
+            Resolver Conflito
+        </button>
+    </mat-dialog-actions>
+</div>

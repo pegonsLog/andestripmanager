@@ -1,0 +1,21 @@
+<div class="connectivity-indicator" *ngIf="connectivity$ | async as status">
+    <!-- Indicador principal de conectividade -->
+    <mat-icon [class]="'connectivity-icon ' + getConnectivityColor(status)" [matTooltip]="getTooltipText(status)"
+        matTooltipPosition="below">
+        {{ getConnectivityIcon(status) }}
+    </mat-icon>
+
+    <!-- Chip com operações pendentes (se houver) -->
+    <mat-chip-set *ngIf="getPendingOperationsCount() > 0" class="pending-operations">
+        <mat-chip color="warn" [matTooltip]="getPendingOperationsCount() + ' operação(ões) aguardando sincronização'"
+            (click)="forceSync()">
+            <mat-icon matChipAvatar>sync</mat-icon>
+            {{ getPendingOperationsCount() }}
+        </mat-chip>
+    </mat-chip-set>
+
+    <!-- Indicador de sincronização em progresso -->
+    <div class="sync-indicator" *ngIf="(syncStatus$ | async) && getPendingOperationsCount() > 0">
+        <mat-icon class="spinning">sync</mat-icon>
+    </div>
+</div>

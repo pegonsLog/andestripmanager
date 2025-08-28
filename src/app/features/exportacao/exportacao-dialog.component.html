@@ -1,0 +1,185 @@
+<div class="exportacao-dialog">
+    <h2 mat-dialog-title class="dialog-title">
+        <mat-icon>download</mat-icon>
+        {{ tituloDialog }}
+    </h2>
+
+    <mat-dialog-content class="dialog-content">
+        <p class="dialog-description">{{ descricaoDialog }}</p>
+
+        <form [formGroup]="form" class="exportacao-form">
+            <!-- Seção: Dados a Incluir -->
+            <mat-card class="opcoes-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>data_object</mat-icon>
+                        Dados a Incluir
+                    </mat-card-title>
+                    <mat-card-subtitle>
+                        Selecione quais informações deseja exportar
+                    </mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <div class="acoes-rapidas">
+                        <button type="button" mat-stroked-button (click)="selecionarTudo()">
+                            <mat-icon>select_all</mat-icon>
+                            Selecionar Tudo
+                        </button>
+                        <button type="button" mat-stroked-button (click)="desmarcarTudo()">
+                            <mat-icon>deselect</mat-icon>
+                            Desmarcar Tudo
+                        </button>
+                        <button type="button" mat-stroked-button (click)="restaurarPadrao()">
+                            <mat-icon>restore</mat-icon>
+                            Padrão
+                        </button>
+                    </div>
+
+                    <div class="opcoes-grid">
+                        <mat-checkbox formControlName="incluirDias" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">calendar_today</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">Dias de Viagem</span>
+                                    <span class="opcao-descricao">Planejamento diário da viagem</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+
+                        <mat-checkbox formControlName="incluirParadas" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">place</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">Paradas</span>
+                                    <span class="opcao-descricao">Abastecimentos, refeições e pontos de interesse</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+
+                        <mat-checkbox formControlName="incluirHospedagens" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">hotel</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">Hospedagens</span>
+                                    <span class="opcao-descricao">Hotéis, pousadas e locais de pernoite</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+
+                        <mat-checkbox formControlName="incluirCustos" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">attach_money</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">Custos</span>
+                                    <span class="opcao-descricao">Gastos e controle financeiro</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+
+                        <mat-checkbox formControlName="incluirManutencoes" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">build</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">Manutenções</span>
+                                    <span class="opcao-descricao">Cuidados com a motocicleta</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+
+                        <mat-checkbox formControlName="incluirClima" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">wb_sunny</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">Clima</span>
+                                    <span class="opcao-descricao">Condições climáticas e previsões</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+
+                        <mat-checkbox formControlName="incluirDiario" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">book</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">Diário de Bordo</span>
+                                    <span class="opcao-descricao">Anotações e memórias da viagem</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+
+                        <mat-checkbox formControlName="incluirFotos" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">photo</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">URLs das Fotos</span>
+                                    <span class="opcao-descricao">Links para as imagens (não inclui as imagens)</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-divider></mat-divider>
+
+            <!-- Seção: Opções de Formatação -->
+            <mat-card class="opcoes-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>settings</mat-icon>
+                        Opções de Formatação
+                    </mat-card-title>
+                    <mat-card-subtitle>
+                        Configure como os dados serão exportados
+                    </mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <div class="formatacao-opcoes">
+                        <div class="opcao-grupo">
+                            <label class="opcao-label">Formato das Datas:</label>
+                            <mat-radio-group formControlName="formatoData" class="radio-group">
+                                <mat-radio-button value="brasileiro">
+                                    Brasileiro (DD/MM/AAAA)
+                                </mat-radio-button>
+                                <mat-radio-button value="iso">
+                                    Internacional (AAAA-MM-DD)
+                                </mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <mat-checkbox formControlName="incluirMetadados" class="opcao-checkbox">
+                            <div class="opcao-content">
+                                <mat-icon class="opcao-icon">info</mat-icon>
+                                <div class="opcao-texto">
+                                    <span class="opcao-titulo">Incluir Metadados</span>
+                                    <span class="opcao-descricao">Informações sobre a exportação (versão, data,
+                                        usuário)</span>
+                                </div>
+                            </div>
+                        </mat-checkbox>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Aviso se nenhuma opção selecionada -->
+            <div class="aviso-selecao" *ngIf="!temOpcaoSelecionada">
+                <mat-icon color="warn">warning</mat-icon>
+                <span>Selecione pelo menos uma opção de dados para exportar</span>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="dialog-actions">
+        <button mat-button (click)="cancelar()" [disabled]="isProcessing">
+            Cancelar
+        </button>
+
+        <button mat-raised-button color="primary" (click)="confirmar()"
+            [disabled]="!temOpcaoSelecionada || isProcessing">
+            <mat-icon *ngIf="!isProcessing">download</mat-icon>
+            <mat-spinner *ngIf="isProcessing" diameter="20"></mat-spinner>
+            {{ isProcessing ? 'Exportando...' : 'Exportar' }}
+        </button>
+    </mat-dialog-actions>
+</div>

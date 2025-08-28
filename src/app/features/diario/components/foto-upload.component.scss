@@ -1,0 +1,242 @@
+.foto-upload-container {
+  .drop-zone {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+
+    &:hover,
+    &.drag-over {
+      border-color: #1976d2;
+      background-color: #e3f2fd;
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .upload-text {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+      margin: 0 0 8px 0;
+      font-family: "Montserrat", sans-serif;
+    }
+
+    .upload-hint {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+  }
+
+  .fotos-preview {
+    margin-top: 24px;
+
+    h4 {
+      font-family: "Montserrat", sans-serif;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+
+      .preview-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+          .preview-overlay {
+            opacity: 1;
+          }
+        }
+
+        .preview-image {
+          width: 100%;
+          height: 120px;
+          object-fit: cover;
+          display: block;
+        }
+
+        .preview-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+
+          .btn-remover {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #f44336;
+
+            &:hover {
+              background-color: white;
+            }
+          }
+        }
+
+        .preview-info {
+          padding: 8px;
+          background: white;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .nome-arquivo {
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .tamanho-arquivo {
+            font-size: 11px;
+            color: #666;
+          }
+        }
+      }
+    }
+
+    .upload-progress {
+      margin-bottom: 16px;
+
+      p {
+        text-align: center;
+        margin: 8px 0 0 0;
+        font-size: 14px;
+        color: #666;
+      }
+    }
+
+    .acoes-container {
+      display: flex;
+      gap: 16px;
+      justify-content: flex-end;
+      align-items: center;
+
+      @media (max-width: 480px) {
+        flex-direction: column;
+        align-items: stretch;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .foto-upload-container {
+    .drop-zone {
+      padding: 30px 15px;
+
+      .upload-icon {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+      }
+
+      .upload-text {
+        font-size: 14px;
+      }
+
+      .upload-hint {
+        font-size: 12px;
+      }
+    }
+
+    .fotos-preview {
+      .preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+
+        .preview-item {
+          .preview-image {
+            height: 100px;
+          }
+
+          .preview-info {
+            padding: 6px;
+
+            .nome-arquivo {
+              font-size: 11px;
+            }
+
+            .tamanho-arquivo {
+              font-size: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animações
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.preview-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+// Estados de drag and drop
+.drop-zone {
+  &.drag-over {
+    .upload-icon {
+      color: #1976d2;
+      animation: bounce 0.6s ease-in-out;
+    }
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  80% {
+    transform: translateY(-5px);
+  }
+}

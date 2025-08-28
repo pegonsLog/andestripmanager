@@ -1,0 +1,102 @@
+<div class="dias-viagem-container">
+    <!-- Cabeçalho com totais -->
+    <mat-card class="totais-card" *ngIf="totais$ | async as totais">
+        <mat-card-header>
+            <mat-card-title>Resumo da Viagem</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="totais-grid">
+                <div class="total-item">
+                    <mat-icon>today</mat-icon>
+                    <div class="total-info">
+                        <span class="total-label">Total de Dias</span>
+                        <span class="total-value">{{ totais.totalDias }}</span>
+                    </div>
+                </div>
+
+                <div class="total-item">
+                    <mat-icon>route</mat-icon>
+                    <div class="total-info">
+                        <span class="total-label">Distância Planejada</span>
+                        <span class="total-value">{{ formatarDistancia(totais.distanciaTotal) }}</span>
+                    </div>
+                </div>
+
+                <div class="total-item" *ngIf="totais.distanciaPercorrida > 0">
+                    <mat-icon>done</mat-icon>
+                    <div class="total-info">
+                        <span class="total-label">Distância Percorrida</span>
+                        <span class="total-value">{{ formatarDistancia(totais.distanciaPercorrida) }}</span>
+                    </div>
+                </div>
+
+                <div class="total-item" *ngIf="totais.tempoEstimadoTotal > 0">
+                    <mat-icon>schedule</mat-icon>
+                    <div class="total-info">
+                        <span class="total-label">Tempo Estimado</span>
+                        <span class="total-value">{{ formatarTempo(totais.tempoEstimadoTotal) }}</span>
+                    </div>
+                </div>
+
+                <div class="total-item" *ngIf="totais.tempoRealTotal > 0">
+                    <mat-icon>timer</mat-icon>
+                    <div class="total-info">
+                        <span class="total-label">Tempo Real</span>
+                        <span class="total-value">{{ formatarTempo(totais.tempoRealTotal) }}</span>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Botão para adicionar novo dia -->
+    <div class="actions-bar">
+        <button mat-raised-button color="primary" (click)="onAdicionarDia()">
+            <mat-icon>add</mat-icon>
+            Adicionar Dia
+        </button>
+    </div>
+
+    <!-- Loading spinner -->
+    <div class="loading-container" *ngIf="isLoading$ | async">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Carregando dias da viagem...</p>
+    </div>
+
+    <!-- Timeline de dias -->
+    <div class="timeline-container" *ngIf="!(isLoading$ | async)">
+        <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="dias-list"
+            *ngIf="(dias$ | async) as dias; else noDias">
+            <div cdkDrag class="dia-item" *ngFor="let dia of dias; trackBy: trackByDiaId">
+                <!-- Indicador de drag -->
+                <div class="drag-handle" cdkDragHandle>
+                    <mat-icon>drag_indicator</mat-icon>
+                </div>
+
+                <!-- Card do dia -->
+                <app-dia-viagem-card [dia]="dia" (editar)="onEditarDia($event)" (visualizar)="onVisualizarDia($event)"
+                    (remover)="onRemoverDia($event)"></app-dia-viagem-card>
+
+                <!-- Linha conectora (exceto no último item) -->
+                <div class="timeline-connector" *ngIf="!$last"></div>
+            </div>
+        </div>
+
+        <!-- Estado vazio -->
+        <ng-template #noDias>
+            <mat-card class="empty-state">
+                <mat-card-content>
+                    <div class="empty-content">
+                        <mat-icon class="empty-icon">route</mat-icon>
+                        <h3>Nenhum dia planejado</h3>
+                        <p>Comece adicionando o primeiro dia da sua viagem</p>
+                        <button mat-raised-button color="primary" (click)="onAdicionarDia()">
+                            <mat-icon>add</mat-icon>
+                            Adicionar Primeiro Dia
+                        </button>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </ng-template>
+    </div>
+</div>

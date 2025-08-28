@@ -104,7 +104,7 @@
   - Integrar criação e edição de viagens
   - _Requisitos: 2.2, 2.3, 2.5_
 
-- [-] 6.2 Implementar componente de detalhes da viagem
+- [x] 6.2 Implementar componente de detalhes da viagem
 
   - Criar ViagemDetailComponent com abas
   - Implementar navegação entre abas (dias, paradas, custos, etc.)
@@ -112,7 +112,7 @@
   - Implementar ações de edição e exclusão
   - _Requisitos: 2.4, 2.5, 2.6_
 
-- [ ] 6.3 Adicionar funcionalidade de exclusão de viagem
+- [x] 6.3 Adicionar funcionalidade de exclusão de viagem
 
   - Implementar confirmação de exclusão
   - Criar lógica para remover dados relacionados
@@ -120,8 +120,9 @@
   - Implementar rollback em caso de erro
   - _Requisitos: 2.6_
 
-- [ ] 7. Desenvolver planejamento de dias de viagem
-- [ ] 7.1 Criar componente de timeline de dias
+- [x] 7. Desenvolver planejamento de dias de viagem
+
+- [x] 7.1 Criar componente de timeline de dias
 
   - Implementar DiasViagemComponent standalone
   - Criar timeline visual dos dias da viagem
@@ -129,7 +130,7 @@
   - Implementar cálculo automático de totais
   - _Requisitos: 3.1, 3.4_
 
-- [ ] 7.2 Implementar formulário de dia de viagem
+- [x] 7.2 Implementar formulário de dia de viagem
 
   - Criar DiaViagemFormComponent
   - Adicionar campos de origem, destino, distância
@@ -137,7 +138,7 @@
   - Integrar com serviço de geocodificação
   - _Requisitos: 3.2, 3.3, 3.5_
 
-- [ ] 7.3 Criar visualização detalhada do dia
+- [x] 7.3 Criar visualização detalhada do dia
 
   - Desenvolver DiaViagemDetailComponent
   - Integrar Google Maps para exibição da rota
@@ -145,8 +146,9 @@
   - Adicionar informações de clima do dia
   - _Requisitos: 3.6, 7.1_
 
-- [ ] 8. Implementar sistema de paradas
-- [ ] 8.1 Criar componente de formulário de parada
+- [x] 8. Implementar sistema de paradas
+
+- [x] 8.1 Criar componente de formulário de parada
 
   - Desenvolver ParadaFormComponent standalone
   - Implementar formulário dinâmico baseado no tipo
@@ -154,7 +156,7 @@
   - Implementar campos para refeição e pontos de interesse
   - _Requisitos: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 8.2 Implementar upload de fotos para paradas
+- [x] 8.2 Implementar upload de fotos para paradas
 
   - Integrar Firebase Storage para upload
   - Adicionar compressão automática de imagens
@@ -162,7 +164,7 @@
   - Criar funcionalidade de exclusão de fotos
   - _Requisitos: 4.6_
 
-- [ ] 8.3 Criar visualização de paradas no mapa
+- [x] 8.3 Criar visualização de paradas no mapa
 
   - Implementar marcadores no Google Maps
   - Adicionar popup com informações da parada
@@ -170,8 +172,9 @@
   - Criar filtros por tipo de parada
   - _Requisitos: 4.7_
 
-- [ ] 9. Desenvolver controle de hospedagens
-- [ ] 9.1 Criar formulário de hospedagem
+- [x] 9. Desenvolver controle de hospedagens
+
+- [x] 9.1 Criar formulário de hospedagem
 
   - Implementar HospedagemFormComponent standalone
   - Adicionar campos de dados da hospedagem
@@ -179,7 +182,7 @@
   - Integrar com serviço de geocodificação
   - _Requisitos: 5.1, 5.2_
 
-- [ ] 9.2 Implementar funcionalidades específicas de hospedagem
+- [x] 9.2 Implementar funcionalidades específicas de hospedagem
 
   - Adicionar checkbox para estacionamento coberto
   - Implementar campo de link de reserva
@@ -187,7 +190,7 @@
   - Adicionar upload de fotos da hospedagem
   - _Requisitos: 5.3, 5.4, 5.5_
 
-- [ ] 9.3 Criar visualização de hospedagens
+- [x] 9.3 Criar visualização de hospedagens
 
   - Desenvolver HospedagemCardComponent
   - Implementar exibição em cards com todas as informações
@@ -195,8 +198,9 @@
   - Criar ações de edição e exclusão
   - _Requisitos: 5.6_
 
-- [ ] 10. Implementar controle de custos
-- [ ] 10.1 Criar sistema de categorização de custos
+- [x] 10. Implementar controle de custos
+
+- [x] 10.1 Criar sistema de categorização de custos
 
   - Implementar CustoFormComponent standalone
   - Adicionar seleção de categoria de custo
@@ -204,7 +208,7 @@
   - Criar associação com dias específicos da viagem
   - _Requisitos: 6.1, 6.2_
 
-- [ ] 10.2 Desenvolver visualização e relatórios de custos
+- [x] 10.2 Desenvolver visualização e relatórios de custos
 
   - Criar CustosListComponent para exibição
   - Implementar agrupamento por categoria
@@ -212,7 +216,7 @@
   - Criar gráficos de distribuição de gastos
   - _Requisitos: 6.3, 6.4_
 
-- [ ] 10.3 Implementar filtros e exportação de custos
+- [x] 10.3 Implementar filtros e exportação de custos
 
   - Adicionar filtro por período de datas
   - Implementar filtro por categoria
@@ -220,8 +224,9 @@
   - Adicionar upload de comprovantes
   - _Requisitos: 6.5, 6.6_
 
-- [ ] 11. Desenvolver sistema de informações climáticas
-- [ ] 11.1 Integrar API de previsão do tempo
+- [x] 11. Desenvolver sistema de informações climáticas
+
+- [x] 11.1 Integrar API de previsão do tempo
 
   - Implementar ClimaService com API externa
   - Criar componente de exibição de clima
@@ -229,7 +234,7 @@
   - Implementar cache de dados climáticos
   - _Requisitos: 7.1_
 
-- [ ] 11.2 Implementar alertas e registro de clima
+- [x] 11.2 Implementar alertas e registro de clima
 
   - Criar sistema de alertas para chuva
   - Implementar registro de clima observado
@@ -237,16 +242,18 @@
   - Criar histórico de clima dos dias anteriores
   - _Requisitos: 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 12. Implementar controle de manutenções
-- [ ] 12.1 Criar sistema de manutenção
+- [x] 12. Implementar controle de manutenções
+
+- [x] 12.1 Criar sistema de manutenção
 
   - Desenvolver ManutencaoFormComponent standalone
+
   - Implementar classificação pré-viagem vs durante viagem
   - Criar checklist de itens de manutenção
   - Adicionar campos de custo e local
   - _Requisitos: 8.1, 8.2_
 
-- [ ] 12.2 Desenvolver histórico de manutenções
+- [x] 12.2 Desenvolver histórico de manutenções
 
   - Criar ManutencaoListComponent
   - Implementar ordenação por data
@@ -254,8 +261,9 @@
   - Criar visualização detalhada de cada manutenção
   - _Requisitos: 8.3, 8.4, 8.5_
 
-- [ ] 13. Desenvolver diário de bordo
-- [ ] 13.1 Criar sistema de diário
+- [x] 13. Desenvolver diário de bordo
+
+- [x] 13.1 Criar sistema de diário
 
   - Implementar DiarioBordoComponent standalone
   - Criar editor de texto rico para notas
@@ -263,7 +271,7 @@
   - Adicionar timestamps automáticos
   - _Requisitos: 9.1, 9.2_
 
-- [ ] 13.2 Implementar galeria de fotos do diário
+- [x] 13.2 Implementar galeria de fotos do diário
 
   - Criar upload automático organizado por data
   - Implementar galeria responsiva de fotos
@@ -271,8 +279,9 @@
   - Criar funcionalidade de compartilhamento
   - _Requisitos: 9.3, 9.4, 9.5_
 
-- [ ] 14. Implementar funcionalidades PWA e offline
-- [ ] 14.1 Configurar Service Worker e cache
+- [x] 14. Implementar funcionalidades PWA e offline
+
+- [x] 14.1 Configurar Service Worker e cache
 
   - Implementar estratégias de cache para dados
   - Criar sincronização automática quando online
@@ -280,7 +289,7 @@
   - Implementar armazenamento local para dados críticos
   - _Requisitos: 10.2, 10.3_
 
-- [ ] 14.2 Otimizar para dispositivos móveis
+- [x] 14.2 Otimizar para dispositivos móveis
 
   - Implementar layout responsivo completo
   - Adicionar gestos touch para navegação
@@ -288,7 +297,7 @@
   - Implementar download de mapas offline
   - _Requisitos: 10.1, 10.4_
 
-- [ ] 14.3 Implementar resolução de conflitos
+- [x] 14.3 Implementar resolução de conflitos
 
   - Criar sistema de detecção de conflitos de dados
   - Implementar estratégia de resolução automática
@@ -296,8 +305,9 @@
   - Criar logs de sincronização
   - _Requisitos: 10.5_
 
-- [ ] 15. Desenvolver sistema de exportação e backup
-- [ ] 15.1 Implementar exportação de dados
+- [x] 15. Desenvolver sistema de exportação e backup
+
+- [x] 15.1 Implementar exportação de dados
 
   - Criar ExportacaoService para geração de JSON
   - Implementar exportação completa de viagem
@@ -305,7 +315,7 @@
   - Criar interface de seleção de dados para exportar
   - _Requisitos: 11.1, 11.3_
 
-- [ ] 15.2 Implementar importação e backup
+- [x] 15.2 Implementar importação e backup
 
   - Criar funcionalidade de importação de viagens
   - Implementar validação de dados importados
@@ -313,7 +323,7 @@
   - Criar sistema de restauração de dados
   - _Requisitos: 11.2, 11.5_
 
-- [ ] 15.3 Adicionar tratamento de erros na exportação
+- [x] 15.3 Adicionar tratamento de erros na exportação
 
   - Implementar validação robusta de dados
   - Criar mensagens de erro específicas
@@ -321,10 +331,12 @@
   - Implementar logs detalhados de operações
   - _Requisitos: 11.4_
 
-- [ ] 16. Implementar testes automatizados
-- [ ] 16.1 Criar testes unitários para componentes
+- [-] 16. Implementar testes automatizados
+
+- [x] 16.1 Criar testes unitários para componentes
 
   - Implementar testes para todos os componentes standalone
+
   - Criar mocks para serviços Firebase
   - Adicionar testes de formulários e validação
   - Implementar testes de eventos e outputs

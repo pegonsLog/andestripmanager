@@ -1,0 +1,82 @@
+<div class="paradas-map-container">
+
+    <!-- Filtros e Controles -->
+    <div class="map-controls" *ngIf="showFilters">
+        <mat-card class="controls-card">
+            <div class="controls-content">
+
+                <!-- Filtro por Tipo -->
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Filtrar por Tipo</mat-label>
+                    <mat-select [(value)]="filtroTipo" (selectionChange)="onFiltroTipoChange()">
+                        <mat-option value="todos">
+                            <mat-icon>all_inclusive</mat-icon>
+                            Todos os Tipos
+                        </mat-option>
+                        <mat-option *ngFor="let tipo of getTiposDisponiveis()" [value]="tipo">
+                            <mat-icon>{{ getTipoConfig(tipo).icon }}</mat-icon>
+                            {{ getTipoConfig(tipo).label }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Informações -->
+                <div class="map-info">
+                    <mat-icon>info</mat-icon>
+                    <span>{{ markers.length }} parada(s) exibida(s)</span>
+                </div>
+
+            </div>
+        </mat-card>
+    </div>
+
+    <!-- Container do Mapa -->
+    <div class="map-wrapper">
+        <div #mapContainer class="map-container" [style.height]="height">
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="map-loading" *ngIf="!isMapReady">
+            <div class="loading-content">
+                <mat-icon class="loading-icon">map</mat-icon>
+                <p>Carregando mapa...</p>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="map-empty" *ngIf="isMapReady && paradas.length === 0">
+            <div class="empty-content">
+                <mat-icon class="empty-icon">location_off</mat-icon>
+                <h3>Nenhuma parada encontrada</h3>
+                <p>Adicione paradas com coordenadas para visualizá-las no mapa</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legenda -->
+    <div class="map-legend" *ngIf="showLegend && isMapReady && paradas.length > 0">
+        <mat-card class="legend-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>legend_toggle</mat-icon>
+                    Legenda
+                </mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="legend-items">
+                    <div class="legend-item" *ngFor="let tipo of getTiposDisponiveis()">
+                        <div class="legend-marker" [style.background-color]="getTipoConfig(tipo).color">
+                            <mat-icon>{{ getTipoConfig(tipo).icon }}</mat-icon>
+                        </div>
+                        <span class="legend-label">{{ getTipoConfig(tipo).label }}</span>
+                        <span class="legend-count">
+                            ({{ paradas.filter(p => p.tipo === tipo).length }})
+                        </span>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+</div>

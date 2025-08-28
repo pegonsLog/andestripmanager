@@ -1,0 +1,435 @@
+.logs-dialog {
+  min-width: 800px;
+  max-width: 1200px;
+
+  .dialog-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 0;
+    color: var(--primary-color, #1976d2);
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .dialog-content {
+    padding: 20px 24px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  // Aba de Estatísticas
+  .estatisticas-container {
+    padding: 20px 0;
+
+    .resumo-card {
+      margin-bottom: 24px;
+
+      .mat-card-header {
+        .mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 18px;
+          font-weight: 500;
+
+          mat-icon {
+            font-size: 22px;
+            width: 22px;
+            height: 22px;
+            color: var(--primary-color, #1976d2);
+          }
+        }
+      }
+
+      .resumo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+
+        .resumo-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          padding: 20px;
+          background-color: rgba(0, 0, 0, 0.02);
+          border-radius: 8px;
+          text-align: center;
+
+          .numero {
+            font-size: 28px;
+            font-weight: 700;
+            color: rgba(0, 0, 0, 0.87);
+          }
+
+          .label {
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.6);
+            font-weight: 500;
+            text-transform: uppercase;
+          }
+
+          &.sucesso {
+            background-color: #e8f5e8;
+
+            .numero {
+              color: #2e7d32;
+            }
+          }
+
+          &.erro {
+            background-color: #ffebee;
+
+            .numero {
+              color: #c62828;
+            }
+          }
+
+          &.retry {
+            background-color: #fff3e0;
+
+            .numero {
+              color: #f57c00;
+            }
+          }
+        }
+      }
+    }
+
+    .estatisticas-detalhes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+
+      .operacoes-card,
+      .erros-card {
+        .mat-card-header {
+          .mat-card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 500;
+
+            mat-icon {
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+              color: var(--primary-color, #1976d2);
+            }
+          }
+        }
+
+        .operacoes-lista,
+        .erros-lista {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+
+          .operacao-item,
+          .erro-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 4px;
+
+            .operacao-nome,
+            .erro-nome {
+              font-size: 14px;
+              color: rgba(0, 0, 0, 0.87);
+              flex: 1;
+              margin-right: 12px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          }
+        }
+
+        .sem-dados {
+          text-align: center;
+          color: rgba(0, 0, 0, 0.6);
+          font-style: italic;
+          margin: 20px 0;
+        }
+      }
+    }
+  }
+
+  // Aba de Logs
+  .logs-container {
+    padding: 20px 0;
+
+    .logs-acoes {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    .table-container {
+      .logs-table {
+        width: 100%;
+
+        .mat-column-timestamp {
+          width: 150px;
+        }
+
+        .mat-column-operacao {
+          min-width: 200px;
+        }
+
+        .mat-column-status {
+          width: 100px;
+        }
+
+        .mat-column-tentativa {
+          width: 80px;
+          text-align: center;
+        }
+
+        .mat-column-tempoExecucao {
+          width: 80px;
+          text-align: center;
+        }
+
+        .mat-column-acoes {
+          width: 60px;
+          text-align: center;
+        }
+
+        .timestamp {
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.6);
+        }
+
+        .operacao {
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.87);
+        }
+
+        .tempo {
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.6);
+          font-family: monospace;
+        }
+
+        // Estilos das linhas por status
+        .erro-row {
+          background-color: rgba(244, 67, 54, 0.05);
+        }
+
+        .retry-row {
+          background-color: rgba(255, 152, 0, 0.05);
+        }
+
+        .sucesso-row {
+          background-color: rgba(76, 175, 80, 0.05);
+        }
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 24px;
+      text-align: center;
+
+      .empty-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: rgba(0, 0, 0, 0.3);
+        margin-bottom: 16px;
+      }
+
+      h3 {
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      p {
+        margin: 0;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 14px;
+      }
+    }
+  }
+
+  .dialog-actions {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      min-width: 100px;
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .logs-dialog {
+    min-width: unset;
+    width: 95vw;
+    max-width: 95vw;
+
+    .estatisticas-container {
+      .resumo-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .estatisticas-detalhes {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .logs-container {
+      .table-container {
+        overflow-x: auto;
+
+        .logs-table {
+          min-width: 600px;
+        }
+      }
+    }
+  }
+}
+
+// Tema escuro
+@media (prefers-color-scheme: dark) {
+  .logs-dialog {
+    .estatisticas-container {
+      .resumo-card {
+        .resumo-grid {
+          .resumo-item {
+            background-color: rgba(255, 255, 255, 0.05);
+
+            .numero {
+              color: rgba(255, 255, 255, 0.87);
+            }
+
+            .label {
+              color: rgba(255, 255, 255, 0.6);
+            }
+
+            &.sucesso {
+              background-color: #1b5e20;
+
+              .numero {
+                color: #a5d6a7;
+              }
+            }
+
+            &.erro {
+              background-color: #b71c1c;
+
+              .numero {
+                color: #ef9a9a;
+              }
+            }
+
+            &.retry {
+              background-color: #e65100;
+
+              .numero {
+                color: #ffcc02;
+              }
+            }
+          }
+        }
+      }
+
+      .estatisticas-detalhes {
+        .operacoes-card,
+        .erros-card {
+          .operacoes-lista,
+          .erros-lista {
+            .operacao-item,
+            .erro-item {
+              background-color: rgba(255, 255, 255, 0.05);
+
+              .operacao-nome,
+              .erro-nome {
+                color: rgba(255, 255, 255, 0.87);
+              }
+            }
+          }
+
+          .sem-dados {
+            color: rgba(255, 255, 255, 0.6);
+          }
+        }
+      }
+    }
+
+    .logs-container {
+      .logs-table {
+        .timestamp {
+          color: rgba(255, 255, 255, 0.6);
+        }
+
+        .operacao {
+          color: rgba(255, 255, 255, 0.87);
+        }
+
+        .tempo {
+          color: rgba(255, 255, 255, 0.6);
+        }
+
+        .erro-row {
+          background-color: rgba(244, 67, 54, 0.1);
+        }
+
+        .retry-row {
+          background-color: rgba(255, 152, 0, 0.1);
+        }
+
+        .sucesso-row {
+          background-color: rgba(76, 175, 80, 0.1);
+        }
+      }
+
+      .empty-state {
+        .empty-icon {
+          color: rgba(255, 255, 255, 0.3);
+        }
+
+        h3 {
+          color: rgba(255, 255, 255, 0.6);
+        }
+
+        p {
+          color: rgba(255, 255, 255, 0.5);
+        }
+      }
+    }
+
+    .dialog-actions {
+      border-top-color: rgba(255, 255, 255, 0.12);
+    }
+  }
+}

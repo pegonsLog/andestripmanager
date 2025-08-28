@@ -1,0 +1,104 @@
+<div class="custos-container">
+
+    <!-- Header com estatísticas -->
+    <div class="custos-header" *ngIf="obterEstatisticas() | async as stats">
+        <div class="stats-grid">
+
+            <div class="stat-item total">
+                <div class="stat-value">{{ formatarMoeda(stats.total) }}</div>
+                <div class="stat-label">Total Geral</div>
+            </div>
+
+            <div class="stat-item planejado">
+                <div class="stat-value">{{ formatarMoeda(stats.totalPlanejado) }}</div>
+                <div class="stat-label">Planejado</div>
+            </div>
+
+            <div class="stat-item real">
+                <div class="stat-value">{{ formatarMoeda(stats.totalReal) }}</div>
+                <div class="stat-label">Real</div>
+            </div>
+
+            <div class="stat-item diferenca">
+                <div class="stat-value" [class.positivo]="stats.totalReal <= stats.totalPlanejado"
+                    [class.negativo]="stats.totalReal > stats.totalPlanejado">
+                    {{ formatarMoeda(stats.totalReal - stats.totalPlanejado) }}
+                </div>
+                <div class="stat-label">Diferença</div>
+            </div>
+
+        </div>
+
+        <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="novoCusto()">
+                <mat-icon>add</mat-icon>
+                Novo Custo
+            </button>
+
+            <button mat-icon-button (click)="recarregar()" matTooltip="Recarregar">
+                <mat-icon>refresh</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabs principais -->
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="custos-tabs">
+
+        <!-- Aba: Formulário -->
+        <mat-tab label="Formulário">
+            <ng-template matTabContent>
+                <div class="tab-content">
+                    <app-custo-form [viagemId]="viagemId" [custo]="custoEditando" [diaViagemId]="diaViagemId"
+                        (custoSalvo)="onCustoSalvo($event)" (cancelar)="onCancelarEdicao()">
+                    </app-custo-form>
+                </div>
+            </ng-template>
+        </mat-tab>
+
+        <!-- Aba: Listagem -->
+        <mat-tab label="Listagem">
+            <ng-template matTabContent>
+                <div class="tab-content">
+
+                    <!-- Loading -->
+                    <div *ngIf="isLoading$ | async" class="loading-container">
+                        <mat-spinner diameter="50"></mat-spinner>
+                        <p>Carregando custos...</p>
+                    </div>
+
+                    <!-- Conteúdo -->
+                    <div *ngIf="!(isLoading$ | async)">
+                        <app-custos-list [viagemId]="viagemId" [mostrarRelatorio]="true" [mostrarGraficos]="true">
+                        </app-custos-list>
+                    </div>
+
+                </div>
+            </ng-template>
+        </mat-tab>
+
+        <!-- Aba: Filtros e Exportação -->
+        <mat-tab label="Filtros">
+            <ng-template matTabContent>
+                <div class="tab-content">
+                    <app-custos-filtros [viagemId]="viagemId" [custos]="custosFiltrados$ | async"
+                        (filtrosAplicados)="onFiltrosAplicados($event)" (exportarSolicitado)="onExportacao($event)"
+                        (uploadComprovante)="onUploadComprovante($event)">
+                    </app-custos-filtros>
+                </div>
+            </ng-template>
+        </mat-tab>
+
+    </mat-tab-group>
+
+    <!-- Estado vazio -->
+    <div *ngIf="!(temCustos() | async) && !(isLoading$ | async)" class="empty-state">
+        <mat-icon>money_off</mat-icon>
+        <h2>Nenhum custo registrado</h2>
+        <p>Comece adicionando os custos da sua viagem para ter controle total dos gastos.</p>
+        <button mat-raised-button color="primary" (click)="novoCusto()">
+            <mat-icon>add</mat-icon>
+            Adicionar Primeiro Custo
+        </button>
+    </div>
+
+</div>

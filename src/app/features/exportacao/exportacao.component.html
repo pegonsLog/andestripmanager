@@ -1,0 +1,211 @@
+<div class="exportacao-container">
+    <div class="header">
+        <h1 class="page-title">
+            <mat-icon>download</mat-icon>
+            Exportação de Dados
+        </h1>
+        <p class="page-description">
+            Exporte suas viagens e dados relacionados em formato JSON para backup ou compartilhamento.
+        </p>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <mat-card class="acoes-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>flash_on</mat-icon>
+                Ações Rápidas
+            </mat-card-title>
+            <mat-card-subtitle>
+                Exportações comuns e rápidas
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <div class="acoes-grid">
+                <button mat-raised-button color="primary" (click)="exportarTodasViagens()"
+                    [disabled]="isExportando || isCarregando">
+                    <mat-icon>cloud_download</mat-icon>
+                    Exportar Todas as Viagens
+                </button>
+
+                <button mat-stroked-button color="primary" (click)="exportarViagensSelecionadas()"
+                    [disabled]="!algumasViagensSelecionadas() || isExportando">
+                    <mat-icon>checklist</mat-icon>
+                    Exportar Selecionadas ({{ viagensSelecionadas.size }})
+                </button>
+
+                <button mat-stroked-button color="accent" (click)="abrirImportacao()"
+                    [disabled]="isExportando || isCarregando">
+                    <mat-icon>upload</mat-icon>
+                    Importar Dados
+                </button>
+
+                <button mat-stroked-button color="warn" (click)="restaurarBackup()"
+                    [disabled]="isExportando || isCarregando">
+                    <mat-icon>restore</mat-icon>
+                    Restaurar Backup
+                </button>
+
+                <button mat-icon-button (click)="abrirLogs()" matTooltip="Ver logs de operações">
+                    <mat-icon>list_alt</mat-icon>
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Lista de Viagens -->
+    <mat-card class="viagens-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>list</mat-icon>
+                Suas Viagens
+            </mat-card-title>
+            <mat-card-subtitle>
+                Selecione viagens específicas para exportar
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <!-- Loading -->
+            <div class="loading-container" *ngIf="isCarregando">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Carregando viagens...</p>
+            </div>
+
+            <!-- Tabela de Viagens -->
+            <div class="table-container" *ngIf="!isCarregando">
+                <table mat-table [dataSource]="viagens$ | async" class="viagens-table">
+                    <!-- Coluna de Seleção -->
+                    <ng-container matColumnDef="selecionar">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <mat-checkbox [checked]="todasViagensSelecionadas((viagens$ | async) || [])"
+                                [indeterminate]="algumasViagensSelecionadas() && !todasViagensSelecionadas((viagens$ | async) || [])"
+                                (change)="selecionarTodasViagens((viagens$ | async) || [])" [disabled]="isExportando">
+                            </mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let viagem">
+                            <mat-checkbox [checked]="isViagemSelecionada(viagem.id!)"
+                                (change)="alternarSelecaoViagem(viagem.id!)" [disabled]="isExportando">
+                            </mat-checkbox>
+                        </td>
+                    </ng-container>
+
+                    <!-- Coluna Nome -->
+                    <ng-container matColumnDef="nome">
+                        <th mat-header-cell *matHeaderCellDef>Nome da Viagem</th>
+                        <td mat-cell *matCellDef="let viagem">
+                            <div class="viagem-info">
+                                <span class="viagem-nome">{{ viagem.nome }}</span>
+                                <span class="viagem-descricao" *ngIf="viagem.descricao">
+                                    {{ viagem.descricao }}
+                                </span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Coluna Período -->
+                    <ng-container matColumnDef="periodo">
+                        <th mat-header-cell *matHeaderCellDef>Período</th>
+                        <td mat-cell *matCellDef="let viagem">
+                            <div class="periodo-info">
+                                <mat-icon class="periodo-icon">date_range</mat-icon>
+                                <span>{{ formatarPeriodo(viagem) }}</span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Coluna Status -->
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let viagem">
+                            <mat-chip [color]="getCorStatus(viagem.status)" selected>
+                                {{ getTextoStatus(viagem.status) }}
+                            </mat-chip>
+                        </td>
+                    </ng-container>
+
+                    <!-- Coluna Ações -->
+                    <ng-container matColumnDef="acoes">
+                        <th mat-header-cell *matHeaderCellDef>Ações</th>
+                        <td mat-cell *matCellDef="let viagem">
+                            <button mat-icon-button color="primary" (click)="exportarViagem(viagem)"
+                                [disabled]="isExportando" matTooltip="Exportar esta viagem">
+                                <mat-icon>download</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+
+                <!-- Mensagem quando não há viagens -->
+                <div class="empty-state" *ngIf="(viagens$ | async)?.length === 0">
+                    <mat-icon class="empty-icon">folder_open</mat-icon>
+                    <h3>Nenhuma viagem encontrada</h3>
+                    <p>Você ainda não criou nenhuma viagem para exportar.</p>
+                    <button mat-raised-button color="primary" routerLink="/viagens/nova">
+                        <mat-icon>add</mat-icon>
+                        Criar Nova Viagem
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Informações sobre Exportação -->
+    <mat-card class="info-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>info</mat-icon>
+                Sobre a Exportação
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <div class="info-grid">
+                <div class="info-item">
+                    <mat-icon class="info-icon">data_object</mat-icon>
+                    <div class="info-content">
+                        <h4>Formato JSON</h4>
+                        <p>Os dados são exportados em formato JSON, compatível com a maioria dos sistemas.</p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <mat-icon class="info-icon">security</mat-icon>
+                    <div class="info-content">
+                        <h4>Dados Seguros</h4>
+                        <p>Apenas seus dados são exportados. Informações sensíveis são protegidas.</p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <mat-icon class="info-icon">backup</mat-icon>
+                    <div class="info-content">
+                        <h4>Backup Completo</h4>
+                        <p>Inclui viagens, dias, paradas, custos, hospedagens e muito mais.</p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <mat-icon class="info-icon">settings</mat-icon>
+                    <div class="info-content">
+                        <h4>Personalizável</h4>
+                        <p>Escolha quais dados incluir e como formatá-los na exportação.</p>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Overlay de Loading Global -->
+    <div class="loading-overlay" *ngIf="isExportando">
+        <div class="loading-content">
+            <mat-spinner diameter="60"></mat-spinner>
+            <h3>Exportando dados...</h3>
+            <p>Por favor, aguarde enquanto preparamos seus dados.</p>
+        </div>
+    </div>
+</div>

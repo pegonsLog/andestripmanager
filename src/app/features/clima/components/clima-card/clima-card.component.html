@@ -1,0 +1,118 @@
+<mat-card [class.compact]="compact" [class.has-alerts]="temAlertasAltos()">
+    <mat-card-header>
+        <div mat-card-avatar>
+            <mat-icon [style.color]="obterCorIcone(obterPrevisao()?.condicao || CondicaoClimatica.NUBLADO)"
+                [matTooltip]="obterDescricaoCondicao(obterPrevisao()?.condicao || CondicaoClimatica.NUBLADO)">
+                {{ obterIconeClima(obterPrevisao()?.condicao || CondicaoClimatica.NUBLADO) }}
+            </mat-icon>
+        </div>
+        <mat-card-title>
+            <span *ngIf="clima?.cidade">{{ clima.cidade }}</span>
+            <span *ngIf="!clima?.cidade">Clima</span>
+        </mat-card-title>
+        <mat-card-subtitle *ngIf="clima?.data">
+            {{ clima.data | date:'dd/MM/yyyy':'pt-BR' }}
+        </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Alertas -->
+        <div *ngIf="alertas.length > 0" class="alertas-container">
+            <mat-chip-listbox>
+                <mat-chip-option *ngFor="let alerta of alertas" [color]="obterCorAlerta(alerta.severidade)"
+                    [matTooltip]="alerta.descricao">
+                    <mat-icon matChipAvatar>{{ obterIconeAlerta(alerta.tipo) }}</mat-icon>
+                    {{ alerta.titulo }}
+                </mat-chip-option>
+            </mat-chip-listbox>
+        </div>
+
+        <!-- Previsão do Tempo -->
+        <div *ngIf="temPrevisao()" class="previsao-container">
+            <h4>Previsão</h4>
+            <div class="clima-info">
+                <div class="temperatura-container">
+                    <div class="temperatura-principal">
+                        <span class="temp-max">{{ formatarTemperatura(obterPrevisao()!.temperaturaMax) }}</span>
+                        <span class="temp-min">{{ formatarTemperatura(obterPrevisao()!.temperaturaMin) }}</span>
+                    </div>
+                    <div class="descricao">{{ obterPrevisao()!.descricao }}</div>
+                </div>
+
+                <div class="detalhes-clima" *ngIf="!compact">
+                    <div class="detalhe-item">
+                        <mat-icon>opacity</mat-icon>
+                        <span>{{ formatarChanceChuva(obterPrevisao()!.chanceChuva) }}</span>
+                        <small>Chuva</small>
+                    </div>
+                    <div class="detalhe-item">
+                        <mat-icon>air</mat-icon>
+                        <span>{{ formatarVento(obterPrevisao()!.vento) }}</span>
+                        <small>Vento</small>
+                    </div>
+                    <div class="detalhe-item">
+                        <mat-icon>water_drop</mat-icon>
+                        <span>{{ formatarUmidade(obterPrevisao()!.umidade) }}</span>
+                        <small>Umidade</small>
+                    </div>
+                    <div class="detalhe-item" *ngIf="obterPrevisao()!.pressao">
+                        <mat-icon>speed</mat-icon>
+                        <span>{{ obterPrevisao()!.pressao }} hPa</span>
+                        <small>Pressão</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clima Observado -->
+        <div *ngIf="temObservado()" class="observado-container">
+            <h4>Clima Observado</h4>
+            <div class="clima-info">
+                <div class="temperatura-container">
+                    <div class="temperatura-principal">
+                        <span class="temp-observada">{{ formatarTemperatura(obterObservado()!.temperatura) }}</span>
+                    </div>
+                    <div class="descricao">{{ obterDescricaoCondicao(obterObservado()!.condicao) }}</div>
+                </div>
+
+                <div class="detalhes-observado" *ngIf="!compact">
+                    <div class="detalhe-item">
+                        <mat-icon [style.color]="obterObservado()!.choveu ? '#42A5F5' : '#757575'">
+                            {{ obterObservado()!.choveu ? 'umbrella' : 'wb_sunny' }}
+                        </mat-icon>
+                        <span>{{ obterObservado()!.choveu ? 'Choveu' : 'Não choveu' }}</span>
+                    </div>
+                    <div class="detalhe-item" *ngIf="obterObservado()!.intensidadeChuva && obterObservado()!.choveu">
+                        <small>Intensidade: {{ obterObservado()!.intensidadeChuva }}</small>
+                    </div>
+                    <div class="detalhe-item" *ngIf="obterObservado()!.vento">
+                        <mat-icon>air</mat-icon>
+                        <span>{{ formatarVento(obterObservado()!.vento!) }}</span>
+                        <small>Vento</small>
+                    </div>
+                </div>
+
+                <div *ngIf="obterObservado()!.observacoes" class="observacoes">
+                    <small><strong>Observações:</strong> {{ obterObservado()!.observacoes }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado vazio -->
+        <div *ngIf="!temPrevisao() && !temObservado()" class="empty-state">
+            <mat-icon>cloud_off</mat-icon>
+            <p>Nenhuma informação climática disponível</p>
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions *ngIf="showActions" align="end">
+        <button mat-button color="primary" (click)="onAtualizarPrevisao()" matTooltip="Atualizar previsão do tempo">
+            <mat-icon>refresh</mat-icon>
+            Atualizar
+        </button>
+        <button mat-button color="accent" (click)="onRegistrarObservado()" matTooltip="Registrar clima observado">
+            <mat-icon>edit</mat-icon>
+            Registrar
+        </button>
+    </mat-card-actions>
+</mat-card>

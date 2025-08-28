@@ -1,0 +1,426 @@
+.diario-bordo-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header-section {
+    margin-bottom: 24px;
+
+    .header-card {
+      mat-card-header {
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: "Montserrat", sans-serif;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .filtros-section {
+    margin-bottom: 24px;
+
+    .filtros-card {
+      .filtros-container {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+
+        .filtro-texto {
+          flex: 2;
+          min-width: 250px;
+        }
+
+        .filtro-data {
+          flex: 1;
+          min-width: 200px;
+        }
+
+        .btn-limpar-filtros {
+          height: 56px;
+          min-width: 140px;
+        }
+
+        @media (max-width: 768px) {
+          flex-direction: column;
+          align-items: stretch;
+
+          .filtro-texto,
+          .filtro-data {
+            flex: none;
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+
+  .form-section {
+    margin-bottom: 24px;
+
+    .form-card {
+      .entrada-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        .full-width {
+          width: 100%;
+        }
+
+        .toggle-container {
+          margin: 16px 0;
+        }
+      }
+    }
+  }
+
+  .entradas-section {
+    .loading-container,
+    .no-entries {
+      margin-bottom: 24px;
+
+      .text-center {
+        text-align: center;
+        padding: 32px;
+
+        .loading-icon,
+        .no-entries-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          color: rgba(0, 0, 0, 0.54);
+          margin-bottom: 16px;
+        }
+
+        h3 {
+          font-family: "Montserrat", sans-serif;
+          font-weight: 500;
+          margin-bottom: 8px;
+          color: rgba(0, 0, 0, 0.87);
+        }
+
+        p {
+          color: rgba(0, 0, 0, 0.6);
+          margin-bottom: 16px;
+        }
+      }
+    }
+
+    .entradas-container {
+      .entrada-card {
+        margin-bottom: 24px;
+        transition: box-shadow 0.3s ease;
+
+        &:hover {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        &.entrada-publica {
+          border-left: 4px solid #4caf50;
+        }
+
+        mat-card-header {
+          .entrada-avatar {
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            mat-icon {
+              color: rgba(0, 0, 0, 0.6);
+            }
+          }
+
+          mat-card-title {
+            font-family: "Montserrat", sans-serif;
+            font-weight: 500;
+            font-size: 18px;
+          }
+
+          mat-card-subtitle {
+            .entrada-meta {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+
+              .data {
+                font-weight: 500;
+                color: rgba(0, 0, 0, 0.87);
+              }
+
+              .timestamp {
+                font-size: 12px;
+                color: rgba(0, 0, 0, 0.6);
+              }
+
+              .dia-viagem {
+                font-size: 12px;
+                color: #1976d2;
+                font-weight: 500;
+              }
+            }
+          }
+        }
+
+        mat-card-content {
+          .entrada-conteudo {
+            margin-bottom: 16px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+          }
+
+          .mostrar-mais {
+            margin-bottom: 16px;
+          }
+
+          .tags-container {
+            margin-bottom: 16px;
+
+            mat-chip-listbox {
+              mat-chip-option {
+                font-size: 12px;
+                height: 28px;
+              }
+            }
+          }
+
+          .fotos-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+
+            .fotos-count {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              margin: 0;
+
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+              }
+            }
+          }
+        }
+
+        mat-card-actions {
+          padding-top: 8px;
+
+          button {
+            &[color="warn"] {
+              color: #f44336;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .diario-bordo-container {
+    padding: 8px;
+
+    .header-section,
+    .filtros-section,
+    .form-section {
+      margin-bottom: 16px;
+    }
+
+    .entradas-section {
+      .entradas-container {
+        .entrada-card {
+          margin-bottom: 16px;
+
+          mat-card-header {
+            mat-card-subtitle {
+              .entrada-meta {
+                .data {
+                  font-size: 14px;
+                }
+
+                .timestamp,
+                .dia-viagem {
+                  font-size: 11px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animações
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.entrada-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Estados de loading
+.loading-icon {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Melhorias de acessibilidade
+.entrada-card {
+  &:focus-within {
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+  }
+}
+
+// Tema escuro (se implementado)
+@media (prefers-color-scheme: dark) {
+  .diario-bordo-container {
+    .entrada-card {
+      &.entrada-publica {
+        border-left-color: #66bb6a;
+      }
+    }
+  }
+}
+
+// Seção de fotos no formulário
+.fotos-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+
+  h4 {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 16px;
+  }
+
+  .fotos-upload {
+    margin-bottom: 16px;
+  }
+}
+
+// Galeria de fotos nas entradas
+.fotos-galeria {
+  margin-top: 16px;
+}
+
+// Modal de upload de fotos
+.modal-upload-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+
+  .modal-upload-container {
+    background: white;
+    border-radius: 8px;
+    max-width: 90vw;
+    max-height: 90vh;
+    width: 600px;
+    overflow: hidden;
+    animation: slideInUp 0.3s ease-out;
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f5f5f5;
+
+      h3 {
+        font-family: "Montserrat", sans-serif;
+        font-weight: 500;
+        color: #333;
+        margin: 0;
+      }
+
+      button {
+        color: #666;
+      }
+    }
+
+    .modal-content {
+      padding: 24px;
+      max-height: calc(90vh - 80px);
+      overflow-y: auto;
+    }
+  }
+}
+
+// Responsividade para modal
+@media (max-width: 768px) {
+  .modal-upload-overlay {
+    .modal-upload-container {
+      width: 95vw;
+      max-height: 95vh;
+
+      .modal-header {
+        padding: 12px 16px;
+
+        h3 {
+          font-size: 18px;
+        }
+      }
+
+      .modal-content {
+        padding: 16px;
+        max-height: calc(95vh - 60px);
+      }
+    }
+  }
+
+  .fotos-section {
+    h4 {
+      font-size: 16px;
+    }
+  }
+}
+
+// Animações para modal
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

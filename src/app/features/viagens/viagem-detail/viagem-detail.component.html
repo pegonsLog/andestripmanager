@@ -160,26 +160,34 @@
                                     </div>
                                 </div>
 
-                                <div class="stat-card" *ngIf="viagem()!.distanciaTotal">
+                                <div class="stat-card" *ngIf="estatisticas().distanciaTotal > 0">
                                     <mat-icon>straighten</mat-icon>
                                     <div class="stat-info">
-                                        <span class="stat-value">{{ viagem()!.distanciaTotal }}</span>
+                                        <span class="stat-value">{{ estatisticas().distanciaTotal }}</span>
                                         <span class="stat-label">km</span>
                                     </div>
                                 </div>
 
-                                <div class="stat-card" *ngIf="viagem()!.custoTotal">
+                                <div class="stat-card" *ngIf="estatisticas().custoTotal > 0">
                                     <mat-icon>attach_money</mat-icon>
                                     <div class="stat-info">
-                                        <span class="stat-value">{{ formatarMoeda(viagem()!.custoTotal!) }}</span>
+                                        <span class="stat-value">{{ formatarMoeda(estatisticas().custoTotal) }}</span>
                                         <span class="stat-label">Custo Total</span>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card">
+                                    <mat-icon>hotel</mat-icon>
+                                    <div class="stat-info">
+                                        <span class="stat-value">{{ estatisticas().totalHospedagens }}</span>
+                                        <span class="stat-label">Hospedagens</span>
                                     </div>
                                 </div>
 
                                 <div class="stat-card">
                                     <mat-icon>place</mat-icon>
                                     <div class="stat-info">
-                                        <span class="stat-value">0</span>
+                                        <span class="stat-value">{{ estatisticas().totalParadas }}</span>
                                         <span class="stat-label">Paradas</span>
                                     </div>
                                 </div>
@@ -231,14 +239,50 @@
                 </ng-template>
 
                 <div class="tab-content">
-                    <div class="placeholder-content">
+                    <div *ngIf="diasViagem().length === 0" class="placeholder-content">
                         <mat-icon class="placeholder-icon">calendar_today</mat-icon>
                         <h3>Planejamento de Dias</h3>
                         <p>Organize cada dia da sua viagem com rotas, distâncias e tempo estimado.</p>
-                        <button mat-raised-button color="primary">
+                        <button mat-raised-button color="primary" (click)="onAdicionarDia()">
                             <mat-icon>add</mat-icon>
                             Adicionar Dia
                         </button>
+                    </div>
+
+                    <div *ngIf="diasViagem().length > 0" class="content-list">
+                        <div class="list-header">
+                            <h3>Dias da Viagem ({{ diasViagem().length }})</h3>
+                            <button mat-raised-button color="primary" (click)="onAdicionarDia()">
+                                <mat-icon>add</mat-icon>
+                                Adicionar Dia
+                            </button>
+                        </div>
+
+                        <div class="dias-timeline">
+                            <mat-card *ngFor="let dia of diasViagem(); trackBy: trackByFn" class="dia-card">
+                                <mat-card-header>
+                                    <div mat-card-avatar class="dia-avatar">
+                                        <span>{{ dia.numeroDia }}</span>
+                                    </div>
+                                    <mat-card-title>{{ formatarData(dia.data) }}</mat-card-title>
+                                    <mat-card-subtitle>
+                                        {{ dia.origem }} → {{ dia.destino }}
+                                    </mat-card-subtitle>
+                                </mat-card-header>
+                                <mat-card-content>
+                                    <div class="dia-info">
+                                        <span *ngIf="dia.distanciaPercorrida">
+                                            <mat-icon>straighten</mat-icon>
+                                            {{ dia.distanciaPercorrida }} km
+                                        </span>
+                                        <span *ngIf="dia.rota?.tempoEstimado">
+                                            <mat-icon>schedule</mat-icon>
+                                            {{ (dia.rota!.tempoEstimado! / 60) | number:'1.1-1' }}h
+                                        </span>
+                                    </div>
+                                </mat-card-content>
+                            </mat-card>
+                        </div>
                     </div>
                 </div>
             </mat-tab>
@@ -251,14 +295,43 @@
                 </ng-template>
 
                 <div class="tab-content">
-                    <div class="placeholder-content">
+                    <div *ngIf="paradas().length === 0" class="placeholder-content">
                         <mat-icon class="placeholder-icon">place</mat-icon>
                         <h3>Paradas da Viagem</h3>
                         <p>Registre abastecimentos, refeições e pontos de interesse.</p>
-                        <button mat-raised-button color="primary">
+                        <button mat-raised-button color="primary" (click)="onAdicionarParada()">
                             <mat-icon>add</mat-icon>
                             Adicionar Parada
                         </button>
+                    </div>
+
+                    <div *ngIf="paradas().length > 0" class="content-list">
+                        <div class="list-header">
+                            <h3>Paradas ({{ paradas().length }})</h3>
+                            <button mat-raised-button color="primary" (click)="onAdicionarParada()">
+                                <mat-icon>add</mat-icon>
+                                Adicionar Parada
+                            </button>
+                        </div>
+
+                        <div class="paradas-list">
+                            <mat-card *ngFor="let parada of paradas(); trackBy: trackByFn" class="parada-card">
+                                <mat-card-header>
+                                    <div mat-card-avatar class="parada-avatar">
+                                        <mat-icon>{{ getIconeParada(parada.tipo) }}</mat-icon>
+                                    </div>
+                                    <mat-card-title>{{ parada.nome }}</mat-card-title>
+                                    <mat-card-subtitle>
+                                        {{ getTipoParadaTexto(parada.tipo) }}
+                                        <span *ngIf="parada.horaChegada"> • {{ parada.horaChegada }}</span>
+                                    </mat-card-subtitle>
+                                </mat-card-header>
+                                <mat-card-content>
+                                    <p *ngIf="parada.endereco">{{ parada.endereco }}</p>
+                                    <p *ngIf="parada.observacoes">{{ parada.observacoes }}</p>
+                                </mat-card-content>
+                            </mat-card>
+                        </div>
                     </div>
                 </div>
             </mat-tab>
@@ -275,7 +348,7 @@
                         <mat-icon class="placeholder-icon">hotel</mat-icon>
                         <h3>Hospedagens</h3>
                         <p>Gerencie reservas, custos e avaliações das hospedagens.</p>
-                        <button mat-raised-button color="primary">
+                        <button mat-raised-button color="primary" (click)="onAdicionarHospedagem()">
                             <mat-icon>add</mat-icon>
                             Adicionar Hospedagem
                         </button>
@@ -291,14 +364,50 @@
                 </ng-template>
 
                 <div class="tab-content">
-                    <div class="placeholder-content">
+                    <div *ngIf="custos().length === 0" class="placeholder-content">
                         <mat-icon class="placeholder-icon">attach_money</mat-icon>
                         <h3>Controle de Custos</h3>
                         <p>Acompanhe todos os gastos da viagem por categoria.</p>
-                        <button mat-raised-button color="primary">
+                        <button mat-raised-button color="primary" (click)="onAdicionarCusto()">
                             <mat-icon>add</mat-icon>
                             Adicionar Custo
                         </button>
+                    </div>
+
+                    <div *ngIf="custos().length > 0" class="content-list">
+                        <div class="list-header">
+                            <h3>Custos ({{ custos().length }})</h3>
+                            <div class="header-info">
+                                <span class="total-custo">Total: {{ formatarMoeda(estatisticas().custoTotal) }}</span>
+                                <button mat-raised-button color="primary" (click)="onAdicionarCusto()">
+                                    <mat-icon>add</mat-icon>
+                                    Adicionar Custo
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="custos-list">
+                            <mat-card *ngFor="let custo of custos(); trackBy: trackByFn" class="custo-card">
+                                <mat-card-header>
+                                    <div mat-card-avatar class="custo-avatar">
+                                        <mat-icon>{{ getIconeCategoria(custo.categoria) }}</mat-icon>
+                                    </div>
+                                    <mat-card-title>{{ custo.descricao }}</mat-card-title>
+                                    <mat-card-subtitle>
+                                        {{ getCategoriaTexto(custo.categoria) }} • {{ formatarData(custo.data) }}
+                                    </mat-card-subtitle>
+                                </mat-card-header>
+                                <mat-card-content>
+                                    <div class="custo-valor">
+                                        <span class="valor">{{ formatarMoeda(custo.valor) }}</span>
+                                        <mat-chip [color]="custo.tipo === 'real' ? 'accent' : 'primary'" selected>
+                                            {{ custo.tipo === 'real' ? 'Real' : 'Planejado' }}
+                                        </mat-chip>
+                                    </div>
+                                    <p *ngIf="custo.observacoes">{{ custo.observacoes }}</p>
+                                </mat-card-content>
+                            </mat-card>
+                        </div>
                     </div>
                 </div>
             </mat-tab>
@@ -315,7 +424,7 @@
                         <mat-icon class="placeholder-icon">wb_sunny</mat-icon>
                         <h3>Informações Climáticas</h3>
                         <p>Acompanhe a previsão do tempo e registre condições observadas.</p>
-                        <button mat-raised-button color="primary">
+                        <button mat-raised-button color="primary" (click)="onAtualizarPrevisaoTempo()">
                             <mat-icon>refresh</mat-icon>
                             Atualizar Previsão
                         </button>
@@ -335,7 +444,7 @@
                         <mat-icon class="placeholder-icon">build</mat-icon>
                         <h3>Controle de Manutenção</h3>
                         <p>Registre manutenções preventivas e corretivas da motocicleta.</p>
-                        <button mat-raised-button color="primary">
+                        <button mat-raised-button color="primary" (click)="onRegistrarManutencao()">
                             <mat-icon>add</mat-icon>
                             Registrar Manutenção
                         </button>
@@ -355,7 +464,7 @@
                         <mat-icon class="placeholder-icon">book</mat-icon>
                         <h3>Diário de Bordo</h3>
                         <p>Documente suas experiências, fotos e memórias da viagem.</p>
-                        <button mat-raised-button color="primary">
+                        <button mat-raised-button color="primary" (click)="onNovaEntradaDiario()">
                             <mat-icon>add</mat-icon>
                             Nova Entrada
                         </button>

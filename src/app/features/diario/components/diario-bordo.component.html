@@ -1,0 +1,269 @@
+<div class="diario-bordo-container">
+    <!-- Cabeçalho -->
+    <div class="header-section">
+        <mat-card class="header-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>book</mat-icon>
+                    Diário de Bordo
+                </mat-card-title>
+                <mat-card-subtitle *ngIf="viagem$ | async as viagem">
+                    {{ viagem.nome }}
+                </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-actions>
+                <button mat-raised-button color="primary" (click)="novaEntrada()" [disabled]="isLoading$ | async">
+                    <mat-icon>add</mat-icon>
+                    Nova Entrada
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-section">
+        <mat-card class="filtros-card">
+            <mat-card-content>
+                <div class="filtros-container">
+                    <!-- Filtro por texto -->
+                    <mat-form-field appearance="outline" class="filtro-texto">
+                        <mat-label>Buscar no diário</mat-label>
+                        <input matInput placeholder="Digite para buscar..."
+                            (input)="filtrarPorTexto($event.target?.value || '')" [value]="filtroTexto$ | async">
+                        <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+
+                    <!-- Filtro por data -->
+                    <mat-form-field appearance="outline" class="filtro-data">
+                        <mat-label>Filtrar por data</mat-label>
+                        <mat-select (selectionChange)="filtrarPorData($event.value)" [value]="filtroData$ | async">
+                            <mat-option value="">Todas as datas</mat-option>
+                            <mat-option *ngFor="let data of obterDatasUnicas()" [value]="data">
+                                {{ formatarData(data) }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Botão limpar filtros -->
+                    <button mat-stroked-button (click)="limparFiltros()" class="btn-limpar-filtros">
+                        <mat-icon>clear</mat-icon>
+                        Limpar Filtros
+                    </button>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Formulário de entrada (modo edição) -->
+    <div class="form-section" *ngIf="isEditMode$ | async">
+        <mat-card class="form-card">
+            <mat-card-header>
+                <mat-card-title>
+                    {{ (entradaEditando$ | async) ? 'Editar Entrada' : 'Nova Entrada' }}
+                </mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+                <form [formGroup]="entradaForm" class="entrada-form">
+                    <!-- Título -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Título (opcional)</mat-label>
+                        <input matInput formControlName="titulo" placeholder="Digite um título para sua entrada">
+                    </mat-form-field>
+
+                    <!-- Seleção do dia (se não especificado) -->
+                    <mat-form-field appearance="outline" class="full-width" *ngIf="!diaViagemId">
+                        <mat-label>Dia da viagem</mat-label>
+                        <mat-select formControlName="diaViagemId">
+                            <mat-option value="">Entrada geral da viagem</mat-option>
+                            <mat-option *ngFor="let dia of diasViagem$ | async" [value]="dia.id">
+                                Dia {{ dia.ordem }} - {{ dia.cidadeOrigem }} → {{ dia.cidadeDestino }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Conteúdo (editor de texto rico básico) -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Conteúdo *</mat-label>
+                        <textarea matInput formControlName="conteudo" placeholder="Conte sobre sua experiência..."
+                            rows="8" cdkTextareaAutosize cdkAutosizeMinRows="8" cdkAutosizeMaxRows="20">
+            </textarea>
+                        <mat-error *ngIf="entradaForm.get('conteudo')?.hasError('required')">
+                            O conteúdo é obrigatório
+                        </mat-error>
+                        <mat-error *ngIf="entradaForm.get('conteudo')?.hasError('minlength')">
+                            O conteúdo deve ter pelo menos 10 caracteres
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Tags -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Tags</mat-label>
+                        <input matInput formControlName="tags"
+                            placeholder="aventura, paisagem, comida (separadas por vírgula)">
+                        <mat-hint>Separe as tags com vírgulas</mat-hint>
+                    </mat-form-field>
+
+                    <!-- Entrada pública -->
+                    <div class="toggle-container">
+                        <mat-slide-toggle formControlName="publico">
+                            Entrada pública (pode ser compartilhada)
+                        </mat-slide-toggle>
+                    </div>
+
+                    <!-- Seção de fotos -->
+                    <div class="fotos-section">
+                        <h4>Fotos da Entrada</h4>
+
+                        <!-- Fotos para upload -->
+                        <div class="fotos-upload" *ngIf="fotosParaUpload.length > 0">
+                            <app-galeria-fotos
+                                [fotos]="converterFotosParaGaleria(fotosParaUpload.map(f => URL.createObjectURL(f)))"
+                                titulo="Fotos para adicionar" [permitirRemocao]="true"
+                                (fotoRemovida)="removerFotoUpload($event)">
+                            </app-galeria-fotos>
+                        </div>
+
+                        <!-- Botão para adicionar fotos -->
+                        <button type="button" mat-stroked-button color="primary" (click)="abrirUploadFotos()">
+                            <mat-icon>add_photo_alternate</mat-icon>
+                            Adicionar Fotos
+                        </button>
+                    </div>
+                </form>
+            </mat-card-content>
+
+            <mat-card-actions align="end">
+                <button mat-button (click)="cancelarEdicao()" [disabled]="isLoading$ | async">
+                    Cancelar
+                </button>
+                <button mat-raised-button color="primary" (click)="salvarEntrada()"
+                    [disabled]="isLoading$ | async || entradaForm.invalid">
+                    <mat-icon *ngIf="isLoading$ | async">hourglass_empty</mat-icon>
+                    {{ (entradaEditando$ | async) ? 'Atualizar' : 'Salvar' }}
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+
+    <!-- Lista de entradas -->
+    <div class="entradas-section">
+        <!-- Loading -->
+        <div class="loading-container" *ngIf="isLoading$ | async">
+            <mat-card>
+                <mat-card-content class="text-center">
+                    <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+                    <p>Carregando entradas...</p>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- Entradas agrupadas por data -->
+        <div class="entradas-container" *ngIf="!(isLoading$ | async)">
+            <ng-container *ngFor="let entrada of (entradasFiltradas$ | async); trackBy: trackByEntrada">
+                <mat-card class="entrada-card" [class.entrada-publica]="entrada.publico">
+                    <!-- Cabeçalho da entrada -->
+                    <mat-card-header>
+                        <div mat-card-avatar class="entrada-avatar">
+                            <mat-icon>{{ entrada.publico ? 'public' : 'lock' }}</mat-icon>
+                        </div>
+                        <mat-card-title>
+                            {{ entrada.titulo || 'Entrada sem título' }}
+                        </mat-card-title>
+                        <mat-card-subtitle>
+                            <div class="entrada-meta">
+                                <span class="data">{{ formatarData(entrada.data) }}</span>
+                                <span class="timestamp">{{ formatarTimestamp(entrada.criadoEm) }}</span>
+                                <span class="dia-viagem" *ngIf="entrada.diaViagemId">
+                                    {{ obterNomeDiaViagem(entrada.diaViagemId) }}
+                                </span>
+                            </div>
+                        </mat-card-subtitle>
+                    </mat-card-header>
+
+                    <!-- Conteúdo da entrada -->
+                    <mat-card-content>
+                        <div class="entrada-conteudo" [innerHTML]="entrada.conteudo | slice:0:300">
+                        </div>
+
+                        <!-- Mostrar mais/menos -->
+                        <div class="mostrar-mais" *ngIf="entrada.conteudo.length > 300">
+                            <button mat-button color="primary" (click)="expandirEntrada(entrada.id!)">
+                                Ver mais...
+                            </button>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="tags-container" *ngIf="entrada.tags && entrada.tags.length > 0">
+                            <mat-chip-listbox>
+                                <mat-chip-option *ngFor="let tag of entrada.tags" disabled>
+                                    {{ tag }}
+                                </mat-chip-option>
+                            </mat-chip-listbox>
+                        </div>
+
+                        <!-- Galeria de fotos -->
+                        <div class="fotos-galeria" *ngIf="entrada.fotos && entrada.fotos.length > 0">
+                            <app-galeria-fotos [fotos]="converterFotosParaGaleria(entrada.fotos)"
+                                [permitirRemocao]="true" (fotoRemovida)="removerFotoEntrada(entrada, $event)">
+                            </app-galeria-fotos>
+                        </div>
+                    </mat-card-content>
+
+                    <!-- Ações -->
+                    <mat-card-actions align="end">
+                        <button mat-icon-button (click)="editarEntrada(entrada)" matTooltip="Editar entrada">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="removerEntrada(entrada)"
+                            matTooltip="Excluir entrada">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                        <button mat-icon-button *ngIf="entrada.publico" matTooltip="Compartilhar entrada">
+                            <mat-icon>share</mat-icon>
+                        </button>
+                    </mat-card-actions>
+                </mat-card>
+            </ng-container>
+
+            <!-- Mensagem quando não há entradas -->
+            <div class="no-entries" *ngIf="(entradasFiltradas$ | async)?.length === 0">
+                <mat-card>
+                    <mat-card-content class="text-center">
+                        <mat-icon class="no-entries-icon">book_online</mat-icon>
+                        <h3>Nenhuma entrada encontrada</h3>
+                        <p *ngIf="(filtroData$ | async) || (filtroTexto$ | async)">
+                            Tente ajustar os filtros ou criar uma nova entrada.
+                        </p>
+                        <p *ngIf="!(filtroData$ | async) && !(filtroTexto$ | async)">
+                            Comece criando sua primeira entrada no diário!
+                        </p>
+                        <button mat-raised-button color="primary" (click)="novaEntrada()"
+                            *ngIf="!(filtroData$ | async) && !(filtroTexto$ | async)">
+                            <mat-icon>add</mat-icon>
+                            Criar Primeira Entrada
+                        </button>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Mo
+dal de upload de fotos -->
+<div class="modal-upload-overlay" *ngIf="mostrarUploadFotos$ | async" (click)="fecharUploadFotos()">
+    <div class="modal-upload-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Adicionar Fotos</h3>
+            <button mat-icon-button (click)="fecharUploadFotos()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <div class="modal-content">
+            <app-foto-upload [maxFiles]="10" [maxFileSize]="5242880" (fotosAdicionadas)="onFotosAdicionadas($event)">
+            </app-foto-upload>
+        </div>
+    </div>
+</div>

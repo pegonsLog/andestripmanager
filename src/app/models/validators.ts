@@ -121,3 +121,56 @@ export function valorPositivoValidator(control: AbstractControl): ValidationErro
 
     return null;
 }
+
+/**
+ * Classe com validadores customizados estáticos
+ */
+export class CustomValidators {
+    /**
+     * Validador para verificar se data de check-out é posterior à data de check-in
+     */
+    static dataCheckOutPosterior(checkInField: string, checkOutField: string): ValidatorFn {
+        return (formGroup: AbstractControl): ValidationErrors | null => {
+            const checkIn = formGroup.get(checkInField)?.value;
+            const checkOut = formGroup.get(checkOutField)?.value;
+
+            if (!checkIn || !checkOut) {
+                return null;
+            }
+
+            const dataCheckIn = new Date(checkIn);
+            const dataCheckOut = new Date(checkOut);
+
+            if (dataCheckOut <= dataCheckIn) {
+                return { dataCheckOutPosterior: { message: 'Data de check-out deve ser posterior à data de check-in' } };
+            }
+
+            return null;
+        };
+    }
+
+    /**
+     * Validador para CPF
+     */
+    static cpf = cpfValidator;
+
+    /**
+     * Validador para CEP
+     */
+    static cep = cepValidator;
+
+    /**
+     * Validador para telefone
+     */
+    static telefone = telefoneValidator;
+
+    /**
+     * Validador para data futura
+     */
+    static dataFutura = dataFuturaValidator;
+
+    /**
+     * Validador para valor positivo
+     */
+    static valorPositivo = valorPositivoValidator;
+}

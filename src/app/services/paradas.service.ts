@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { where, orderBy, QueryConstraint } from '@angular/fire/firestore';
+import { Firestore, where, orderBy, QueryConstraint } from '@angular/fire/firestore';
 import { BaseFirestoreService } from '../core/services/base.service';
 import { Parada, TipoParada } from '../models';
 
@@ -10,7 +10,7 @@ import { Parada, TipoParada } from '../models';
 export class ParadasService extends BaseFirestoreService<Parada> {
     protected collectionName = 'paradas';
 
-    constructor(firestore: any) {
+    constructor(firestore: Firestore) {
         super(firestore);
     }
 

@@ -1,0 +1,244 @@
+<div class="manutencao-list-container">
+
+    <!-- Cabeçalho com estatísticas (apenas quando não é viagem específica) -->
+    <div *ngIf="!viagemId && (estatisticas$ | async) as stats" class="estatisticas-section">
+        <mat-card class="estatisticas-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>analytics</mat-icon>
+                    Estatísticas de Manutenção
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="estatisticas-grid">
+                    <div class="estatistica-item">
+                        <div class="estatistica-valor">{{ stats.totalManutencoes }}</div>
+                        <div class="estatistica-label">Total de Manutenções</div>
+                    </div>
+                    <div class="estatistica-item">
+                        <div class="estatistica-valor">{{ formatarMoeda(stats.custoTotal) }}</div>
+                        <div class="estatistica-label">Custo Total</div>
+                    </div>
+                    <div class="estatistica-item">
+                        <div class="estatistica-valor">{{ formatarMoeda(stats.custoMedio) }}</div>
+                        <div class="estatistica-label">Custo Médio</div>
+                    </div>
+                    <div class="estatistica-item" *ngIf="stats.ultimaManutencao">
+                        <div class="estatistica-valor">{{ formatarData(stats.ultimaManutencao.data) }}</div>
+                        <div class="estatistica-label">Última Manutenção</div>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Filtros -->
+    <mat-card *ngIf="showFilters" class="filtros-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>filter_list</mat-icon>
+                Filtros
+            </mat-card-title>
+            <div class="filtros-actions">
+                <button mat-button (click)="limparFiltros()">
+                    <mat-icon>clear</mat-icon>
+                    Limpar Filtros
+                </button>
+                <button *ngIf="showActions" mat-raised-button color="primary" (click)="onNovaManutencao()">
+                    <mat-icon>add</mat-icon>
+                    Nova Manutenção
+                </button>
+            </div>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="filtrosForm" class="filtros-form">
+                <div class="filtros-row">
+                    <mat-form-field appearance="outline" class="filtro-field">
+                        <mat-label>Buscar</mat-label>
+                        <input matInput formControlName="textoBusca"
+                            placeholder="Buscar por descrição, local, oficina...">
+                        <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="filtro-field">
+                        <mat-label>Tipo</mat-label>
+                        <mat-select formControlName="tipo">
+                            <mat-option value="">Todos os tipos</mat-option>
+                            <mat-option *ngFor="let tipo of tiposManutencao" [value]="tipo">
+                                {{ obterLabelTipoManutencao(tipo) }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="filtro-field">
+                        <mat-label>Categoria</mat-label>
+                        <mat-select formControlName="categoria">
+                            <mat-option value="">Todas as categorias</mat-option>
+                            <mat-option *ngFor="let categoria of categoriasManutencao" [value]="categoria">
+                                {{ obterLabelCategoriaManutencao(categoria) }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="filtros-row">
+                    <mat-form-field appearance="outline" class="filtro-field">
+                        <mat-label>Data Início</mat-label>
+                        <input matInput [matDatepicker]="dataInicioPicker" formControlName="dataInicio">
+                        <mat-datepicker-toggle matSuffix [for]="dataInicioPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dataInicioPicker></mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="filtro-field">
+                        <mat-label>Data Fim</mat-label>
+                        <input matInput [matDatepicker]="dataFimPicker" formControlName="dataFim">
+                        <mat-datepicker-toggle matSuffix [for]="dataFimPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dataFimPicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Carregando manutenções...</p>
+    </div>
+
+    <!-- Lista de Manutenções -->
+    <div *ngIf="!isLoading" class="manutencoes-container">
+        <div *ngIf="(manutencoesFiltradas$ | async) as manutencoes">
+
+            <!-- Resumo dos resultados -->
+            <div class="resultados-resumo" *ngIf="manutencoes.length > 0">
+                <span class="resultados-count">
+                    {{ manutencoes.length }} manutenção{{ manutencoes.length !== 1 ? 'ões' : '' }} encontrada{{
+                    manutencoes.length !== 1 ? 's' : '' }}
+                </span>
+                <span class="resultados-custo">
+                    Custo total: {{ formatarMoeda(calcularCustoTotal(manutencoes)) }}
+                </span>
+            </div>
+
+            <!-- Cards de Manutenção -->
+            <div class="manutencoes-grid">
+                <mat-card *ngFor="let manutencao of manutencoes; trackBy: trackByManutencao" class="manutencao-card">
+
+                    <!-- Cabeçalho do Card -->
+                    <mat-card-header>
+                        <div mat-card-avatar class="manutencao-avatar">
+                            <mat-icon>{{ obterIconeTipoManutencao(manutencao.tipo) }}</mat-icon>
+                        </div>
+                        <mat-card-title>{{ manutencao.descricao }}</mat-card-title>
+                        <mat-card-subtitle>
+                            <div class="manutencao-info">
+                                <span>{{ formatarData(manutencao.data) }}</span>
+                                <span>{{ manutencao.quilometragem.toLocaleString('pt-BR') }} km</span>
+                            </div>
+                        </mat-card-subtitle>
+                        <div class="card-actions">
+                            <mat-chip-set>
+                                <mat-chip [color]="obterCorTipoManutencao(manutencao.tipo)" selected>
+                                    {{ obterLabelTipoManutencao(manutencao.tipo) }}
+                                </mat-chip>
+                            </mat-chip-set>
+                        </div>
+                    </mat-card-header>
+
+                    <!-- Conteúdo Principal -->
+                    <mat-card-content>
+                        <div class="manutencao-detalhes">
+
+                            <!-- Custo -->
+                            <div class="detalhe-item custo-destaque">
+                                <mat-icon>attach_money</mat-icon>
+                                <span class="custo-valor">{{ formatarMoeda(manutencao.custo) }}</span>
+                            </div>
+
+                            <!-- Local e Oficina -->
+                            <div *ngIf="manutencao.local || manutencao.oficina" class="detalhe-item">
+                                <mat-icon>location_on</mat-icon>
+                                <div class="local-info">
+                                    <span *ngIf="manutencao.oficina" class="oficina">{{ manutencao.oficina }}</span>
+                                    <span *ngIf="manutencao.local" class="local">{{ manutencao.local }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Próxima Manutenção -->
+                            <div *ngIf="temProximaManutencao(manutencao)" class="detalhe-item proxima-manutencao">
+                                <mat-icon>schedule</mat-icon>
+                                <span>Próxima: {{ obterTextoProximaManutencao(manutencao) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Expansão para Itens/Serviços -->
+                        <mat-expansion-panel class="itens-expansion">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    <mat-icon>build</mat-icon>
+                                    Itens e Serviços ({{ manutencao.itensServicos.length }})
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+
+                            <div class="itens-lista">
+                                <div *ngFor="let item of manutencao.itensServicos" class="item-servico">
+                                    <div class="item-info">
+                                        <span class="item-nome">{{ item.nome }}</span>
+                                        <mat-chip class="categoria-chip">
+                                            {{ obterLabelCategoriaManutencao(item.categoria) }}
+                                        </mat-chip>
+                                    </div>
+                                    <div class="item-detalhes">
+                                        <span class="item-custo">{{ formatarMoeda(item.custo) }}</span>
+                                        <span *ngIf="item.quantidade && item.quantidade > 1" class="item-quantidade">
+                                            x{{ item.quantidade }}
+                                        </span>
+                                        <span *ngIf="item.marca" class="item-marca">{{ item.marca }}</span>
+                                    </div>
+                                    <div *ngIf="item.observacoes" class="item-observacoes">
+                                        {{ item.observacoes }}
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-expansion-panel>
+
+                        <!-- Observações -->
+                        <div *ngIf="manutencao.observacoes" class="observacoes-section">
+                            <mat-divider></mat-divider>
+                            <div class="observacoes">
+                                <mat-icon>note</mat-icon>
+                                <span>{{ manutencao.observacoes }}</span>
+                            </div>
+                        </div>
+                    </mat-card-content>
+
+                    <!-- Ações do Card -->
+                    <mat-card-actions *ngIf="showActions" align="end">
+                        <button mat-button (click)="onEditarManutencao(manutencao)" matTooltip="Editar manutenção">
+                            <mat-icon>edit</mat-icon>
+                            Editar
+                        </button>
+                        <button mat-button color="warn" (click)="onExcluirManutencao(manutencao)"
+                            matTooltip="Excluir manutenção">
+                            <mat-icon>delete</mat-icon>
+                            Excluir
+                        </button>
+                    </mat-card-actions>
+                </mat-card>
+            </div>
+
+            <!-- Estado vazio -->
+            <div *ngIf="manutencoes.length === 0" class="estado-vazio">
+                <mat-icon class="icone-vazio">build</mat-icon>
+                <h3>Nenhuma manutenção encontrada</h3>
+                <p>Tente ajustar os filtros de busca ou registre sua primeira manutenção.</p>
+                <button *ngIf="showActions" mat-raised-button color="primary" (click)="onNovaManutencao()">
+                    <mat-icon>add</mat-icon>
+                    Registrar Primeira Manutenção
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

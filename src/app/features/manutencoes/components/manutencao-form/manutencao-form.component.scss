@@ -1,0 +1,283 @@
+.manutencao-form-card {
+  max-width: 800px;
+  margin: 0 auto;
+
+  mat-card-header {
+    margin-bottom: 16px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    mat-card-subtitle {
+      margin-top: 4px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+}
+
+.manutencao-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .section-title {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #1976d2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.form-field {
+  flex: 1;
+
+  &.full-width {
+    width: 100%;
+  }
+}
+
+// Estilos para os itens de manutenção
+.itens-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.item-card {
+  mat-card {
+    border-left: 4px solid #1976d2;
+
+    mat-card-content {
+      padding: 16px;
+    }
+  }
+
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+}
+
+// Estilos para botões
+mat-card-actions {
+  padding: 16px 24px;
+  gap: 8px;
+
+  button {
+    min-width: 100px;
+
+    &[color="primary"] {
+      position: relative;
+
+      .spinner-button {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      mat-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+// Estilos para campos específicos
+mat-form-field {
+  &.mat-form-field-appearance-outline {
+    .mat-form-field-wrapper {
+      margin: 0;
+    }
+  }
+
+  // Estilo para campo de custo total (readonly)
+  &:has(input[readonly]) {
+    .mat-form-field-outline {
+      background-color: #f5f5f5;
+    }
+
+    input {
+      color: #666;
+      font-weight: 500;
+    }
+  }
+}
+
+// Estilos para dividers
+mat-divider {
+  margin: 8px 0;
+  opacity: 0.3;
+}
+
+// Estilos responsivos
+@media (max-width: 768px) {
+  .manutencao-form-card {
+    margin: 8px;
+
+    mat-card-content {
+      padding: 16px;
+    }
+
+    mat-card-actions {
+      padding: 12px 16px;
+
+      button {
+        min-width: 80px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .form-section {
+    gap: 12px;
+
+    .section-title {
+      font-size: 1.1rem;
+    }
+  }
+
+  .item-card {
+    mat-card {
+      mat-card-content {
+        padding: 12px;
+      }
+    }
+
+    .item-header {
+      margin-bottom: 12px;
+
+      h4 {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .manutencao-form-card {
+    margin: 4px;
+
+    mat-card-header {
+      mat-card-title {
+        font-size: 1.3rem;
+      }
+    }
+  }
+
+  .form-section {
+    .section-header {
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  mat-card-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// Animações
+.item-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Estados de erro
+.mat-form-field.mat-form-field-invalid {
+  .mat-form-field-outline-thick {
+    color: #f44336;
+  }
+}
+
+// Melhorias de acessibilidade
+.form-field {
+  mat-label {
+    font-weight: 500;
+  }
+
+  mat-hint {
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  mat-error {
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+}
+
+// Estilos para ícones
+mat-icon {
+  &[matSuffix],
+  &[matPrefix] {
+    color: rgba(0, 0, 0, 0.54);
+  }
+}
+
+// Estilos para spinner de loading
+.spinner-button {
+  color: white !important;
+}

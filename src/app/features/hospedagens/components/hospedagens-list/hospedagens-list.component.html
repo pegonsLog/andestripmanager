@@ -1,0 +1,125 @@
+<div class="hospedagens-container">
+    <!-- Header com Filtros -->
+    <div class="header-section" *ngIf="showFilters">
+        <div class="filtros-container">
+            <h2 class="section-title">
+                <mat-icon>hotel</mat-icon>
+                Hospedagens
+                <span class="contador" *ngIf="contarHospedagens() | async as count">
+                    ({{ count }})
+                </span>
+            </h2>
+
+            <!-- Filtros -->
+            <div class="filtros">
+                <mat-form-field appearance="outline" class="filtro-campo">
+                    <mat-label>Buscar</mat-label>
+                    <input matInput [formControl]="filtroBusca" placeholder="Nome ou endereço...">
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filtro-campo">
+                    <mat-label>Tipo</mat-label>
+                    <mat-select [formControl]="filtroTipo">
+                        <mat-option value="">Todos os tipos</mat-option>
+                        <mat-option *ngFor="let tipo of tiposHospedagem" [value]="tipo">
+                            {{ getTipoHospedagemLabel(tipo) }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filtro-campo">
+                    <mat-label>Avaliação Mínima</mat-label>
+                    <mat-select [formControl]="filtroAvaliacao">
+                        <mat-option value="">Qualquer avaliação</mat-option>
+                        <mat-option *ngFor="let avaliacao of avaliacoes" [value]="avaliacao">
+                            {{ avaliacao }} estrela{{ avaliacao > 1 ? 's' : '' }} ou mais
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <button mat-icon-button (click)="limparFiltros()" matTooltip="Limpar filtros"
+                    class="btn-limpar-filtros">
+                    <mat-icon>clear</mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Resumo -->
+        <div class="resumo-section" *ngIf="calcularCustoTotal() | async as custoTotal">
+            <mat-card class="resumo-card">
+                <mat-card-content>
+                    <div class="resumo-item">
+                        <mat-icon>hotel</mat-icon>
+                        <span class="resumo-label">Total de hospedagens:</span>
+                        <span class="resumo-valor">{{ contarHospedagens() | async }}</span>
+                    </div>
+                    <div class="resumo-item">
+                        <mat-icon>attach_money</mat-icon>
+                        <span class="resumo-label">Custo total:</span>
+                        <span class="resumo-valor custo">{{ custoTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+                            }}</span>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+
+    <!-- Botão Nova Hospedagem -->
+    <div class="actions-section" *ngIf="showAddButton">
+        <button mat-fab color="primary" (click)="onNovaHospedagem()" class="fab-nova-hospedagem"
+            matTooltip="Nova Hospedagem">
+            <mat-icon>add</mat-icon>
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="isLoading">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Carregando hospedagens...</p>
+    </div>
+
+    <!-- Lista de Hospedagens -->
+    <div class="hospedagens-grid" *ngIf="!isLoading">
+        <ng-container *ngIf="hospedagensFiltradas$ | async as hospedagens">
+            <!-- Cards de Hospedagem -->
+            <app-hospedagem-card *ngFor="let hospedagem of hospedagens; trackBy: trackByHospedagem"
+                [hospedagem]="hospedagem" [showActions]="true" (editar)="onEditarHospedagem($event)"
+                (excluir)="onExcluirHospedagem($event)" (visualizar)="onVisualizarHospedagem($event)"
+                (verMapa)="onVerMapa($event)">
+            </app-hospedagem-card>
+
+            <!-- Estado Vazio -->
+            <div class="estado-vazio" *ngIf="hospedagens.length === 0">
+                <mat-card class="vazio-card">
+                    <mat-card-content>
+                        <div class="vazio-content">
+                            <mat-icon class="vazio-icon">hotel_class</mat-icon>
+                            <h3>Nenhuma hospedagem encontrada</h3>
+                            <p *ngIf="filtroBusca.value || filtroTipo.value || filtroAvaliacao.value">
+                                Tente ajustar os filtros para encontrar hospedagens.
+                            </p>
+                            <p *ngIf="!filtroBusca.value && !filtroTipo.value && !filtroAvaliacao.value">
+                                Adicione sua primeira hospedagem para começar a organizar sua viagem.
+                            </p>
+
+                            <div class="vazio-actions">
+                                <button mat-raised-button color="primary" (click)="onNovaHospedagem()"
+                                    *ngIf="showAddButton">
+                                    <mat-icon>add</mat-icon>
+                                    Nova Hospedagem
+                                </button>
+
+                                <button mat-button (click)="limparFiltros()"
+                                    *ngIf="filtroBusca.value || filtroTipo.value || filtroAvaliacao.value">
+                                    <mat-icon>clear</mat-icon>
+                                    Limpar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </ng-container>
+    </div>
+</div>

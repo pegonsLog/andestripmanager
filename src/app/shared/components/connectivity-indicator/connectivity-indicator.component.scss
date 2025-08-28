@@ -1,0 +1,135 @@
+.connectivity-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 16px;
+  background-color: rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.connectivity-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  transition: color 0.3s ease;
+
+  &.primary {
+    color: var(--mdc-theme-primary, #1976d2);
+  }
+
+  &.accent {
+    color: var(--mdc-theme-secondary, #ff4081);
+  }
+
+  &.warn {
+    color: var(--mdc-theme-error, #f44336);
+  }
+}
+
+.pending-operations {
+  .mat-mdc-chip {
+    font-size: 12px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.sync-indicator {
+  display: flex;
+  align-items: center;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--mdc-theme-primary, #1976d2);
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsividade para dispositivos móveis
+@media (max-width: 768px) {
+  .connectivity-indicator {
+    padding: 2px 6px;
+    gap: 4px;
+  }
+
+  .connectivity-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .pending-operations .mat-mdc-chip {
+    font-size: 11px;
+    height: 20px;
+  }
+}
+
+// Estados de conectividade
+.connectivity-indicator {
+  &.online {
+    border-left: 3px solid var(--mdc-theme-primary, #1976d2);
+  }
+
+  &.offline {
+    border-left: 3px solid var(--mdc-theme-error, #f44336);
+    background-color: rgba(244, 67, 54, 0.1);
+  }
+
+  &.poor-connection {
+    border-left: 3px solid var(--mdc-theme-warning, #ff9800);
+    background-color: rgba(255, 152, 0, 0.1);
+  }
+}
+
+// Animações para mudanças de estado
+.connectivity-icon {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Tooltip customizado
+.mat-mdc-tooltip {
+  font-size: 12px;
+  max-width: 250px;
+  white-space: pre-line;
+}

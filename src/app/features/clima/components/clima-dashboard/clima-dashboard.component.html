@@ -1,0 +1,125 @@
+<div class="clima-dashboard">
+    <!-- Loading State -->
+    <div *ngIf="estaCarregando()" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Carregando informações climáticas...</p>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div *ngIf="!estaCarregando()" class="dashboard-content">
+
+        <!-- Alertas Climáticos -->
+        <div *ngIf="showAlertas && alertas.length > 0" class="alertas-section">
+            <app-alertas-clima [alertas]="alertas" [expandable]="true">
+            </app-alertas-clima>
+        </div>
+
+        <!-- Clima Atual -->
+        <div *ngIf="temDadosClimaticos()" class="clima-atual-section">
+            <app-clima-card [clima]="clima" [previsao]="previsaoAtual" [alertas]="alertas" [showActions]="true"
+                (registrarObservado)="onRegistrarObservado()" (atualizarPrevisao)="onAtualizarPrevisao()">
+            </app-clima-card>
+        </div>
+
+        <!-- Estado Vazio - Sem Dados -->
+        <div *ngIf="!temDadosClimaticos()" class="empty-state">
+            <mat-icon>cloud_off</mat-icon>
+            <h3>Informações Climáticas Indisponíveis</h3>
+            <p>Não foi possível obter dados climáticos para este dia.</p>
+            <div class="empty-actions">
+                <button mat-raised-button color="primary" (click)="onAtualizarPrevisao()"
+                    [disabled]="!diaViagem?.coordenadas?.destino">
+                    <mat-icon>refresh</mat-icon>
+                    Tentar Novamente
+                </button>
+                <button mat-button color="accent" (click)="onRegistrarObservado()" [disabled]="!diaViagem">
+                    <mat-icon>edit</mat-icon>
+                    Registrar Manualmente
+                </button>
+            </div>
+            <small *ngIf="!diaViagem?.coordenadas?.destino">
+                Configure as coordenadas do destino para obter a previsão do tempo
+            </small>
+        </div>
+
+        <!-- Histórico Climático -->
+        <div *ngIf="showHistorico && obterDiasViagemIds().length > 0" class="historico-section">
+            <app-historico-clima [diasViagemIds]="obterDiasViagemIds()" [maxItems]="5">
+            </app-historico-clima>
+        </div>
+
+        <!-- Dicas Climáticas -->
+        <div *ngIf="previsaoAtual" class="dicas-section">
+            <mat-card class="dicas-card">
+                <mat-card-header>
+                    <div mat-card-avatar>
+                        <mat-icon>lightbulb</mat-icon>
+                    </div>
+                    <mat-card-title>Dicas para a Viagem</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="dicas-list">
+                        <!-- Dica de Chuva -->
+                        <div *ngIf="previsaoAtual.chanceChuva > 50" class="dica-item chuva">
+                            <mat-icon>umbrella</mat-icon>
+                            <div class="dica-content">
+                                <strong>Prepare-se para chuva</strong>
+                                <p>{{ previsaoAtual.chanceChuva }}% de chance de chuva. Leve capa de chuva e
+                                    equipamentos impermeáveis.</p>
+                            </div>
+                        </div>
+
+                        <!-- Dica de Vento -->
+                        <div *ngIf="previsaoAtual.vento > 30" class="dica-item vento">
+                            <mat-icon>air</mat-icon>
+                            <div class="dica-content">
+                                <strong>Vento forte</strong>
+                                <p>Ventos de {{ previsaoAtual.vento }} km/h. Dirija com cuidado e mantenha distância de
+                                    veículos grandes.</p>
+                            </div>
+                        </div>
+
+                        <!-- Dica de Temperatura -->
+                        <div *ngIf="previsaoAtual.temperaturaMax > 30" class="dica-item temperatura-alta">
+                            <mat-icon>thermostat</mat-icon>
+                            <div class="dica-content">
+                                <strong>Temperatura elevada</strong>
+                                <p>Máxima de {{ previsaoAtual.temperaturaMax }}°C. Mantenha-se hidratado e use protetor
+                                    solar.</p>
+                            </div>
+                        </div>
+
+                        <div *ngIf="previsaoAtual.temperaturaMin < 10" class="dica-item temperatura-baixa">
+                            <mat-icon>ac_unit</mat-icon>
+                            <div class="dica-content">
+                                <strong>Temperatura baixa</strong>
+                                <p>Mínima de {{ previsaoAtual.temperaturaMin }}°C. Use roupas adequadas e aquecimento.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Dica de Visibilidade -->
+                        <div *ngIf="previsaoAtual.visibilidade && previsaoAtual.visibilidade < 5"
+                            class="dica-item visibilidade">
+                            <mat-icon>visibility_off</mat-icon>
+                            <div class="dica-content">
+                                <strong>Visibilidade reduzida</strong>
+                                <p>Visibilidade de {{ previsaoAtual.visibilidade }} km. Use faróis e reduza a
+                                    velocidade.</p>
+                            </div>
+                        </div>
+
+                        <!-- Dica padrão se não há alertas -->
+                        <div *ngIf="alertas.length === 0" class="dica-item padrao">
+                            <mat-icon>check_circle</mat-icon>
+                            <div class="dica-content">
+                                <strong>Condições favoráveis</strong>
+                                <p>O clima está bom para viajar. Aproveite a jornada com segurança!</p>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>

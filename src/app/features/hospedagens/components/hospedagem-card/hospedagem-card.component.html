@@ -1,0 +1,167 @@
+<mat-card class="hospedagem-card" [class.com-foto]="temFotos()">
+    <!-- Foto da Hospedagem -->
+    <div class="foto-container" *ngIf="temFotos()">
+        <img [src]="getPrimeiraFoto()" [alt]="hospedagem.nome" class="foto-hospedagem">
+        <div class="foto-overlay" *ngIf="getQuantidadeFotos() > 1">
+            <mat-icon>photo_library</mat-icon>
+            <span>+{{ getQuantidadeFotos() - 1 }}</span>
+        </div>
+    </div>
+
+    <mat-card-header>
+        <div mat-card-avatar class="tipo-avatar">
+            <mat-icon>{{ getTipoIcon(hospedagem.tipo) }}</mat-icon>
+        </div>
+
+        <mat-card-title class="hospedagem-nome">
+            {{ hospedagem.nome }}
+        </mat-card-title>
+
+        <mat-card-subtitle class="hospedagem-tipo">
+            {{ getTipoHospedagemLabel(hospedagem.tipo) }}
+        </mat-card-subtitle>
+
+        <!-- Menu de Ações -->
+        <div class="card-actions" *ngIf="showActions">
+            <button mat-icon-button [matMenuTriggerFor]="menuAcoes">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-menu #menuAcoes="matMenu">
+                <button mat-menu-item (click)="onVisualizar()">
+                    <mat-icon>visibility</mat-icon>
+                    <span>Visualizar</span>
+                </button>
+                <button mat-menu-item (click)="onEditar()">
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar</span>
+                </button>
+                <button mat-menu-item (click)="onVerMapa()" *ngIf="hospedagem.coordenadas">
+                    <mat-icon>map</mat-icon>
+                    <span>Ver no Mapa</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="onExcluir()" class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    <span>Excluir</span>
+                </button>
+            </mat-menu>
+        </div>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Informações Principais -->
+        <div class="info-principal">
+            <!-- Datas -->
+            <div class="info-item">
+                <mat-icon class="info-icon">event</mat-icon>
+                <div class="info-content">
+                    <span class="info-label">Check-in/out:</span>
+                    <span class="info-value">
+                        {{ formatarData(hospedagem.dataCheckIn) }} - {{ formatarData(hospedagem.dataCheckOut) }}
+                    </span>
+                    <span class="info-extra">({{ calcularDiasEstadia() }} noites)</span>
+                </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="info-item">
+                <mat-icon class="info-icon">location_on</mat-icon>
+                <div class="info-content">
+                    <span class="info-value">{{ hospedagem.endereco }}</span>
+                </div>
+            </div>
+
+            <!-- Valor -->
+            <div class="info-item valor-item">
+                <mat-icon class="info-icon">attach_money</mat-icon>
+                <div class="info-content">
+                    <span class="info-label">Diária:</span>
+                    <span class="valor-diaria">{{ hospedagem.valorDiaria | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+                        }}</span>
+                    <span class="valor-total">Total: {{ hospedagem.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+                        }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Avaliação -->
+        <div class="avaliacao-section" *ngIf="hospedagem.avaliacao && hospedagem.avaliacao > 0">
+            <div class="estrelas">
+                <mat-icon *ngFor="let estrela of getEstrelas(hospedagem.avaliacao)"
+                    [class.estrela-preenchida]="estrela === 1">
+                    star
+                </mat-icon>
+                <span class="avaliacao-numero">{{ hospedagem.avaliacao }}/5</span>
+            </div>
+        </div>
+
+        <!-- Características Especiais -->
+        <div class="caracteristicas">
+            <!-- Estacionamento Coberto -->
+            <mat-chip-set *ngIf="hospedagem.estacionamentoCoberto">
+                <mat-chip class="chip-destaque">
+                    <mat-icon matChipAvatar>motorcycle</mat-icon>
+                    Estacionamento Coberto
+                </mat-chip>
+            </mat-chip-set>
+
+            <!-- Comodidades -->
+            <div class="comodidades" *ngIf="temComodidades()">
+                <span class="comodidades-label">Comodidades:</span>
+                <mat-chip-set class="comodidades-chips">
+                    <mat-chip *ngFor="let comodidade of getComodidadesLimitadas()">
+                        {{ comodidade }}
+                    </mat-chip>
+                    <mat-chip *ngIf="getComodidadesRestantes() > 0" class="chip-mais">
+                        +{{ getComodidadesRestantes() }} mais
+                    </mat-chip>
+                </mat-chip-set>
+            </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="observacoes" *ngIf="hospedagem.observacoes">
+            <mat-icon class="obs-icon">notes</mat-icon>
+            <p class="obs-texto">{{ hospedagem.observacoes }}</p>
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions class="card-footer" *ngIf="showActions">
+        <!-- Links Externos -->
+        <div class="links-externos">
+            <button mat-icon-button *ngIf="hospedagem.linkReserva" (click)="abrirLink(hospedagem.linkReserva)"
+                matTooltip="Abrir Reserva">
+                <mat-icon>link</mat-icon>
+            </button>
+
+            <button mat-icon-button *ngIf="hospedagem.siteOficial" (click)="abrirLink(hospedagem.siteOficial)"
+                matTooltip="Site Oficial">
+                <mat-icon>language</mat-icon>
+            </button>
+
+            <button mat-icon-button *ngIf="hospedagem.telefone" (click)="abrirLink('tel:' + hospedagem.telefone)"
+                matTooltip="Ligar">
+                <mat-icon>phone</mat-icon>
+            </button>
+
+            <button mat-icon-button *ngIf="hospedagem.email" (click)="abrirLink('mailto:' + hospedagem.email)"
+                matTooltip="Enviar Email">
+                <mat-icon>email</mat-icon>
+            </button>
+        </div>
+
+        <!-- Ações Principais -->
+        <div class="acoes-principais">
+            <button mat-button color="primary" (click)="onVisualizar()">
+                <mat-icon>visibility</mat-icon>
+                Detalhes
+            </button>
+
+            <button mat-button *ngIf="hospedagem.coordenadas" (click)="onVerMapa()">
+                <mat-icon>map</mat-icon>
+                Mapa
+            </button>
+        </div>
+    </mat-card-actions>
+</mat-card>

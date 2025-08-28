@@ -1,0 +1,180 @@
+<div class="logs-dialog">
+    <h2 mat-dialog-title class="dialog-title">
+        <mat-icon>list_alt</mat-icon>
+        Logs de Operações
+    </h2>
+
+    <mat-dialog-content class="dialog-content">
+        <mat-tab-group>
+            <!-- Aba de Estatísticas -->
+            <mat-tab label="Estatísticas">
+                <div class="estatisticas-container">
+                    <!-- Resumo Geral -->
+                    <mat-card class="resumo-card">
+                        <mat-card-header>
+                            <mat-card-title>
+                                <mat-icon>analytics</mat-icon>
+                                Resumo Geral
+                            </mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div class="resumo-grid">
+                                <div class="resumo-item">
+                                    <span class="numero">{{ estatisticas.total || 0 }}</span>
+                                    <span class="label">Total de Operações</span>
+                                </div>
+                                <div class="resumo-item sucesso">
+                                    <span class="numero">{{ estatisticas.sucessos || 0 }}</span>
+                                    <span class="label">Sucessos</span>
+                                </div>
+                                <div class="resumo-item erro">
+                                    <span class="numero">{{ estatisticas.erros || 0 }}</span>
+                                    <span class="label">Erros</span>
+                                </div>
+                                <div class="resumo-item retry">
+                                    <span class="numero">{{ estatisticas.retries || 0 }}</span>
+                                    <span class="label">Tentativas</span>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+
+                    <div class="estatisticas-detalhes">
+                        <!-- Operações Mais Comuns -->
+                        <mat-card class="operacoes-card">
+                            <mat-card-header>
+                                <mat-card-title>
+                                    <mat-icon>trending_up</mat-icon>
+                                    Operações Mais Comuns
+                                </mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="operacoes-lista" *ngIf="operacoesMaisComuns.length > 0; else semOperacoes">
+                                    <div class="operacao-item" *ngFor="let item of operacoesMaisComuns">
+                                        <span class="operacao-nome">{{ item.operacao }}</span>
+                                        <mat-chip color="primary" selected>{{ item.count }}</mat-chip>
+                                    </div>
+                                </div>
+                                <ng-template #semOperacoes>
+                                    <p class="sem-dados">Nenhuma operação registrada</p>
+                                </ng-template>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <!-- Erros Mais Comuns -->
+                        <mat-card class="erros-card">
+                            <mat-card-header>
+                                <mat-card-title>
+                                    <mat-icon>error_outline</mat-icon>
+                                    Erros Mais Comuns
+                                </mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="erros-lista" *ngIf="errosMaisComuns.length > 0; else semErros">
+                                    <div class="erro-item" *ngFor="let item of errosMaisComuns">
+                                        <span class="erro-nome">{{ item.erro }}</span>
+                                        <mat-chip color="warn" selected>{{ item.count }}</mat-chip>
+                                    </div>
+                                </div>
+                                <ng-template #semErros>
+                                    <p class="sem-dados">Nenhum erro registrado</p>
+                                </ng-template>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Aba de Logs Detalhados -->
+            <mat-tab label="Logs Detalhados">
+                <div class="logs-container">
+                    <div class="logs-acoes">
+                        <button mat-stroked-button (click)="exportarLogs()">
+                            <mat-icon>download</mat-icon>
+                            Exportar Logs
+                        </button>
+                        <button mat-stroked-button color="warn" (click)="limparLogs()">
+                            <mat-icon>clear_all</mat-icon>
+                            Limpar Logs
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table mat-table [dataSource]="logs" class="logs-table">
+                            <!-- Coluna Timestamp -->
+                            <ng-container matColumnDef="timestamp">
+                                <th mat-header-cell *matHeaderCellDef>Data/Hora</th>
+                                <td mat-cell *matCellDef="let log">
+                                    <span class="timestamp">{{ formatarTimestamp(log.timestamp) }}</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Coluna Operação -->
+                            <ng-container matColumnDef="operacao">
+                                <th mat-header-cell *matHeaderCellDef>Operação</th>
+                                <td mat-cell *matCellDef="let log">
+                                    <span class="operacao">{{ log.operacao }}</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Coluna Status -->
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef>Status</th>
+                                <td mat-cell *matCellDef="let log">
+                                    <mat-chip [color]="getCorStatus(log.status)" selected>
+                                        {{ log.status }}
+                                    </mat-chip>
+                                </td>
+                            </ng-container>
+
+                            <!-- Coluna Tentativa -->
+                            <ng-container matColumnDef="tentativa">
+                                <th mat-header-cell *matHeaderCellDef>Tentativa</th>
+                                <td mat-cell *matCellDef="let log">
+                                    <span *ngIf="log.tentativa">{{ log.tentativa }}</span>
+                                    <span *ngIf="!log.tentativa">-</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Coluna Tempo de Execução -->
+                            <ng-container matColumnDef="tempoExecucao">
+                                <th mat-header-cell *matHeaderCellDef>Tempo</th>
+                                <td mat-cell *matCellDef="let log">
+                                    <span class="tempo">{{ formatarTempoExecucao(log.tempoExecucao) }}</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Coluna Ações -->
+                            <ng-container matColumnDef="acoes">
+                                <th mat-header-cell *matHeaderCellDef>Detalhes</th>
+                                <td mat-cell *matCellDef="let log">
+                                    <button mat-icon-button *ngIf="log.erro || log.detalhes" matTooltip="Ver detalhes">
+                                        <mat-icon>info</mat-icon>
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                                [class.erro-row]="row.status === 'erro'" [class.retry-row]="row.status === 'retry'"
+                                [class.sucesso-row]="row.status === 'sucesso'"></tr>
+                        </table>
+
+                        <!-- Mensagem quando não há logs -->
+                        <div class="empty-state" *ngIf="logs.length === 0">
+                            <mat-icon class="empty-icon">list_alt</mat-icon>
+                            <h3>Nenhum log encontrado</h3>
+                            <p>As operações realizadas aparecerão aqui.</p>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="dialog-actions">
+        <button mat-raised-button color="primary" (click)="fechar()">
+            Fechar
+        </button>
+    </mat-dialog-actions>
+</div>

@@ -1,0 +1,172 @@
+<mat-card class="filtros-card">
+    <mat-card-header>
+        <mat-card-title>
+            <mat-icon>filter_list</mat-icon>
+            Filtros e Exportação
+        </mat-card-title>
+        <div class="filtros-actions">
+            <mat-chip-set *ngIf="temFiltrosAtivos()">
+                <mat-chip class="filtros-chip">
+                    {{ contarFiltrosAtivos() }} filtro(s) ativo(s)
+                </mat-chip>
+            </mat-chip-set>
+            <button mat-icon-button (click)="limparFiltros()" matTooltip="Limpar filtros"
+                [disabled]="!temFiltrosAtivos()">
+                <mat-icon>clear</mat-icon>
+            </button>
+        </div>
+    </mat-card-header>
+
+    <mat-card-content>
+        <form [formGroup]="filtrosForm" class="filtros-form">
+
+            <!-- Primeira linha: Categoria e Tipo -->
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Categoria</mat-label>
+                    <mat-select formControlName="categoria">
+                        <mat-option value="">Todas as categorias</mat-option>
+                        <mat-option *ngFor="let categoria of categorias" [value]="categoria">
+                            {{ obterLabelCategoria(categoria) }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Tipo de Custo</mat-label>
+                    <mat-select formControlName="tipo">
+                        <mat-option value="">Todos os tipos</mat-option>
+                        <mat-option *ngFor="let tipo of tiposCusto" [value]="tipo.value">
+                            {{ tipo.label }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <!-- Segunda linha: Período -->
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Data Início</mat-label>
+                    <input matInput [matDatepicker]="dataInicioPicker" formControlName="dataInicio">
+                    <mat-datepicker-toggle matSuffix [for]="dataInicioPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dataInicioPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Data Fim</mat-label>
+                    <input matInput [matDatepicker]="dataFimPicker" formControlName="dataFim">
+                    <mat-datepicker-toggle matSuffix [for]="dataFimPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dataFimPicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <!-- Terceira linha: Valores -->
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Valor Mínimo</mat-label>
+                    <input matInput type="number" formControlName="valorMinimo" min="0" step="0.01" placeholder="0,00">
+                    <span matPrefix>R$&nbsp;</span>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Valor Máximo</mat-label>
+                    <input matInput type="number" formControlName="valorMaximo" min="0" step="0.01" placeholder="0,00">
+                    <span matPrefix>R$&nbsp;</span>
+                </mat-form-field>
+            </div>
+
+            <!-- Quarta linha: Descrição -->
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Buscar na Descrição</mat-label>
+                    <input matInput formControlName="descricao" placeholder="Digite parte da descrição">
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+            </div>
+
+            <!-- Mensagem de erro de validação -->
+            <div *ngIf="!validarPeriodo() || !validarValores()" class="validation-error">
+                <mat-icon>error</mat-icon>
+                {{ obterMensagemErro() }}
+            </div>
+
+        </form>
+    </mat-card-content>
+
+    <!-- Ações de Exportação -->
+    <mat-card-actions class="export-actions">
+        <div class="export-section">
+            <h4>Exportar Dados</h4>
+            <div class="export-buttons">
+
+                <button mat-raised-button color="primary" (click)="exportarJSON()" [disabled]="isExportando$ | async">
+                    <mat-icon *ngIf="!(isExportando$ | async)">download</mat-icon>
+                    <mat-spinner *ngIf="isExportando$ | async" diameter="20"></mat-spinner>
+                    Exportar JSON
+                </button>
+
+                <button mat-raised-button color="accent" (click)="exportarCSV()"
+                    [disabled]="(isExportando$ | async) || custos.length === 0">
+                    <mat-icon *ngIf="!(isExportando$ | async)">table_chart</mat-icon>
+                    <mat-spinner *ngIf="isExportando$ | async" diameter="20"></mat-spinner>
+                    Exportar CSV
+                </button>
+
+            </div>
+
+            <div class="export-info">
+                <p>
+                    <mat-icon>info</mat-icon>
+                    JSON inclui relatório completo com gráficos. CSV contém apenas a lista de custos.
+                </p>
+            </div>
+        </div>
+    </mat-card-actions>
+
+</mat-card>
+
+<!-- Upload de Comprovantes -->
+<mat-card *ngIf="custos.length > 0" class="comprovantes-card">
+    <mat-card-header>
+        <mat-card-title>
+            <mat-icon>receipt</mat-icon>
+            Upload de Comprovantes
+        </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+        <div class="comprovantes-info">
+            <p>
+                <mat-icon>cloud_upload</mat-icon>
+                Selecione custos abaixo para fazer upload de comprovantes (JPG, PNG ou PDF, máx. 5MB)
+            </p>
+        </div>
+
+        <div class="custos-comprovantes">
+            <div *ngFor="let custo of custos; trackBy: trackByCusto" class="custo-comprovante-item">
+
+                <div class="custo-info">
+                    <div class="custo-descricao">{{ custo.descricao }}</div>
+                    <div class="custo-detalhes">
+                        <span class="custo-valor">{{ formatarMoeda(custo.valor) }}</span>
+                        <span class="custo-data">{{ formatarDataExibicao(custo.data) }}</span>
+                    </div>
+                </div>
+
+                <div class="comprovante-actions">
+                    <input type="file" #fileInput (change)="onFileSelected($event, custo.id!)"
+                        accept=".jpg,.jpeg,.png,.pdf" style="display: none">
+
+                    <button mat-icon-button color="primary" (click)="fileInput.click()" matTooltip="Upload comprovante">
+                        <mat-icon>attach_file</mat-icon>
+                    </button>
+
+                    <mat-icon *ngIf="custo.comprovanteUrl" color="accent" matTooltip="Comprovante anexado">
+                        check_circle
+                    </mat-icon>
+                </div>
+
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>

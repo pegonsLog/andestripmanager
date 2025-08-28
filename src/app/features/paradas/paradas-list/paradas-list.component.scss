@@ -1,0 +1,409 @@
+.paradas-list-container {
+  width: 100%;
+  font-family: "Montserrat", sans-serif;
+}
+
+// Header
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0 0.5rem;
+
+  .header-info {
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+      font-family: "Montserrat", sans-serif;
+      font-weight: 600;
+      color: var(--text-primary, #333);
+
+      mat-icon {
+        color: var(--primary-color, #1976d2);
+      }
+    }
+  }
+
+  .header-actions {
+    button {
+      font-family: "Montserrat", sans-serif;
+      font-weight: 500;
+
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+// Abas de Conteúdo
+.content-tabs {
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+  }
+
+  .mat-mdc-tab-body-wrapper {
+    padding-top: 1.5rem;
+  }
+}
+
+// Lista de Paradas
+.paradas-list {
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--text-secondary, #666);
+
+    .loading-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color, #1976d2);
+      animation: spin 2s linear infinite;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+
+  .paradas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    padding: 0.5rem;
+
+    .parada-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-color, #1976d2);
+      }
+
+      mat-card-header {
+        .parada-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: var(--surface-color, #f5f5f5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          mat-icon {
+            font-size: 1.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+          }
+        }
+
+        mat-card-title {
+          font-family: "Montserrat", sans-serif;
+          font-weight: 600;
+          font-size: 1.1rem;
+          color: var(--text-primary, #333);
+        }
+
+        mat-card-subtitle {
+          font-family: "Montserrat", sans-serif;
+          color: var(--text-secondary, #666);
+          font-size: 0.9rem;
+        }
+      }
+
+      mat-card-content {
+        .parada-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+
+          .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+
+            .info-icon {
+              font-size: 1.2rem;
+              width: 1.2rem;
+              height: 1.2rem;
+              color: var(--text-secondary, #666);
+              margin-top: 0.1rem;
+              flex-shrink: 0;
+            }
+
+            .endereco-text {
+              color: var(--text-secondary, #666);
+              line-height: 1.4;
+            }
+
+            .custo-text {
+              font-weight: 600;
+              color: var(--success-color, #4caf50);
+            }
+
+            &.observacoes {
+              .observacoes-text {
+                color: var(--text-secondary, #666);
+                line-height: 1.4;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+              }
+            }
+
+            mat-chip-set {
+              mat-chip {
+                font-family: "Montserrat", sans-serif;
+                font-size: 0.8rem;
+                font-weight: 500;
+              }
+            }
+          }
+        }
+      }
+
+      mat-card-actions {
+        padding: 0.5rem 1rem 1rem 1rem;
+
+        button {
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.04);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Container do Mapa
+.map-container {
+  padding: 0.5rem;
+}
+
+// Estado Vazio
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+
+  .empty-content {
+    text-align: center;
+    max-width: 400px;
+    color: var(--text-secondary, #666);
+
+    .empty-icon {
+      font-size: 4rem;
+      width: 4rem;
+      height: 4rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.5;
+      color: var(--text-secondary, #999);
+    }
+
+    h3 {
+      margin: 0 0 1rem 0;
+      font-family: "Montserrat", sans-serif;
+      font-weight: 600;
+      color: var(--text-primary, #333);
+    }
+
+    p {
+      margin: 0 0 2rem 0;
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    button {
+      font-family: "Montserrat", sans-serif;
+      font-weight: 500;
+
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .paradas-list-container {
+    .list-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+
+      .header-info {
+        text-align: center;
+      }
+
+      .header-actions {
+        display: flex;
+        justify-content: center;
+      }
+    }
+
+    .paradas-list {
+      .paradas-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0;
+
+        .parada-card {
+          mat-card-content {
+            .parada-info {
+              .info-row {
+                font-size: 0.85rem;
+
+                .info-icon {
+                  font-size: 1.1rem;
+                  width: 1.1rem;
+                  height: 1.1rem;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .paradas-list-container {
+    .list-header {
+      padding: 0;
+
+      .header-info h3 {
+        font-size: 1.2rem;
+      }
+    }
+
+    .paradas-list {
+      .paradas-grid {
+        .parada-card {
+          mat-card-header {
+            .parada-avatar {
+              width: 36px;
+              height: 36px;
+
+              mat-icon {
+                font-size: 1.3rem;
+                width: 1.3rem;
+                height: 1.3rem;
+              }
+            }
+
+            mat-card-title {
+              font-size: 1rem;
+            }
+
+            mat-card-subtitle {
+              font-size: 0.85rem;
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      min-height: 300px;
+      padding: 1.5rem;
+
+      .empty-content {
+        .empty-icon {
+          font-size: 3rem;
+          width: 3rem;
+          height: 3rem;
+        }
+
+        h3 {
+          font-size: 1.3rem;
+        }
+
+        p {
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+// Animações
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.parada-card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+// Estilos para chips coloridos
+:global(.mat-mdc-chip.mat-primary) {
+  --mdc-chip-container-color: #1976d2;
+  --mdc-chip-label-text-color: white;
+}
+
+:global(.mat-mdc-chip.mat-warn) {
+  --mdc-chip-container-color: #f44336;
+  --mdc-chip-label-text-color: white;
+}
+
+:global(.mat-mdc-chip.mat-accent) {
+  --mdc-chip-container-color: #9c27b0;
+  --mdc-chip-label-text-color: white;
+}
+
+// Ajustes para abas
+:global(.mat-mdc-tab-group) {
+  .mat-mdc-tab-header {
+    .mat-mdc-tab-label {
+      font-family: "Montserrat", sans-serif;
+      font-weight: 500;
+    }
+  }
+}
+
+// Hover effects
+.parada-card:hover {
+  .parada-avatar {
+    transform: scale(1.05);
+  }
+}
+
+// Focus states
+button:focus-visible {
+  outline: 2px solid var(--primary-color, #1976d2);
+  outline-offset: 2px;
+}

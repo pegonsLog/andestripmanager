@@ -1,0 +1,138 @@
+<mat-card class="dia-card" [class.completo]="isDiaCompleto()">
+    <mat-card-header>
+        <div mat-card-avatar class="dia-avatar">
+            <span class="dia-numero">{{ dia.numeroDia }}</span>
+        </div>
+
+        <mat-card-title>
+            <div class="titulo-container">
+                <span class="data">{{ formatarData(dia.data) }}</span>
+                <div class="rota">
+                    <span class="origem">{{ dia.origem }}</span>
+                    <mat-icon class="seta">arrow_forward</mat-icon>
+                    <span class="destino">{{ dia.destino }}</span>
+                </div>
+            </div>
+        </mat-card-title>
+
+        <mat-card-subtitle>
+            <div class="distancia-info">
+                <mat-icon>route</mat-icon>
+                <span>{{ formatarDistancia(dia.distanciaPlanejada) }}</span>
+                <span *ngIf="dia.rota?.tempoEstimado" class="tempo">
+                    • {{ formatarTempo(dia.rota.tempoEstimado) }}
+                </span>
+            </div>
+        </mat-card-subtitle>
+
+        <!-- Menu de ações -->
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="onVisualizar()">
+                <mat-icon>visibility</mat-icon>
+                <span>Visualizar</span>
+            </button>
+            <button mat-menu-item (click)="onEditar()">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="onRemover()" class="delete-action">
+                <mat-icon>delete</mat-icon>
+                <span>Remover</span>
+            </button>
+        </mat-menu>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Informações de horário -->
+        <div class="horarios-container" *ngIf="dia.horaPartidaPlanejada || dia.horaChegadaPlanejada">
+            <div class="horario-item" *ngIf="dia.horaPartidaPlanejada">
+                <mat-icon class="horario-icon">schedule</mat-icon>
+                <div class="horario-info">
+                    <span class="horario-label">Partida</span>
+                    <div class="horario-valores">
+                        <span class="planejado">{{ dia.horaPartidaPlanejada }}</span>
+                        <span *ngIf="dia.horaPartidaReal" class="real">{{ dia.horaPartidaReal }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="horario-item" *ngIf="dia.horaChegadaPlanejada">
+                <mat-icon class="horario-icon">flag</mat-icon>
+                <div class="horario-info">
+                    <span class="horario-label">Chegada</span>
+                    <div class="horario-valores">
+                        <span class="planejado">{{ dia.horaChegadaPlanejada }}</span>
+                        <span *ngIf="dia.horaChegadaReal" class="real">{{ dia.horaChegadaReal }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progresso da viagem -->
+        <div class="progresso-container" *ngIf="dia.distanciaPercorrida">
+            <div class="progresso-info">
+                <span class="progresso-label">Progresso</span>
+                <span class="progresso-valor">{{ getProgresso() }}%</span>
+            </div>
+            <div class="progresso-bar">
+                <div class="progresso-fill" [style.width.%]="getProgresso()"></div>
+            </div>
+            <div class="distancia-real">
+                <mat-icon>done</mat-icon>
+                <span>{{ formatarDistancia(dia.distanciaPercorrida) }} percorridos</span>
+            </div>
+        </div>
+
+        <!-- Informações climáticas -->
+        <div class="clima-container" *ngIf="dia.condicaoClimatica || dia.temperaturaMin || dia.temperaturaMax">
+            <mat-chip-set>
+                <mat-chip *ngIf="dia.condicaoClimatica" [color]="getClimaColor(dia.condicaoClimatica)">
+                    <mat-icon matChipAvatar>{{ getClimaIcon(dia.condicaoClimatica) }}</mat-icon>
+                    {{ dia.condicaoClimatica }}
+                </mat-chip>
+
+                <mat-chip *ngIf="dia.temperaturaMin || dia.temperaturaMax">
+                    <mat-icon matChipAvatar>device_thermostat</mat-icon>
+                    <span *ngIf="dia.temperaturaMin && dia.temperaturaMax">
+                        {{ dia.temperaturaMin }}° - {{ dia.temperaturaMax }}°
+                    </span>
+                    <span *ngIf="dia.temperaturaMin && !dia.temperaturaMax">
+                        Min: {{ dia.temperaturaMin }}°
+                    </span>
+                    <span *ngIf="!dia.temperaturaMin && dia.temperaturaMax">
+                        Max: {{ dia.temperaturaMax }}°
+                    </span>
+                </mat-chip>
+            </mat-chip-set>
+        </div>
+
+        <!-- Observações -->
+        <div class="observacoes-container" *ngIf="dia.observacoes">
+            <mat-icon class="observacoes-icon">note</mat-icon>
+            <p class="observacoes-texto">{{ dia.observacoes }}</p>
+        </div>
+
+        <!-- Fotos -->
+        <div class="fotos-container" *ngIf="dia.fotos && dia.fotos.length > 0">
+            <div class="fotos-preview">
+                <mat-icon>photo_library</mat-icon>
+                <span>{{ dia.fotos.length }} foto(s)</span>
+            </div>
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+        <button mat-button (click)="onVisualizar()">
+            <mat-icon>visibility</mat-icon>
+            Detalhes
+        </button>
+        <button mat-button color="primary" (click)="onEditar()">
+            <mat-icon>edit</mat-icon>
+            Editar
+        </button>
+    </mat-card-actions>
+</mat-card>

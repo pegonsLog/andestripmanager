@@ -1,0 +1,372 @@
+<div class="importacao-dialog">
+    <h2 mat-dialog-title class="dialog-title">
+        <mat-icon>{{ iconeDialog }}</mat-icon>
+        {{ tituloDialog }}
+    </h2>
+
+    <mat-dialog-content class="dialog-content">
+        <!-- Etapa 0: Validação -->
+        <div *ngIf="etapaAtual === 0" class="etapa-validacao">
+            <div class="loading-container" *ngIf="isValidando">
+                <mat-spinner diameter="40"></mat-spinner>
+                <h3>Validando arquivo...</h3>
+                <p>Verificando a integridade dos dados</p>
+            </div>
+
+            <div class="validacao-resultado" *ngIf="!isValidando && validacao">
+                <div class="resultado-header" [class.erro]="!validacao.valido" [class.sucesso]="validacao.valido">
+                    <mat-icon>{{ validacao.valido ? 'check_circle' : 'error' }}</mat-icon>
+                    <h3>{{ validacao.valido ? 'Arquivo válido!' : 'Arquivo inválido' }}</h3>
+                </div>
+
+                <!-- Estatísticas se válido -->
+                <mat-card *ngIf="validacao.valido && validacao.estatisticas" class="estatisticas-card">
+                    <mat-card-header>
+                        <mat-card-title>Dados encontrados</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="estatisticas-grid">
+                            <div class="estatistica-item" *ngIf="validacao.estatisticas.totalDias > 0">
+                                <mat-icon>calendar_today</mat-icon>
+                                <span class="numero">{{ validacao.estatisticas.totalDias }}</span>
+                                <span class="label">Dias</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="validacao.estatisticas.totalParadas > 0">
+                                <mat-icon>place</mat-icon>
+                                <span class="numero">{{ validacao.estatisticas.totalParadas }}</span>
+                                <span class="label">Paradas</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="validacao.estatisticas.totalHospedagens > 0">
+                                <mat-icon>hotel</mat-icon>
+                                <span class="numero">{{ validacao.estatisticas.totalHospedagens }}</span>
+                                <span class="label">Hospedagens</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="validacao.estatisticas.totalCustos > 0">
+                                <mat-icon>attach_money</mat-icon>
+                                <span class="numero">{{ validacao.estatisticas.totalCustos }}</span>
+                                <span class="label">Custos</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="validacao.estatisticas.totalManutencoes > 0">
+                                <mat-icon>build</mat-icon>
+                                <span class="numero">{{ validacao.estatisticas.totalManutencoes }}</span>
+                                <span class="label">Manutenções</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="validacao.estatisticas.totalEntradasDiario > 0">
+                                <mat-icon>book</mat-icon>
+                                <span class="numero">{{ validacao.estatisticas.totalEntradasDiario }}</span>
+                                <span class="label">Diário</span>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- Erros -->
+                <div class="mensagens-container" *ngIf="validacao.erros.length > 0">
+                    <h4 class="mensagens-titulo erro">
+                        <mat-icon>error</mat-icon>
+                        Erros encontrados
+                    </h4>
+                    <mat-list class="mensagens-lista">
+                        <mat-list-item *ngFor="let erro of validacao.erros">
+                            <mat-icon matListItemIcon color="warn">error</mat-icon>
+                            <div matListItemTitle>{{ erro }}</div>
+                        </mat-list-item>
+                    </mat-list>
+                </div>
+
+                <!-- Avisos -->
+                <div class="mensagens-container" *ngIf="validacao.avisos.length > 0">
+                    <h4 class="mensagens-titulo aviso">
+                        <mat-icon>warning</mat-icon>
+                        Avisos
+                    </h4>
+                    <mat-list class="mensagens-lista">
+                        <mat-list-item *ngFor="let aviso of validacao.avisos">
+                            <mat-icon matListItemIcon color="accent">warning</mat-icon>
+                            <div matListItemTitle>{{ aviso }}</div>
+                        </mat-list-item>
+                    </mat-list>
+                </div>
+            </div>
+        </div>
+
+        <!-- Etapa 1: Opções de Importação -->
+        <div *ngIf="etapaAtual === 1" class="etapa-opcoes">
+            <p class="etapa-descricao">
+                Configure quais dados deseja importar e como a importação deve ser realizada.
+            </p>
+
+            <form [formGroup]="form" class="importacao-form">
+                <!-- Opções Gerais -->
+                <mat-card class="opcoes-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon>settings</mat-icon>
+                            Opções Gerais
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="opcoes-gerais">
+                            <mat-checkbox formControlName="substituirExistente" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">swap_horiz</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Substituir dados existentes</span>
+                                        <span class="opcao-descricao">Se uma viagem com o mesmo nome existir, ela será
+                                            substituída</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+
+                            <mat-checkbox formControlName="criarBackupAntes" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">backup</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Criar backup antes da importação</span>
+                                        <span class="opcao-descricao">Recomendado para segurança dos dados
+                                            existentes</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- Dados a Importar -->
+                <mat-card class="opcoes-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon>data_object</mat-icon>
+                            Dados a Importar
+                        </mat-card-title>
+                        <mat-card-subtitle>
+                            Selecione quais informações deseja importar
+                        </mat-card-subtitle>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                        <div class="acoes-rapidas">
+                            <button type="button" mat-stroked-button (click)="selecionarTudo()">
+                                <mat-icon>select_all</mat-icon>
+                                Selecionar Tudo
+                            </button>
+                            <button type="button" mat-stroked-button (click)="desmarcarTudo()">
+                                <mat-icon>deselect</mat-icon>
+                                Desmarcar Tudo
+                            </button>
+                            <button type="button" mat-stroked-button (click)="restaurarPadrao()">
+                                <mat-icon>restore</mat-icon>
+                                Padrão
+                            </button>
+                        </div>
+
+                        <div class="opcoes-grid">
+                            <mat-checkbox formControlName="importarDias" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">calendar_today</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Dias de Viagem</span>
+                                        <span class="opcao-descricao">Planejamento diário da viagem</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+
+                            <mat-checkbox formControlName="importarParadas" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">place</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Paradas</span>
+                                        <span class="opcao-descricao">Abastecimentos, refeições e pontos de
+                                            interesse</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+
+                            <mat-checkbox formControlName="importarHospedagens" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">hotel</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Hospedagens</span>
+                                        <span class="opcao-descricao">Hotéis, pousadas e locais de pernoite</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+
+                            <mat-checkbox formControlName="importarCustos" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">attach_money</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Custos</span>
+                                        <span class="opcao-descricao">Gastos e controle financeiro</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+
+                            <mat-checkbox formControlName="importarManutencoes" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">build</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Manutenções</span>
+                                        <span class="opcao-descricao">Cuidados com a motocicleta</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+
+                            <mat-checkbox formControlName="importarClima" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">wb_sunny</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Clima</span>
+                                        <span class="opcao-descricao">Condições climáticas e previsões</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+
+                            <mat-checkbox formControlName="importarDiario" class="opcao-checkbox">
+                                <div class="opcao-content">
+                                    <mat-icon class="opcao-icon">book</mat-icon>
+                                    <div class="opcao-texto">
+                                        <span class="opcao-titulo">Diário de Bordo</span>
+                                        <span class="opcao-descricao">Anotações e memórias da viagem</span>
+                                    </div>
+                                </div>
+                            </mat-checkbox>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- Aviso se nenhuma opção selecionada -->
+                <div class="aviso-selecao" *ngIf="!temOpcaoSelecionada">
+                    <mat-icon color="warn">warning</mat-icon>
+                    <span>Selecione pelo menos uma opção de dados para importar</span>
+                </div>
+            </form>
+        </div>
+
+        <!-- Etapa 2: Resultado -->
+        <div *ngIf="etapaAtual === 2" class="etapa-resultado">
+            <!-- Loading durante importação -->
+            <div class="loading-container" *ngIf="isImportando">
+                <mat-spinner diameter="60"></mat-spinner>
+                <h3>Importando dados...</h3>
+                <p>Por favor, aguarde enquanto processamos os dados.</p>
+            </div>
+
+            <!-- Resultado da importação -->
+            <div class="resultado-container" *ngIf="!isImportando && resultado">
+                <div class="resultado-header" [class.erro]="!resultado.sucesso" [class.sucesso]="resultado.sucesso">
+                    <mat-icon>{{ resultado.sucesso ? 'check_circle' : 'error' }}</mat-icon>
+                    <h3>{{ resultado.sucesso ? 'Importação concluída!' : 'Erro na importação' }}</h3>
+                </div>
+
+                <!-- Estatísticas do resultado -->
+                <mat-card *ngIf="resultado.sucesso" class="resultado-estatisticas">
+                    <mat-card-header>
+                        <mat-card-title>Dados importados</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="estatisticas-grid">
+                            <div class="estatistica-item" *ngIf="resultado.estatisticas.viagensImportadas > 0">
+                                <mat-icon>flight</mat-icon>
+                                <span class="numero">{{ resultado.estatisticas.viagensImportadas }}</span>
+                                <span class="label">Viagens</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="resultado.estatisticas.diasImportados > 0">
+                                <mat-icon>calendar_today</mat-icon>
+                                <span class="numero">{{ resultado.estatisticas.diasImportados }}</span>
+                                <span class="label">Dias</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="resultado.estatisticas.paradasImportadas > 0">
+                                <mat-icon>place</mat-icon>
+                                <span class="numero">{{ resultado.estatisticas.paradasImportadas }}</span>
+                                <span class="label">Paradas</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="resultado.estatisticas.hospedagensImportadas > 0">
+                                <mat-icon>hotel</mat-icon>
+                                <span class="numero">{{ resultado.estatisticas.hospedagensImportadas }}</span>
+                                <span class="label">Hospedagens</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="resultado.estatisticas.custosImportados > 0">
+                                <mat-icon>attach_money</mat-icon>
+                                <span class="numero">{{ resultado.estatisticas.custosImportados }}</span>
+                                <span class="label">Custos</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="resultado.estatisticas.manutencoesImportadas > 0">
+                                <mat-icon>build</mat-icon>
+                                <span class="numero">{{ resultado.estatisticas.manutencoesImportadas }}</span>
+                                <span class="label">Manutenções</span>
+                            </div>
+                            <div class="estatistica-item" *ngIf="resultado.estatisticas.diarioImportado > 0">
+                                <mat-icon>book</mat-icon>
+                                <span class="numero">{{ resultado.estatisticas.diarioImportado }}</span>
+                                <span class="label">Diário</span>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- Erros -->
+                <div class="mensagens-container" *ngIf="resultado.erros.length > 0">
+                    <h4 class="mensagens-titulo erro">
+                        <mat-icon>error</mat-icon>
+                        Erros
+                    </h4>
+                    <mat-list class="mensagens-lista">
+                        <mat-list-item *ngFor="let erro of resultado.erros">
+                            <mat-icon matListItemIcon color="warn">error</mat-icon>
+                            <div matListItemTitle>{{ erro }}</div>
+                        </mat-list-item>
+                    </mat-list>
+                </div>
+
+                <!-- Avisos -->
+                <div class="mensagens-container" *ngIf="resultado.avisos.length > 0">
+                    <h4 class="mensagens-titulo aviso">
+                        <mat-icon>warning</mat-icon>
+                        Avisos
+                    </h4>
+                    <mat-list class="mensagens-lista">
+                        <mat-list-item *ngFor="let aviso of resultado.avisos">
+                            <mat-icon matListItemIcon color="accent">warning</mat-icon>
+                            <div matListItemTitle>{{ aviso }}</div>
+                        </mat-list-item>
+                    </mat-list>
+                </div>
+            </div>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="dialog-actions">
+        <!-- Ações para etapa de validação -->
+        <ng-container *ngIf="etapaAtual === 0">
+            <button mat-button (click)="cancelar()">
+                Cancelar
+            </button>
+            <button mat-raised-button color="primary" (click)="etapaAtual = 1" [disabled]="!validacao?.valido">
+                Continuar
+            </button>
+        </ng-container>
+
+        <!-- Ações para etapa de opções -->
+        <ng-container *ngIf="etapaAtual === 1">
+            <button mat-button (click)="voltarEtapa()">
+                Voltar
+            </button>
+            <button mat-button (click)="cancelar()">
+                Cancelar
+            </button>
+            <button mat-raised-button color="primary" (click)="executarImportacao()"
+                [disabled]="!temOpcaoSelecionada || isImportando">
+                <mat-icon>upload</mat-icon>
+                Importar
+            </button>
+        </ng-container>
+
+        <!-- Ações para etapa de resultado -->
+        <ng-container *ngIf="etapaAtual === 2">
+            <button mat-raised-button color="primary" (click)="fechar()" [disabled]="isImportando">
+                Fechar
+            </button>
+        </ng-container>
+    </mat-dialog-actions>
+</div>

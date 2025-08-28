@@ -1,0 +1,240 @@
+.parada-form-card {
+  max-width: 800px;
+  margin: 0 auto;
+
+  mat-card-header {
+    margin-bottom: 1rem;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: "Montserrat", sans-serif;
+      font-weight: 600;
+
+      mat-icon {
+        color: var(--primary-color, #1976d2);
+      }
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+
+  mat-spinner {
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--text-secondary, #666);
+    font-family: "Montserrat", sans-serif;
+  }
+}
+
+.form-section {
+  margin-bottom: 2rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color, #1976d2);
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--primary-color, #1976d2);
+
+    mat-icon {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  &.two-columns {
+    mat-form-field {
+      flex: 1;
+    }
+  }
+
+  &.three-columns {
+    mat-form-field {
+      flex: 1;
+    }
+  }
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .parada-form-card {
+    margin: 0 0.5rem;
+  }
+
+  .form-row {
+    &.two-columns,
+    &.three-columns {
+      flex-direction: column;
+
+      mat-form-field {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Estilos para campos específicos
+mat-form-field {
+  font-family: "Montserrat", sans-serif;
+
+  &.full-width {
+    width: 100%;
+  }
+
+  .mat-mdc-form-field-label {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+  }
+
+  .mat-mdc-input-element {
+    font-family: "Montserrat", sans-serif;
+  }
+
+  .mat-mdc-select-value {
+    font-family: "Montserrat", sans-serif;
+  }
+}
+
+// Estilos para select com ícones
+mat-option {
+  font-family: "Montserrat", sans-serif;
+
+  mat-icon {
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+}
+
+// Estilos para botões
+mat-card-actions {
+  padding: 1rem 1.5rem;
+
+  button {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+
+    mat-spinner {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+// Estilos para avaliações com estrelas
+.mat-mdc-option .mat-option-text {
+  display: flex;
+  align-items: center;
+}
+
+// Estilos para hints
+.mat-mdc-form-field-hint {
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #666);
+}
+
+// Estilos para erros
+.mat-mdc-form-field-error {
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.75rem;
+}
+
+// Animações suaves
+.form-section {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Estilos para campos de moeda
+mat-form-field {
+  .mat-mdc-form-field-prefix {
+    color: var(--primary-color, #1976d2);
+    font-weight: 500;
+  }
+
+  .mat-mdc-form-field-suffix {
+    color: var(--text-secondary, #666);
+    font-weight: 500;
+  }
+}
+
+// Estilos para textarea
+textarea.mat-mdc-input-element {
+  font-family: "Montserrat", sans-serif;
+  resize: vertical;
+  min-height: 60px;
+}
+
+// Estilos para campos de tempo
+input[type="time"] {
+  font-family: "Montserrat", sans-serif;
+}
+
+// Estilos para campos numéricos
+input[type="number"] {
+  font-family: "Montserrat", sans-serif;
+}
+
+// Hover effects
+mat-form-field:hover {
+  .mat-mdc-form-field-outline {
+    opacity: 0.8;
+  }
+}
+
+// Focus effects
+mat-form-field.mat-focused {
+  .mat-mdc-form-field-label {
+    color: var(--primary-color, #1976d2);
+  }
+}
+
+// Estilos para campos desabilitados
+mat-form-field.mat-form-field-disabled {
+  opacity: 0.6;
+
+  .mat-mdc-input-element {
+    color: var(--text-disabled, #999);
+  }
+}

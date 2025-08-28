@@ -1,0 +1,154 @@
+<mat-card class="historico-container">
+    <!-- Cabeçalho -->
+    <mat-card-header *ngIf="showTitle">
+        <div mat-card-avatar>
+            <mat-icon>history</mat-icon>
+        </div>
+        <mat-card-title>Histórico Climático</mat-card-title>
+        <mat-card-subtitle *ngIf="obterEstatisticas() as stats">
+            {{ stats.total }} registro{{ stats.total !== 1 ? 's' : '' }} •
+            Precisão média: {{ stats.precisaoMedia }}%
+        </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="loading-container">
+            <mat-icon>refresh</mat-icon>
+            <p>Carregando histórico...</p>
+        </div>
+
+        <!-- Estatísticas Rápidas -->
+        <div *ngIf="!isLoading && obterEstatisticas() as stats" class="stats-container">
+            <div class="stat-item">
+                <mat-icon>assessment</mat-icon>
+                <div class="stat-info">
+                    <span class="stat-value">{{ stats.total }}</span>
+                    <span class="stat-label">Registros</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <mat-icon>cloud</mat-icon>
+                <div class="stat-info">
+                    <span class="stat-value">{{ stats.comPrevisao }}</span>
+                    <span class="stat-label">Previsões</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <mat-icon>visibility</mat-icon>
+                <div class="stat-info">
+                    <span class="stat-value">{{ stats.comObservado }}</span>
+                    <span class="stat-label">Observados</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <mat-icon>check_circle</mat-icon>
+                <div class="stat-info">
+                    <span class="stat-value" [style.color]="obterCorPrecisao(stats.precisaoMedia)">
+                        {{ stats.precisaoMedia }}%
+                    </span>
+                    <span class="stat-label">Precisão</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Histórico -->
+        <div *ngIf="!isLoading && historico.length > 0" class="historico-table">
+            <table mat-table [dataSource]="historico" class="full-width">
+                <!-- Coluna Data -->
+                <ng-container matColumnDef="data">
+                    <th mat-header-cell *matHeaderCellDef>Data</th>
+                    <td mat-cell *matCellDef="let item">
+                        <div class="data-cell">
+                            <strong>{{ formatarData(item.data) }}</strong>
+                            <small>{{ item.cidade }}</small>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Coluna Cidade -->
+                <ng-container matColumnDef="cidade">
+                    <th mat-header-cell *matHeaderCellDef>Local</th>
+                    <td mat-cell *matCellDef="let item">{{ item.cidade }}</td>
+                </ng-container>
+
+                <!-- Coluna Previsão -->
+                <ng-container matColumnDef="previsao">
+                    <th mat-header-cell *matHeaderCellDef>Previsão</th>
+                    <td mat-cell *matCellDef="let item">
+                        <div *ngIf="temPrevisao(item)" class="clima-info">
+                            <div class="clima-icon">
+                                <mat-icon [style.color]="obterCorIcone(item.previsao!.condicao)">
+                                    {{ obterIconeClima(item.previsao!.condicao) }}
+                                </mat-icon>
+                            </div>
+                            <div class="clima-details">
+                                <span class="temperatura">
+                                    {{ formatarRangeTemperatura(item.previsao!.temperaturaMin,
+                                    item.previsao!.temperaturaMax) }}
+                                </span>
+                                <small class="chuva">{{ item.previsao!.chanceChuva }}% chuva</small>
+                            </div>
+                        </div>
+                        <span *ngIf="!temPrevisao(item)" class="no-data">-</span>
+                    </td>
+                </ng-container>
+
+                <!-- Coluna Observado -->
+                <ng-container matColumnDef="observado">
+                    <th mat-header-cell *matHeaderCellDef>Observado</th>
+                    <td mat-cell *matCellDef="let item">
+                        <div *ngIf="temObservado(item)" class="clima-info">
+                            <div class="clima-icon">
+                                <mat-icon [style.color]="obterCorIcone(item.observado!.condicao)">
+                                    {{ obterIconeClima(item.observado!.condicao) }}
+                                </mat-icon>
+                            </div>
+                            <div class="clima-details">
+                                <span class="temperatura">{{ formatarTemperatura(item.observado!.temperatura) }}</span>
+                                <small class="chuva">
+                                    <mat-icon [style.color]="item.observado!.choveu ? '#42A5F5' : '#757575'">
+                                        {{ item.observado!.choveu ? 'umbrella' : 'wb_sunny' }}
+                                    </mat-icon>
+                                    {{ item.observado!.choveu ? 'Choveu' : 'Não choveu' }}
+                                </small>
+                            </div>
+                        </div>
+                        <span *ngIf="!temObservado(item)" class="no-data">-</span>
+                    </td>
+                </ng-container>
+
+                <!-- Coluna Precisão -->
+                <ng-container matColumnDef="precisao">
+                    <th mat-header-cell *matHeaderCellDef>Precisão</th>
+                    <td mat-cell *matCellDef="let item">
+                        <div *ngIf="item.precisao !== undefined" class="precisao-info">
+                            <mat-chip [style.background-color]="obterCorPrecisao(item.precisao)" [style.color]="'white'"
+                                [matTooltip]="obterTextoPrecisao(item.precisao)">
+                                {{ item.precisao }}%
+                            </mat-chip>
+                        </div>
+                        <span *ngIf="item.precisao === undefined" class="no-data">-</span>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+
+        <!-- Estado vazio -->
+        <div *ngIf="!isLoading && historico.length === 0" class="empty-state">
+            <mat-icon>cloud_off</mat-icon>
+            <p>Nenhum registro climático encontrado</p>
+            <small>Os dados climáticos aparecerão aqui conforme você registrar informações durante a viagem</small>
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions *ngIf="!isLoading && historico.length > 0" align="end">
+        <button mat-button color="primary" (click)="atualizarHistorico()">
+            <mat-icon>refresh</mat-icon>
+            Atualizar
+        </button>
+    </mat-card-actions>
+</mat-card>

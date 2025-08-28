@@ -56,5 +56,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/viagens/viagem-form/viagem-form.component').then(c => c.ViagemFormComponent)
             }
         ]
+    },
+    {
+        path: 'manutencoes',
+        loadComponent: () => import('./features/manutencoes/components/manutencoes/manutencoes.component').then(c => c.ManutencoesComponent),
+        canActivate: [AuthGuard]
     }
 ];

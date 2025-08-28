@@ -1,0 +1,326 @@
+.hospedagens-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Header Section
+.header-section {
+  margin-bottom: 24px;
+}
+
+.filtros-container {
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 16px 0;
+
+    mat-icon {
+      font-size: 1.8rem;
+      width: 1.8rem;
+      height: 1.8rem;
+      color: #1976d2;
+    }
+
+    .contador {
+      font-size: 1rem;
+      color: #666;
+      font-weight: 400;
+    }
+  }
+
+  .filtros {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    .filtro-campo {
+      min-width: 200px;
+      flex: 1;
+
+      &:first-child {
+        flex: 2;
+        min-width: 250px;
+      }
+    }
+
+    .btn-limpar-filtros {
+      color: #666;
+
+      &:hover {
+        color: #1976d2;
+        background-color: rgba(25, 118, 210, 0.1);
+      }
+    }
+  }
+}
+
+// Resumo Section
+.resumo-section {
+  margin: 16px 0;
+
+  .resumo-card {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    color: white;
+
+    mat-card-content {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .resumo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      .resumo-label {
+        font-weight: 500;
+      }
+
+      .resumo-valor {
+        font-weight: 700;
+        font-size: 1.1rem;
+
+        &.custo {
+          color: #4caf50;
+          background-color: rgba(255, 255, 255, 0.2);
+          padding: 4px 8px;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+}
+
+// Actions Section
+.actions-section {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+
+  .fab-nova-hospedagem {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+// Loading
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+
+  p {
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+// Grid de Hospedagens
+.hospedagens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+// Estado Vazio
+.estado-vazio {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  margin: 48px 0;
+
+  .vazio-card {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+
+    .vazio-content {
+      padding: 32px;
+
+      .vazio-icon {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        color: #ccc;
+        margin-bottom: 16px;
+      }
+
+      h3 {
+        color: #666;
+        margin: 0 0 16px 0;
+        font-weight: 500;
+      }
+
+      p {
+        color: #888;
+        margin: 0 0 24px 0;
+        line-height: 1.5;
+      }
+
+      .vazio-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+
+        button {
+          mat-icon {
+            margin-right: 8px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .hospedagens-container {
+    padding: 8px;
+  }
+
+  .filtros {
+    flex-direction: column;
+    align-items: stretch !important;
+
+    .filtro-campo {
+      min-width: auto !important;
+      width: 100%;
+    }
+
+    .btn-limpar-filtros {
+      align-self: center;
+      margin-top: 8px;
+    }
+  }
+
+  .resumo-section {
+    .resumo-card {
+      mat-card-content {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .resumo-item {
+        justify-content: center;
+      }
+    }
+  }
+
+  .actions-section {
+    bottom: 16px;
+    right: 16px;
+
+    .fab-nova-hospedagem {
+      width: 48px;
+      height: 48px;
+
+      mat-icon {
+        font-size: 1.5rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.25rem !important;
+
+    mat-icon {
+      font-size: 1.5rem !important;
+      width: 1.5rem !important;
+      height: 1.5rem !important;
+    }
+  }
+
+  .vazio-content {
+    padding: 24px 16px !important;
+
+    .vazio-icon {
+      font-size: 3rem !important;
+      width: 3rem !important;
+      height: 3rem !important;
+    }
+
+    .vazio-actions {
+      flex-direction: column;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Animações
+.hospedagens-grid {
+  app-hospedagem-card {
+    animation: fadeInUp 0.3s ease-out;
+    animation-fill-mode: both;
+
+    @for $i from 1 through 20 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{($i - 1) * 0.1}s;
+      }
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Transições suaves
+.filtros-container,
+.resumo-section,
+.hospedagens-grid {
+  transition: all 0.3s ease;
+}
+
+// Estados de hover para cards
+.hospedagens-grid {
+  app-hospedagem-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}

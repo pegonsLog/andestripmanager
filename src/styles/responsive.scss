@@ -1,0 +1,551 @@
+// Breakpoints responsivos
+$breakpoints: (
+  mobile: 768px,
+  tablet: 1024px,
+  desktop: 1200px,
+  large: 1440px,
+);
+
+// Mixins para media queries
+@mixin mobile {
+  @media (max-width: #{map-get($breakpoints, mobile) - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{map-get($breakpoints, mobile)}) and (max-width: #{map-get($breakpoints, tablet) - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{map-get($breakpoints, tablet)}) {
+    @content;
+  }
+}
+
+@mixin mobile-tablet {
+  @media (max-width: #{map-get($breakpoints, tablet) - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-desktop {
+  @media (min-width: #{map-get($breakpoints, mobile)}) {
+    @content;
+  }
+}
+
+// Classes utilitárias responsivas
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+
+  @include mobile {
+    padding: 0 12px;
+  }
+
+  @include tablet {
+    padding: 0 24px;
+  }
+
+  @include desktop {
+    padding: 0 32px;
+  }
+}
+
+// Grid responsivo
+.grid {
+  display: grid;
+  gap: 16px;
+
+  &.cols-1 {
+    grid-template-columns: 1fr;
+  }
+
+  &.cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &.cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &.cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+// Flexbox utilitários responsivos
+.flex {
+  display: flex;
+
+  &.flex-column {
+    flex-direction: column;
+  }
+
+  &.flex-wrap {
+    flex-wrap: wrap;
+  }
+
+  &.justify-center {
+    justify-content: center;
+  }
+
+  &.justify-between {
+    justify-content: space-between;
+  }
+
+  &.align-center {
+    align-items: center;
+  }
+
+  &.gap-sm {
+    gap: 8px;
+  }
+
+  &.gap-md {
+    gap: 16px;
+  }
+
+  &.gap-lg {
+    gap: 24px;
+  }
+}
+
+// Espaçamentos responsivos
+.spacing {
+  &.p-sm {
+    padding: 8px;
+
+    @include mobile {
+      padding: 6px;
+    }
+  }
+
+  &.p-md {
+    padding: 16px;
+
+    @include mobile {
+      padding: 12px;
+    }
+  }
+
+  &.p-lg {
+    padding: 24px;
+
+    @include mobile {
+      padding: 16px;
+    }
+  }
+
+  &.m-sm {
+    margin: 8px;
+
+    @include mobile {
+      margin: 6px;
+    }
+  }
+
+  &.m-md {
+    margin: 16px;
+
+    @include mobile {
+      margin: 12px;
+    }
+  }
+
+  &.m-lg {
+    margin: 24px;
+
+    @include mobile {
+      margin: 16px;
+    }
+  }
+}
+
+// Tipografia responsiva
+.text {
+  &.text-xs {
+    font-size: 12px;
+
+    @include mobile {
+      font-size: 11px;
+    }
+  }
+
+  &.text-sm {
+    font-size: 14px;
+
+    @include mobile {
+      font-size: 13px;
+    }
+  }
+
+  &.text-md {
+    font-size: 16px;
+
+    @include mobile {
+      font-size: 15px;
+    }
+  }
+
+  &.text-lg {
+    font-size: 18px;
+
+    @include mobile {
+      font-size: 17px;
+    }
+  }
+
+  &.text-xl {
+    font-size: 20px;
+
+    @include mobile {
+      font-size: 18px;
+    }
+  }
+
+  &.text-2xl {
+    font-size: 24px;
+
+    @include mobile {
+      font-size: 20px;
+    }
+  }
+
+  &.text-3xl {
+    font-size: 32px;
+
+    @include mobile {
+      font-size: 24px;
+    }
+  }
+}
+
+// Visibilidade responsiva
+.hide-mobile {
+  @include mobile {
+    display: none !important;
+  }
+}
+
+.hide-tablet {
+  @include tablet {
+    display: none !important;
+  }
+}
+
+.hide-desktop {
+  @include desktop {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: none !important;
+
+  @include mobile {
+    display: block !important;
+  }
+}
+
+.show-tablet {
+  display: none !important;
+
+  @include tablet {
+    display: block !important;
+  }
+}
+
+.show-desktop {
+  display: none !important;
+
+  @include desktop {
+    display: block !important;
+  }
+}
+
+// Otimizações para dispositivos móveis
+.mobile-optimized {
+  @include mobile {
+    // Melhorar performance de scroll
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+
+    // Otimizar renderização
+    transform: translateZ(0);
+    will-change: transform;
+
+    // Melhorar toque
+    touch-action: manipulation;
+
+    // Reduzir animações em dispositivos lentos
+    &.low-end {
+      * {
+        animation-duration: 0.1s !important;
+        transition-duration: 0.1s !important;
+      }
+    }
+  }
+}
+
+// Componentes de interface responsivos
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+
+  @include mobile {
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  @include desktop {
+    padding: 24px;
+    border-radius: 12px;
+  }
+}
+
+.button {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  min-height: 44px; // Tamanho mínimo para touch
+
+  @include mobile {
+    padding: 10px 20px;
+    font-size: 15px;
+    min-height: 48px; // Maior em mobile para melhor toque
+  }
+
+  @include desktop {
+    padding: 14px 28px;
+    font-size: 17px;
+  }
+}
+
+.input {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 16px;
+  min-height: 44px;
+
+  @include mobile {
+    padding: 14px 16px;
+    font-size: 16px; // Evitar zoom no iOS
+    min-height: 48px;
+  }
+}
+
+// Navegação responsiva
+.nav {
+  &.nav-mobile {
+    @include mobile {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      padding: 8px 0;
+      z-index: 1000;
+
+      .nav-item {
+        flex: 1;
+        text-align: center;
+        padding: 8px 4px;
+
+        .nav-icon {
+          font-size: 20px;
+          margin-bottom: 4px;
+        }
+
+        .nav-label {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
+
+// Otimizações para touch
+.touch-optimized {
+  // Área de toque mínima
+  min-height: 44px;
+  min-width: 44px;
+
+  // Feedback visual para toque
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+
+  // Remover highlight padrão do webkit
+  -webkit-tap-highlight-color: transparent;
+
+  // Melhorar responsividade do toque
+  touch-action: manipulation;
+}
+
+// Gestos de swipe
+.swipeable {
+  touch-action: pan-y; // Permitir scroll vertical, detectar swipe horizontal
+
+  &.swipe-horizontal {
+    touch-action: pan-y;
+  }
+
+  &.swipe-vertical {
+    touch-action: pan-x;
+  }
+
+  &.swipe-all {
+    touch-action: none;
+  }
+}
+
+// Indicadores de carregamento responsivos
+.loading {
+  &.loading-mobile {
+    @include mobile {
+      .spinner {
+        width: 24px;
+        height: 24px;
+      }
+
+      .loading-text {
+        font-size: 14px;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+// Modais responsivos
+.modal {
+  @include mobile {
+    .modal-content {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+
+      &.modal-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: auto;
+        max-height: 80vh;
+        border-radius: 16px 16px 0 0;
+        animation: slideUp 0.3s ease-out;
+      }
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+// Otimizações para dispositivos de baixo desempenho
+.low-performance {
+  // Desabilitar animações complexas
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  // Simplificar sombras
+  .card,
+  .button {
+    box-shadow: none !important;
+    border: 1px solid #e0e0e0;
+  }
+
+  // Reduzir gradientes
+  .gradient {
+    background: solid !important;
+  }
+}
+
+// Modo escuro responsivo
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    background-color: #121212;
+    color: #ffffff;
+
+    .card {
+      background-color: #1e1e1e;
+      border-color: #333333;
+    }
+
+    .input {
+      background-color: #2d2d2d;
+      border-color: #444444;
+      color: #ffffff;
+    }
+  }
+}
+
+// Acessibilidade
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Orientação
+@media (orientation: landscape) {
+  .landscape-only {
+    display: block;
+  }
+
+  .portrait-only {
+    display: none;
+  }
+}
+
+@media (orientation: portrait) {
+  .landscape-only {
+    display: none;
+  }
+
+  .portrait-only {
+    display: block;
+  }
+}

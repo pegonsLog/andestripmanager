@@ -1,0 +1,365 @@
+.hospedagem-card {
+  max-width: 400px;
+  margin: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  &.com-foto {
+    .foto-container {
+      display: block;
+    }
+  }
+}
+
+// Foto da Hospedagem
+.foto-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  display: none;
+
+  .foto-hospedagem {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .foto-overlay {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.875rem;
+
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  &:hover .foto-hospedagem {
+    transform: scale(1.05);
+  }
+}
+
+// Header do Card
+mat-card-header {
+  position: relative;
+  padding-bottom: 8px;
+
+  .tipo-avatar {
+    background-color: #1976d2;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  .hospedagem-nome {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+  }
+
+  .hospedagem-tipo {
+    color: #666;
+    font-size: 0.875rem;
+  }
+
+  .card-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+// Conteúdo do Card
+mat-card-content {
+  padding-top: 8px;
+}
+
+.info-principal {
+  margin-bottom: 16px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  .info-icon {
+    color: #666;
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .info-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .info-label {
+      font-size: 0.875rem;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .info-value {
+      font-size: 0.95rem;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .info-extra {
+      font-size: 0.8rem;
+      color: #888;
+      font-style: italic;
+    }
+  }
+
+  &.valor-item {
+    .info-content {
+      .valor-diaria {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1976d2;
+      }
+
+      .valor-total {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Avaliação
+.avaliacao-section {
+  margin-bottom: 16px;
+
+  .estrelas {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    mat-icon {
+      font-size: 1.2rem;
+      width: 1.2rem;
+      height: 1.2rem;
+      color: #ddd;
+
+      &.estrela-preenchida {
+        color: #ffc107;
+      }
+    }
+
+    .avaliacao-numero {
+      margin-left: 8px;
+      font-weight: 600;
+      color: #1976d2;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// Características
+.caracteristicas {
+  margin-bottom: 16px;
+
+  mat-chip-set {
+    margin-bottom: 8px;
+
+    .chip-destaque {
+      background-color: #4caf50;
+      color: white;
+
+      mat-icon {
+        color: white;
+      }
+    }
+  }
+
+  .comodidades {
+    .comodidades-label {
+      font-size: 0.875rem;
+      color: #666;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .comodidades-chips {
+      mat-chip {
+        font-size: 0.8rem;
+        height: 28px;
+
+        &.chip-mais {
+          background-color: #e0e0e0;
+          color: #666;
+        }
+      }
+    }
+  }
+}
+
+// Observações
+.observacoes {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+  .obs-icon {
+    color: #666;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .obs-texto {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #555;
+    line-height: 1.4;
+  }
+}
+
+// Footer do Card
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  border-top: 1px solid #e0e0e0;
+
+  .links-externos {
+    display: flex;
+    gap: 4px;
+
+    button {
+      color: #666;
+
+      &:hover {
+        color: #1976d2;
+      }
+    }
+  }
+
+  .acoes-principais {
+    display: flex;
+    gap: 8px;
+
+    button {
+      mat-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+// Menu de ações
+.delete-action {
+  color: #f44336;
+
+  mat-icon {
+    color: #f44336;
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .hospedagem-card {
+    margin: 8px;
+    max-width: none;
+  }
+
+  .foto-container {
+    height: 150px;
+  }
+
+  .info-item {
+    .info-content {
+      .info-value {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .card-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+
+    .links-externos {
+      justify-content: center;
+    }
+
+    .acoes-principais {
+      justify-content: center;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+}
+
+// Animações
+.hospedagem-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Estados especiais
+.hospedagem-card {
+  &.selecionado {
+    border: 2px solid #1976d2;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+  }
+
+  &.desabilitado {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}

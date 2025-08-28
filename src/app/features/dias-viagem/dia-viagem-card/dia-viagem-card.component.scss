@@ -1,0 +1,301 @@
+.dia-card {
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  &.completo {
+    border-left-color: #4caf50;
+
+    .dia-avatar {
+      background-color: #4caf50;
+    }
+  }
+
+  .dia-avatar {
+    background-color: var(--primary-color, #1976d2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+
+    .dia-numero {
+      font-weight: 600;
+      font-size: 16px;
+    }
+  }
+
+  mat-card-header {
+    .titulo-container {
+      .data {
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.6);
+        text-transform: capitalize;
+      }
+
+      .rota {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+
+        .origem,
+        .destino {
+          font-weight: 500;
+          font-size: 16px;
+        }
+
+        .seta {
+          color: rgba(0, 0, 0, 0.5);
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    mat-card-subtitle {
+      .distancia-info {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 8px;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          color: rgba(0, 0, 0, 0.5);
+        }
+
+        .tempo {
+          color: rgba(0, 0, 0, 0.6);
+        }
+      }
+    }
+
+    .menu-button {
+      margin-left: auto;
+    }
+  }
+
+  mat-card-content {
+    .horarios-container {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background-color: rgba(0, 0, 0, 0.02);
+      border-radius: 8px;
+
+      .horario-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .horario-icon {
+          color: var(--primary-color, #1976d2);
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+
+        .horario-info {
+          .horario-label {
+            display: block;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.6);
+            font-weight: 500;
+          }
+
+          .horario-valores {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+
+            .planejado {
+              font-weight: 500;
+              color: rgba(0, 0, 0, 0.7);
+            }
+
+            .real {
+              font-weight: 600;
+              color: #4caf50;
+
+              &::before {
+                content: "→ ";
+                color: rgba(0, 0, 0, 0.5);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .progresso-container {
+      margin-bottom: 16px;
+      padding: 12px;
+      background-color: rgba(76, 175, 80, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(76, 175, 80, 0.2);
+
+      .progresso-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .progresso-label {
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.6);
+          font-weight: 500;
+        }
+
+        .progresso-valor {
+          font-weight: 600;
+          color: #4caf50;
+        }
+      }
+
+      .progresso-bar {
+        height: 6px;
+        background-color: rgba(76, 175, 80, 0.2);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 8px;
+
+        .progresso-fill {
+          height: 100%;
+          background-color: #4caf50;
+          transition: width 0.3s ease;
+        }
+      }
+
+      .distancia-real {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #4caf50;
+
+        mat-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+
+    .clima-container {
+      margin-bottom: 16px;
+
+      mat-chip-set {
+        mat-chip {
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
+        }
+      }
+    }
+
+    .observacoes-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background-color: rgba(255, 193, 7, 0.1);
+      border-radius: 8px;
+      border-left: 3px solid #ffc107;
+
+      .observacoes-icon {
+        color: #ff9800;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .observacoes-texto {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.4;
+        color: rgba(0, 0, 0, 0.7);
+      }
+    }
+
+    .fotos-container {
+      .fotos-preview {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background-color: rgba(156, 39, 176, 0.1);
+        border-radius: 8px;
+        color: #9c27b0;
+        font-size: 14px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+
+  mat-card-actions {
+    button {
+      mat-icon {
+        margin-right: 4px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+// Menu de ações
+.delete-action {
+  color: #f44336;
+
+  mat-icon {
+    color: #f44336;
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .dia-card {
+    mat-card-content {
+      .horarios-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    mat-card-header {
+      .titulo-container {
+        .rota {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+
+          .seta {
+            transform: rotate(90deg);
+          }
+        }
+      }
+    }
+  }
+}

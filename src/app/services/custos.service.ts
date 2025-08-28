@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { where, orderBy, QueryConstraint } from '@angular/fire/firestore';
+import { Firestore, where, orderBy, QueryConstraint } from '@angular/fire/firestore';
 import { BaseFirestoreService } from '../core/services/base.service';
 import { Custo, CategoriaCusto, ResumoCustos, RelatorioCustos } from '../models';
+import { AuthService } from '../core/services/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,10 @@ import { Custo, CategoriaCusto, ResumoCustos, RelatorioCustos } from '../models'
 export class CustosService extends BaseFirestoreService<Custo> {
     protected collectionName = 'custos';
 
-    constructor(firestore: any) {
+    constructor(
+        firestore: Firestore,
+        private authService: AuthService
+    ) {
         super(firestore);
     }
 
@@ -56,8 +60,25 @@ export class CustosService extends BaseFirestoreService<Custo> {
     /**
      * Cria novo custo
      */
-    async criarCusto(dadosCusto: Omit<Custo, 'id' | 'criadoEm' | 'atualizadoEm'>): Promise<string> {
-        return this.novo(dadosCusto);
+    async criarCusto(dadosCusto: Omit<Custo, 'id' | 'criadoEm' | 'atualizadoEm' | 'usuarioId'>): Promise<string> {
+        const currentUser = this.authService.getCurrentUser();
+        if (!currentUser?.id) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        const custoCompleto = {
+            ...dadosCusto,
+            usuarioId: currentUser.id
+        };
+
+        return this.novo(custoCompleto);
+    }
+
+    /**
+     * Atualiza um custo existente
+     */
+    async atualizar(id: string, dadosCusto: Partial<Custo>): Promise<void> {
+        return this.altera(id, dadosCusto);
     }
 
     /**

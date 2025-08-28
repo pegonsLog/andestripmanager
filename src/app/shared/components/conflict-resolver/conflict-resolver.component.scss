@@ -1,0 +1,376 @@
+.conflict-resolver {
+  max-width: 800px;
+  width: 100%;
+}
+
+.conflict-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+
+  .conflict-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    .severity-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+
+    .conflict-details {
+      h2 {
+        margin: 0 0 8px 0;
+        font-size: 20px;
+      }
+
+      .conflict-description {
+        margin: 0 0 12px 0;
+        color: #666;
+      }
+
+      mat-chip-set {
+        gap: 8px;
+      }
+    }
+  }
+
+  .timestamp-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+
+    .timestamp-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+.data-comparison {
+  padding: 16px 0;
+
+  .comparison-header {
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0 0 12px 0;
+    }
+  }
+
+  .comparison-table {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+
+    .comparison-row {
+      display: grid;
+      grid-template-columns: 200px 1fr 1fr;
+      border-bottom: 1px solid #e0e0e0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &.header {
+        background-color: #f5f5f5;
+        font-weight: 600;
+
+        .field-name,
+        .local-value,
+        .remote-value {
+          padding: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+      }
+
+      &.conflicted {
+        background-color: #fff3e0;
+
+        .field-name {
+          background-color: #ffcc80;
+        }
+      }
+
+      .field-name {
+        padding: 12px;
+        border-right: 1px solid #e0e0e0;
+        background-color: #fafafa;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .conflict-indicator {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+
+      .local-value,
+      .remote-value {
+        padding: 12px;
+        border-right: 1px solid #e0e0e0;
+
+        &:last-child {
+          border-right: none;
+        }
+
+        pre {
+          margin: 0;
+          font-family: "Courier New", monospace;
+          font-size: 12px;
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+      }
+    }
+  }
+}
+
+.resolution-form {
+  padding: 16px 0;
+
+  h3 {
+    margin: 0 0 16px 0;
+  }
+
+  .suggested-resolution {
+    margin-bottom: 24px;
+    border: 2px solid #4caf50;
+
+    mat-card-content {
+      p {
+        margin-bottom: 16px;
+      }
+    }
+  }
+
+  .resolution-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .resolution-option {
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover:not(.disabled) {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+
+      &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      mat-card-content {
+        padding: 16px;
+
+        .mat-radio-button {
+          width: 100%;
+
+          .option-content {
+            margin-left: 32px;
+
+            .option-header {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              margin-bottom: 8px;
+
+              mat-icon {
+                color: #666;
+              }
+
+              .option-label {
+                font-weight: 600;
+                font-size: 16px;
+              }
+            }
+
+            .option-description {
+              margin: 0;
+              color: #666;
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.resolution-preview {
+  padding: 16px 0;
+
+  h3 {
+    margin: 0 0 16px 0;
+  }
+
+  .preview-card {
+    margin-top: 16px;
+
+    .preview-data {
+      margin: 0;
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+      background-color: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+    }
+  }
+}
+
+.technical-details {
+  padding: 16px 0;
+
+  mat-expansion-panel {
+    margin-bottom: 8px;
+
+    .detail-item {
+      margin-bottom: 8px;
+      padding: 4px 0;
+
+      strong {
+        display: inline-block;
+        width: 150px;
+      }
+    }
+
+    .base-data {
+      margin: 0;
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background-color: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .conflict-resolver {
+    max-width: 100%;
+  }
+
+  .conflict-header {
+    flex-direction: column;
+    gap: 16px;
+
+    .timestamp-info {
+      align-self: stretch;
+    }
+  }
+
+  .comparison-table {
+    .comparison-row {
+      grid-template-columns: 1fr;
+
+      .field-name,
+      .local-value,
+      .remote-value {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      &.header {
+        .local-value,
+        .remote-value {
+          background-color: #e3f2fd;
+        }
+      }
+    }
+  }
+
+  .resolution-options {
+    .resolution-option {
+      mat-card-content {
+        padding: 12px;
+
+        .mat-radio-button {
+          .option-content {
+            margin-left: 24px;
+
+            .option-header {
+              .option-label {
+                font-size: 14px;
+              }
+            }
+
+            .option-description {
+              font-size: 13px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Modo escuro
+@media (prefers-color-scheme: dark) {
+  .conflict-header {
+    background-color: #2d2d2d;
+  }
+
+  .comparison-table {
+    border-color: #444;
+
+    .comparison-row {
+      border-bottom-color: #444;
+
+      &.header {
+        background-color: #2d2d2d;
+      }
+
+      &.conflicted {
+        background-color: #3d2f00;
+
+        .field-name {
+          background-color: #5d4f20;
+        }
+      }
+
+      .field-name {
+        background-color: #1e1e1e;
+        border-right-color: #444;
+      }
+
+      .local-value,
+      .remote-value {
+        border-right-color: #444;
+      }
+    }
+  }
+
+  .preview-data,
+  .base-data {
+    background-color: #2d2d2d !important;
+    color: #fff;
+  }
+}

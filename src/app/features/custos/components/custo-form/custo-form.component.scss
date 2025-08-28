@@ -1,0 +1,131 @@
+.custo-form-card {
+  max-width: 600px;
+  margin: 0 auto;
+
+  mat-card-header {
+    margin-bottom: 16px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--primary-color, #1976d2);
+    }
+  }
+}
+
+.custo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+
+    .half-width {
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 16px;
+
+      .half-width {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Estilos para campos com erro
+.mat-form-field.mat-form-field-invalid {
+  .mat-form-field-outline-thick {
+    color: #f44336;
+  }
+}
+
+// Estilos para botões
+mat-card-actions {
+  padding: 16px 24px;
+  gap: 8px;
+
+  button {
+    min-width: 100px;
+
+    mat-icon {
+      margin-right: 4px;
+    }
+  }
+}
+
+// Estilos para snackbar
+:host ::ng-deep {
+  .success-snackbar {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  .error-snackbar {
+    background-color: #f44336;
+    color: white;
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .custo-form-card {
+    margin: 16px;
+    max-width: none;
+  }
+}
+
+// Animações
+.custo-form {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Estilos para loading
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+// Melhorias visuais para campos monetários
+.mat-form-field-prefix {
+  color: #666;
+  font-weight: 500;
+}
+
+// Estilos para hints
+.mat-hint {
+  font-size: 12px;
+  color: #666;
+}
+
+// Estilos para select
+.mat-select-panel {
+  max-height: 300px;
+}
+
+// Estilos para textarea
+textarea.mat-input-element {
+  resize: vertical;
+  min-height: 60px;
+}

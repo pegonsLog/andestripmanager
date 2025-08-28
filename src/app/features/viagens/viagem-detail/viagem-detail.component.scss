@@ -1,46 +1,39 @@
-// Variáveis de cores e espaçamentos
-$primary-color: #1976d2;
-$accent-color: #ff4081;
-$warn-color: #f44336;
-$success-color: #4caf50;
-$spacing-xs: 8px;
-$spacing-sm: 16px;
-$spacing-md: 24px;
-$spacing-lg: 32px;
-$border-radius: 8px;
+/* Variáveis */
+$primary: #1976d2;
+$accent: #ff4081;
+$warn: #f44336;
+$success: #4caf50;
 
-// Container principal
 .viagem-detail-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: $spacing-md;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: 1.5rem;
 
   @media (max-width: 768px) {
-    padding: $spacing-sm;
-    gap: $spacing-sm;
+    padding: 1rem;
+    gap: 1rem;
   }
 }
 
-// Loading
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: $spacing-lg;
+  padding: 2rem;
   text-align: center;
   min-height: 300px;
 
   p {
-    margin-top: $spacing-sm;
+    margin-top: 1rem;
     color: rgba(0, 0, 0, 0.6);
   }
 }
 
-// Cabeçalho da viagem
+/* Cabeçalho da viagem */
 .header-card {
   .avatar-icon {
     display: flex;
@@ -52,19 +45,19 @@ $border-radius: 8px;
 
   mat-card-header {
     position: relative;
-    padding-bottom: $spacing-sm;
+    padding-bottom: 1rem;
   }
 
   .subtitle-info {
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
+    gap: 1rem;
     flex-wrap: wrap;
 
     @media (max-width: 480px) {
       flex-direction: column;
       align-items: flex-start;
-      gap: $spacing-xs;
+      gap: 0.5rem;
     }
   }
 
@@ -73,15 +66,14 @@ $border-radius: 8px;
     top: 0;
     right: 0;
     display: flex;
-    gap: $spacing-xs;
+    gap: 0.5rem;
   }
 
-  // Grid de informações
   .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: $spacing-sm;
-    margin-top: $spacing-sm;
+    gap: 1rem;
+    margin-top: 1rem;
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
@@ -91,14 +83,14 @@ $border-radius: 8px;
   .info-item {
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
-    padding: $spacing-sm;
+    gap: 1rem;
+    padding: 1rem;
     background-color: rgba(0, 0, 0, 0.02);
-    border-radius: $border-radius;
-    border-left: 4px solid $primary-color;
+    border-radius: 8px;
+    border-left: 4px solid $primary;
 
     mat-icon {
-      color: $primary-color;
+      color: $primary;
       font-size: 20px;
       width: 20px;
       height: 20px;
@@ -124,14 +116,13 @@ $border-radius: 8px;
     }
   }
 
-  // Descrição
   .description {
-    margin-top: $spacing-md;
-    padding-top: $spacing-sm;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
     border-top: 1px solid rgba(0, 0, 0, 0.12);
 
     h4 {
-      margin: 0 0 $spacing-xs 0;
+      margin: 0 0 0.5rem 0;
       font-size: 16px;
       font-weight: 600;
       color: rgba(0, 0, 0, 0.87);
@@ -145,14 +136,13 @@ $border-radius: 8px;
   }
 }
 
-// Card de edição
 .edit-card {
   mat-card-content {
     padding: 0;
   }
 }
 
-// Abas
+/* Abas */
 .tabs-card {
   flex: 1;
 
@@ -165,7 +155,7 @@ $border-radius: 8px;
       min-width: 120px;
 
       .tab-icon {
-        margin-right: $spacing-xs;
+        margin-right: 0.5rem;
         font-size: 18px;
         width: 18px;
         height: 18px;
@@ -173,30 +163,29 @@ $border-radius: 8px;
     }
 
     .mat-mdc-tab-body-wrapper {
-      padding: $spacing-md;
+      padding: 1.5rem;
 
       @media (max-width: 768px) {
-        padding: $spacing-sm;
+        padding: 1rem;
       }
     }
   }
 }
 
-// Conteúdo das abas
 .tab-content {
   min-height: 400px;
 }
 
-// Resumo
+/* Resumo */
 .resumo-container {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: 2rem;
 }
 
 .stats-section {
   h3 {
-    margin: 0 0 $spacing-sm 0;
+    margin: 0 0 1rem 0;
     font-size: 18px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.87);
@@ -205,7 +194,7 @@ $border-radius: 8px;
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: $spacing-sm;
+    gap: 1rem;
 
     @media (max-width: 480px) {
       grid-template-columns: repeat(2, 1fr);
@@ -215,10 +204,10 @@ $border-radius: 8px;
   .stat-card {
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
-    padding: $spacing-md;
+    gap: 1rem;
+    padding: 1.5rem;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-radius: $border-radius;
+    border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 
@@ -228,7 +217,7 @@ $border-radius: 8px;
     }
 
     mat-icon {
-      color: $primary-color;
+      color: $primary;
       font-size: 24px;
       width: 24px;
       height: 24px;
@@ -258,17 +247,17 @@ $border-radius: 8px;
 
 .observacoes-section {
   h3 {
-    margin: 0 0 $spacing-sm 0;
+    margin: 0 0 1rem 0;
     font-size: 18px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.87);
   }
 
   .observacoes-content {
-    padding: $spacing-md;
+    padding: 1.5rem;
     background-color: rgba(0, 0, 0, 0.02);
-    border-radius: $border-radius;
-    border-left: 4px solid $accent-color;
+    border-radius: 8px;
+    border-left: 4px solid $accent;
 
     p {
       margin: 0;
@@ -280,7 +269,7 @@ $border-radius: 8px;
 
 .quick-actions {
   h3 {
-    margin: 0 0 $spacing-sm 0;
+    margin: 0 0 1rem 0;
     font-size: 18px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.87);
@@ -289,7 +278,7 @@ $border-radius: 8px;
   .actions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: $spacing-sm;
+    gap: 1rem;
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
@@ -300,7 +289,7 @@ $border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: $spacing-xs;
+      gap: 0.5rem;
       font-weight: 500;
 
       mat-icon {
@@ -312,14 +301,14 @@ $border-radius: 8px;
   }
 }
 
-// Placeholder para abas não implementadas
+/* Placeholder para abas não implementadas */
 .placeholder-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: $spacing-lg;
+  padding: 2rem;
   min-height: 300px;
 
   .placeholder-icon {
@@ -327,18 +316,18 @@ $border-radius: 8px;
     width: 64px;
     height: 64px;
     color: rgba(0, 0, 0, 0.3);
-    margin-bottom: $spacing-md;
+    margin-bottom: 1.5rem;
   }
 
   h3 {
-    margin: 0 0 $spacing-sm 0;
+    margin: 0 0 1rem 0;
     font-size: 24px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.6);
   }
 
   p {
-    margin: 0 0 $spacing-md 0;
+    margin: 0 0 1.5rem 0;
     color: rgba(0, 0, 0, 0.5);
     max-width: 400px;
     line-height: 1.6;
@@ -346,36 +335,36 @@ $border-radius: 8px;
 
   button {
     mat-icon {
-      margin-right: $spacing-xs;
+      margin-right: 0.5rem;
     }
   }
 }
 
-// Estado de erro
+/* Estado de erro */
 .error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: $spacing-lg;
+  padding: 2rem;
   min-height: 400px;
 
   .error-icon {
     font-size: 64px;
     width: 64px;
     height: 64px;
-    color: $warn-color;
-    margin-bottom: $spacing-md;
+    color: $warn;
+    margin-bottom: 1.5rem;
   }
 
   h2 {
-    margin: 0 0 $spacing-sm 0;
+    margin: 0 0 1rem 0;
     color: rgba(0, 0, 0, 0.87);
   }
 
   p {
-    margin: 0 0 $spacing-md 0;
+    margin: 0 0 1.5rem 0;
     color: rgba(0, 0, 0, 0.6);
     max-width: 400px;
     line-height: 1.6;
@@ -383,21 +372,21 @@ $border-radius: 8px;
 
   button {
     mat-icon {
-      margin-right: $spacing-xs;
+      margin-right: 0.5rem;
     }
   }
 }
 
-// Ações de menu
+/* Ações de menu */
 .delete-action {
-  color: $warn-color !important;
+  color: $warn !important;
 
   mat-icon {
-    color: $warn-color !important;
+    color: $warn !important;
   }
 }
 
-// Responsividade para tablets
+/* Responsividade */
 @media (max-width: 1024px) {
   .viagem-detail-container {
     max-width: 100%;
@@ -412,7 +401,6 @@ $border-radius: 8px;
   }
 }
 
-// Responsividade para mobile
 @media (max-width: 480px) {
   .header-card {
     .subtitle-info {
@@ -440,44 +428,5 @@ $border-radius: 8px;
     .tab-icon {
       display: none;
     }
-  }
-}
-
-// Animações
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.viagem-detail-container {
-  animation: fadeIn 0.3s ease-out;
-}
-
-// Melhorias de acessibilidade
-button:focus,
-.mat-mdc-tab:focus {
-  outline: 2px solid $primary-color;
-  outline-offset: 2px;
-}
-
-// Tema escuro (se necessário)
-@media (prefers-color-scheme: dark) {
-  .header-card .info-item {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-left-color: $accent-color;
-  }
-
-  .stat-card {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  }
-
-  .observacoes-section .observacoes-content {
-    background-color: rgba(255, 255, 255, 0.05);
   }
 }

@@ -1,0 +1,126 @@
+.confirmation-dialog {
+  min-width: 400px;
+  max-width: 600px;
+
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+    .dialog-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+
+    h2 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 20px;
+    }
+  }
+
+  .dialog-content {
+    margin-bottom: 24px;
+    line-height: 1.5;
+
+    p {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.7);
+    }
+
+    .confirmacao-texto {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.12);
+
+      .full-width {
+        width: 100%;
+      }
+
+      mat-form-field {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+
+    .btn-cancelar {
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-confirmar {
+      min-width: 100px;
+    }
+  }
+
+  // Variações por tipo
+  &.dialog-danger {
+    .dialog-header {
+      .dialog-icon {
+        color: #f44336;
+      }
+
+      h2 {
+        color: #f44336;
+      }
+    }
+  }
+
+  &.dialog-warning {
+    .dialog-header {
+      .dialog-icon {
+        color: #ff9800;
+      }
+
+      h2 {
+        color: #ff9800;
+      }
+    }
+  }
+
+  &.dialog-info {
+    .dialog-header {
+      .dialog-icon {
+        color: #2196f3;
+      }
+
+      h2 {
+        color: #2196f3;
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 600px) {
+  .confirmation-dialog {
+    min-width: 280px;
+    max-width: 90vw;
+
+    .dialog-header {
+      h2 {
+        font-size: 18px;
+      }
+    }
+
+    .dialog-actions {
+      flex-direction: column-reverse;
+      gap: 8px;
+
+      .btn-cancelar,
+      .btn-confirmar {
+        width: 100%;
+      }
+    }
+  }
+}

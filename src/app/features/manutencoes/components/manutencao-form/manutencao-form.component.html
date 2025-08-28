@@ -1,0 +1,219 @@
+<mat-card class="manutencao-form-card">
+    <mat-card-header>
+        <mat-card-title>
+            <mat-icon>build</mat-icon>
+            {{ isEditMode ? 'Editar Manutenção' : 'Nova Manutenção' }}
+        </mat-card-title>
+        <mat-card-subtitle>
+            {{ viagemId ? 'Manutenção durante viagem' : 'Manutenção da motocicleta' }}
+        </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+        <form [formGroup]="manutencaoForm" (ngSubmit)="onSubmit()" class="manutencao-form">
+
+            <!-- Informações Básicas -->
+            <div class="form-section">
+                <h3 class="section-title">Informações Básicas</h3>
+
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Tipo de Manutenção</mat-label>
+                        <mat-select formControlName="tipo" required>
+                            <mat-option *ngFor="let tipo of tiposManutencao" [value]="tipo">
+                                {{ obterLabelTipoManutencao(tipo) }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="temErro('tipo')">
+                            {{ obterMensagemErro('tipo') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Data da Manutenção</mat-label>
+                        <input matInput [matDatepicker]="dataPicker" formControlName="data" required>
+                        <mat-datepicker-toggle matSuffix [for]="dataPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dataPicker></mat-datepicker>
+                        <mat-error *ngIf="temErro('data')">
+                            {{ obterMensagemErro('data') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Quilometragem</mat-label>
+                        <input matInput type="number" formControlName="quilometragem" required>
+                        <span matSuffix>km</span>
+                        <mat-error *ngIf="temErro('quilometragem')">
+                            {{ obterMensagemErro('quilometragem') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Custo Total</mat-label>
+                        <input matInput type="number" formControlName="custo" required readonly>
+                        <span matPrefix>R$ </span>
+                        <mat-hint>Calculado automaticamente baseado nos itens</mat-hint>
+                        <mat-error *ngIf="temErro('custo')">
+                            {{ obterMensagemErro('custo') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline" class="form-field full-width">
+                    <mat-label>Descrição</mat-label>
+                    <textarea matInput formControlName="descricao" rows="3" required
+                        placeholder="Descreva o motivo e detalhes da manutenção..."></textarea>
+                    <mat-error *ngIf="temErro('descricao')">
+                        {{ obterMensagemErro('descricao') }}
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Informações do Local -->
+            <div class="form-section">
+                <h3 class="section-title">Local e Oficina</h3>
+
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Local</mat-label>
+                        <input matInput formControlName="local" placeholder="Cidade, Estado">
+                        <mat-icon matSuffix>location_on</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Nome da Oficina</mat-label>
+                        <input matInput formControlName="oficina" placeholder="Nome da oficina ou mecânico">
+                    </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>Telefone da Oficina</mat-label>
+                    <input matInput formControlName="telefoneOficina" placeholder="(11) 99999-9999">
+                    <mat-icon matSuffix>phone</mat-icon>
+                </mat-form-field>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Itens e Serviços -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">Itens e Serviços</h3>
+                    <button type="button" mat-raised-button color="primary" (click)="adicionarItem()">
+                        <mat-icon>add</mat-icon>
+                        Adicionar Item
+                    </button>
+                </div>
+
+                <div formArrayName="itensServicos" class="itens-container">
+                    <div *ngFor="let item of itensServicos.controls; let i = index" [formGroupName]="i"
+                        class="item-card">
+                        <mat-card>
+                            <mat-card-content>
+                                <div class="item-header">
+                                    <h4>Item {{ i + 1 }}</h4>
+                                    <button type="button" mat-icon-button color="warn" (click)="removerItem(i)"
+                                        [disabled]="itensServicos.length <= 1">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Nome do Item/Serviço</mat-label>
+                                        <input matInput formControlName="nome" required>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Categoria</mat-label>
+                                        <mat-select formControlName="categoria" required>
+                                            <mat-option *ngFor="let categoria of categoriasManutencao"
+                                                [value]="categoria">
+                                                {{ obterLabelCategoriaManutencao(categoria) }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Custo Unitário</mat-label>
+                                        <input matInput type="number" formControlName="custo" required
+                                            (input)="calcularCustoTotal()">
+                                        <span matPrefix>R$ </span>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Quantidade</mat-label>
+                                        <input matInput type="number" formControlName="quantidade"
+                                            (input)="calcularCustoTotal()">
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Marca/Modelo</mat-label>
+                                        <input matInput formControlName="marca">
+                                    </mat-form-field>
+                                </div>
+
+                                <mat-form-field appearance="outline" class="form-field full-width">
+                                    <mat-label>Observações do Item</mat-label>
+                                    <textarea matInput formControlName="observacoes" rows="2"></textarea>
+                                </mat-form-field>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+                </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Próxima Manutenção -->
+            <div class="form-section">
+                <h3 class="section-title">Próxima Manutenção</h3>
+
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Próxima Manutenção (km)</mat-label>
+                        <input matInput type="number" formControlName="proximaManutencaoKm">
+                        <span matSuffix>km</span>
+                        <mat-hint>Quilometragem recomendada para próxima manutenção</mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Data Recomendada</mat-label>
+                        <input matInput [matDatepicker]="proximaDataPicker" formControlName="proximaManutencaoData">
+                        <mat-datepicker-toggle matSuffix [for]="proximaDataPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #proximaDataPicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Observações Gerais -->
+            <div class="form-section">
+                <mat-form-field appearance="outline" class="form-field full-width">
+                    <mat-label>Observações Gerais</mat-label>
+                    <textarea matInput formControlName="observacoes" rows="4"
+                        placeholder="Observações adicionais sobre a manutenção..."></textarea>
+                </mat-form-field>
+            </div>
+        </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+        <button type="button" mat-button (click)="onCancelar()" [disabled]="isLoading">
+            Cancelar
+        </button>
+        <button type="submit" mat-raised-button color="primary" (click)="onSubmit()"
+            [disabled]="isLoading || manutencaoForm.invalid">
+            <mat-spinner *ngIf="isLoading" diameter="20" class="spinner-button"></mat-spinner>
+            <mat-icon *ngIf="!isLoading">save</mat-icon>
+            {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+        </button>
+    </mat-card-actions>
+</mat-card>

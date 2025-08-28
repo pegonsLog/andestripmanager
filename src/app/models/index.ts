@@ -7,5 +7,7 @@ export * from './parada.interface';
 export * from './hospedagem.interface';
 export * from './custo.interface';
 export * from './manutencao.interface';
+export * from './clima.interface';
+export * from './diario-bordo.interface';
 export * from './enums';
 export * from './validators';

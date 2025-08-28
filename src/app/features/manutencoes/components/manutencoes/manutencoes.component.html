@@ -1,0 +1,33 @@
+<div class="manutencoes-container">
+    <mat-tab-group [(selectedIndex)]="abaSelecionada" (selectedIndexChange)="onMudancaAba($event)"
+        class="manutencoes-tabs">
+
+        <!-- Aba da Lista -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <mat-icon>list</mat-icon>
+                Histórico de Manutenções
+            </ng-template>
+
+            <div class="tab-content">
+                <app-manutencao-list [viagemId]="viagemId" [showFilters]="true" [showActions]="true"
+                    (novaManutencao)="onNovaManutencao()" (editarManutencao)="onEditarManutencao($event)">
+                </app-manutencao-list>
+            </div>
+        </mat-tab>
+
+        <!-- Aba do Formulário -->
+        <mat-tab [disabled]="!mostrarFormulario">
+            <ng-template mat-tab-label>
+                <mat-icon>{{ manutencaoEdicao ? 'edit' : 'add' }}</mat-icon>
+                {{ obterTituloFormulario() }}
+            </ng-template>
+
+            <div class="tab-content" *ngIf="mostrarFormulario">
+                <app-manutencao-form [manutencao]="manutencaoEdicao" [viagemId]="viagemId"
+                    (salvar)="onSalvarManutencao($event)" (cancelar)="onCancelarEdicao()">
+                </app-manutencao-form>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>

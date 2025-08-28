@@ -1,0 +1,106 @@
+<div class="dialog-container">
+    <h2 mat-dialog-title>
+        <mat-icon>edit</mat-icon>
+        Registrar Clima Observado
+    </h2>
+
+    <mat-dialog-content>
+        <form [formGroup]="form" class="clima-form">
+            <!-- Temperatura -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Temperatura</mat-label>
+                <input matInput type="number" formControlName="temperatura" placeholder="Ex: 25">
+                <span matTextSuffix>°C</span>
+                <mat-error *ngIf="form.get('temperatura')?.hasError('required')">
+                    {{ obterMensagemErro('temperatura') }}
+                </mat-error>
+                <mat-error *ngIf="form.get('temperatura')?.hasError('min') || form.get('temperatura')?.hasError('max')">
+                    {{ obterMensagemErro('temperatura') }}
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Condição Climática -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Condição Climática</mat-label>
+                <mat-select formControlName="condicao">
+                    <mat-option *ngFor="let condicao of condicoesClimaticas" [value]="condicao">
+                        <div class="condicao-option">
+                            <mat-icon>{{ obterIconeCondicao(condicao) }}</mat-icon>
+                            <span>{{ obterLabelCondicao(condicao) }}</span>
+                        </div>
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form.get('condicao')?.hasError('required')">
+                    {{ obterMensagemErro('condicao') }}
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Chuva -->
+            <div class="checkbox-container">
+                <mat-checkbox formControlName="choveu" (change)="onChoveuChange()">
+                    Choveu durante o período
+                </mat-checkbox>
+            </div>
+
+            <!-- Intensidade da Chuva -->
+            <mat-form-field *ngIf="mostrarIntensidadeChuva()" appearance="outline" class="full-width">
+                <mat-label>Intensidade da Chuva</mat-label>
+                <mat-select formControlName="intensidadeChuva">
+                    <mat-option *ngFor="let intensidade of intensidadesChuva" [value]="intensidade.value">
+                        {{ intensidade.label }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form.get('intensidadeChuva')?.hasError('required')">
+                    {{ obterMensagemErro('intensidadeChuva') }}
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Vento -->
+            <div class="slider-container">
+                <label class="slider-label">
+                    <mat-icon>air</mat-icon>
+                    Vento: {{ formatarVento(form.get('vento')?.value || 0) }}
+                </label>
+                <mat-slider class="full-width" [min]="0" [max]="100" [step]="5" [discrete]="true"
+                    [showTickMarks]="true">
+                    <input matSliderThumb formControlName="vento">
+                </mat-slider>
+            </div>
+
+            <!-- Horário do Registro -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Horário do Registro</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="horarioRegistro" readonly>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error *ngIf="form.get('horarioRegistro')?.hasError('required')">
+                    {{ obterMensagemErro('horarioRegistro') }}
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Observações -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Observações</mat-label>
+                <textarea matInput formControlName="observacoes" rows="3"
+                    placeholder="Descreva detalhes adicionais sobre o clima..."></textarea>
+                <mat-hint align="end">
+                    {{ form.get('observacoes')?.value?.length || 0 }}/500
+                </mat-hint>
+                <mat-error *ngIf="form.get('observacoes')?.hasError('maxlength')">
+                    {{ obterMensagemErro('observacoes') }}
+                </mat-error>
+            </mat-form-field>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" (click)="onCancelar()">
+            <mat-icon>close</mat-icon>
+            Cancelar
+        </button>
+        <button mat-raised-button color="primary" type="button" [disabled]="temErros()" (click)="onSalvar()">
+            <mat-icon>save</mat-icon>
+            Salvar
+        </button>
+    </mat-dialog-actions>
+</div>

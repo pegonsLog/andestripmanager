@@ -1,0 +1,237 @@
+<div class="custos-container">
+
+    <!-- Loading -->
+    <div *ngIf="isLoading$ | async" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Carregando custos...</p>
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div *ngIf="!(isLoading$ | async)" class="custos-content">
+
+        <!-- Relatório Resumo -->
+        <mat-card *ngIf="mostrarRelatorio && (relatorio$ | async) as relatorio" class="relatorio-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>assessment</mat-icon>
+                    Relatório de Custos
+                </mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="relatorio-grid">
+
+                    <!-- Total Planejado -->
+                    <div class="relatorio-item">
+                        <div class="relatorio-valor planejado">
+                            {{ formatarMoeda(relatorio.totalPlanejado) }}
+                        </div>
+                        <div class="relatorio-label">Total Planejado</div>
+                    </div>
+
+                    <!-- Total Real -->
+                    <div class="relatorio-item">
+                        <div class="relatorio-valor real">
+                            {{ formatarMoeda(relatorio.totalReal) }}
+                        </div>
+                        <div class="relatorio-label">Total Real</div>
+                    </div>
+
+                    <!-- Diferença -->
+                    <div class="relatorio-item">
+                        <div class="relatorio-valor" [class.positivo]="relatorio.diferenca >= 0"
+                            [class.negativo]="relatorio.diferenca < 0">
+                            {{ formatarMoeda(relatorio.diferenca) }}
+                        </div>
+                        <div class="relatorio-label">Diferença</div>
+                    </div>
+
+                    <!-- Variação Percentual -->
+                    <div class="relatorio-item">
+                        <div class="relatorio-valor" [class.positivo]="relatorio.percentualVariacao >= 0"
+                            [class.negativo]="relatorio.percentualVariacao < 0">
+                            {{ formatarPercentual(relatorio.percentualVariacao) }}
+                        </div>
+                        <div class="relatorio-label">Variação %</div>
+                    </div>
+
+                    <!-- Custo Médio por Dia -->
+                    <div class="relatorio-item">
+                        <div class="relatorio-valor">
+                            {{ formatarMoeda(relatorio.custoMedioPorDia) }}
+                        </div>
+                        <div class="relatorio-label">Média por Dia</div>
+                    </div>
+
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Resumo por Categoria -->
+        <mat-card *ngIf="(resumoPorCategoria$ | async) as resumo" class="resumo-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>pie_chart</mat-icon>
+                    Resumo por Categoria
+                </mat-card-title>
+                <div class="card-actions">
+                    <button mat-icon-button (click)="recarregar()" matTooltip="Recarregar">
+                        <mat-icon>refresh</mat-icon>
+                    </button>
+                </div>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="resumo-grid">
+                    <div *ngFor="let item of resumo; trackBy: trackByResumo" class="resumo-item">
+
+                        <div class="categoria-header">
+                            <mat-icon [style.color]="obterCorCategoria(item.categoria)">
+                                {{ obterIconeCategoria(item.categoria) }}
+                            </mat-icon>
+                            <span class="categoria-nome">{{ obterLabelCategoria(item.categoria) }}</span>
+                        </div>
+
+                        <div class="categoria-valores">
+                            <div class="valor-principal">{{ formatarMoeda(item.valorTotal) }}</div>
+                            <div class="valor-detalhes">
+                                <span class="percentual">{{ formatarPercentual(item.percentual) }}</span>
+                                <span class="quantidade">{{ item.quantidade }} item(s)</span>
+                                <span class="media">Média: {{ formatarMoeda(item.valorMedio) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Barra de progresso visual -->
+                        <div class="progress-bar">
+                            <div class="progress-fill" [style.width.%]="item.percentual"
+                                [style.background-color]="obterCorCategoria(item.categoria)">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Lista de Custos Agrupados -->
+        <mat-card *ngIf="(custos$ | async) as custos" class="custos-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>list</mat-icon>
+                    Custos Detalhados
+                </mat-card-title>
+                <div class="total-geral">
+                    Total: {{ formatarMoeda(calcularTotalGeral(custos)) }}
+                </div>
+            </mat-card-header>
+
+            <mat-card-content>
+
+                <!-- Sem custos -->
+                <div *ngIf="custos.length === 0" class="empty-state">
+                    <mat-icon>money_off</mat-icon>
+                    <h3>Nenhum custo registrado</h3>
+                    <p>Adicione custos para visualizar o relatório detalhado.</p>
+                </div>
+
+                <!-- Custos agrupados por categoria -->
+                <mat-accordion *ngIf="custos.length > 0" class="custos-accordion">
+
+                    <mat-expansion-panel
+                        *ngFor="let grupo of agruparCustosPorCategoria(custos) | keyvalue; trackBy: trackByCategoria"
+                        class="categoria-panel">
+
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <mat-icon [style.color]="obterCorCategoria(grupo.key)">
+                                    {{ obterIconeCategoria(grupo.key) }}
+                                </mat-icon>
+                                <span class="categoria-titulo">{{ obterLabelCategoria(grupo.key) }}</span>
+                                <mat-chip class="categoria-chip">{{ grupo.value.length }}</mat-chip>
+                            </mat-panel-title>
+
+                            <mat-panel-description>
+                                {{ formatarMoeda(calcularTotalGeral(grupo.value)) }}
+                            </mat-panel-description>
+                        </mat-expansion-panel-header>
+
+                        <!-- Lista de custos da categoria -->
+                        <div class="custos-categoria">
+
+                            <!-- Custos Planejados -->
+                            <div *ngIf="temCustosPlanejados(grupo.value)" class="tipo-custos">
+                                <h4 class="tipo-titulo planejado">
+                                    <mat-icon>schedule</mat-icon>
+                                    Planejados
+                                </h4>
+
+                                <div class="custos-lista">
+                                    <div *ngFor="let custo of filtrarCustosPorTipo(grupo.value, 'planejado'); trackBy: trackByCusto"
+                                        class="custo-item planejado">
+
+                                        <div class="custo-info">
+                                            <div class="custo-descricao">{{ custo.descricao }}</div>
+                                            <div class="custo-detalhes">
+                                                <span class="custo-data">{{ formatarData(custo.data) }}</span>
+                                                <span *ngIf="custo.hora" class="custo-hora">{{ custo.hora }}</span>
+                                                <span *ngIf="custo.local" class="custo-local">{{ custo.local }}</span>
+                                            </div>
+                                            <div *ngIf="custo.observacoes" class="custo-observacoes">
+                                                {{ custo.observacoes }}
+                                            </div>
+                                        </div>
+
+                                        <div class="custo-valor">
+                                            {{ formatarMoeda(custo.valor) }}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Custos Reais -->
+                            <div *ngIf="temCustosReais(grupo.value)" class="tipo-custos">
+                                <h4 class="tipo-titulo real">
+                                    <mat-icon>check_circle</mat-icon>
+                                    Reais
+                                </h4>
+
+                                <div class="custos-lista">
+                                    <div *ngFor="let custo of filtrarCustosPorTipo(grupo.value, 'real'); trackBy: trackByCusto"
+                                        class="custo-item real">
+
+                                        <div class="custo-info">
+                                            <div class="custo-descricao">{{ custo.descricao }}</div>
+                                            <div class="custo-detalhes">
+                                                <span class="custo-data">{{ formatarData(custo.data) }}</span>
+                                                <span *ngIf="custo.hora" class="custo-hora">{{ custo.hora }}</span>
+                                                <span *ngIf="custo.local" class="custo-local">{{ custo.local }}</span>
+                                                <span *ngIf="custo.metodoPagamento" class="custo-pagamento">
+                                                    {{ custo.metodoPagamento }}
+                                                </span>
+                                            </div>
+                                            <div *ngIf="custo.observacoes" class="custo-observacoes">
+                                                {{ custo.observacoes }}
+                                            </div>
+                                        </div>
+
+                                        <div class="custo-valor">
+                                            {{ formatarMoeda(custo.valor) }}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </mat-expansion-panel>
+
+                </mat-accordion>
+
+            </mat-card-content>
+        </mat-card>
+
+    </div>
+
+</div>

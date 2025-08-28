@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { where, orderBy, QueryConstraint } from '@angular/fire/firestore';
+import { Firestore, where, orderBy, QueryConstraint } from '@angular/fire/firestore';
 import { BaseFirestoreService } from '../core/services/base.service';
-import { Hospedagem, TipoHospedagem } from '../models';
+import { Hospedagem } from '../models';
+import { TipoHospedagem } from '../models/hospedagem.interface';
 
 @Injectable({
     providedIn: 'root'
@@ -10,7 +11,7 @@ import { Hospedagem, TipoHospedagem } from '../models';
 export class HospedagensService extends BaseFirestoreService<Hospedagem> {
     protected collectionName = 'hospedagens';
 
-    constructor(firestore: any) {
+    constructor(firestore: Firestore) {
         super(firestore);
     }
 

@@ -1,0 +1,165 @@
+.dialog-container {
+  min-width: 400px;
+  max-width: 600px;
+
+  h2[mat-dialog-title] {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+
+    .mat-icon {
+      margin-right: 12px;
+      color: #2196f3;
+    }
+  }
+}
+
+.mat-mdc-dialog-content {
+  padding: 20px 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.clima-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .condicao-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .checkbox-container {
+    margin: 8px 0;
+
+    .mat-mdc-checkbox {
+      .mdc-form-field {
+        color: rgba(0, 0, 0, 0.87);
+      }
+    }
+  }
+
+  .slider-container {
+    margin: 16px 0;
+
+    .slider-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.87);
+      margin-bottom: 12px;
+
+      .mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #2196f3;
+      }
+    }
+
+    .mat-mdc-slider {
+      width: 100%;
+    }
+  }
+}
+
+.mat-mdc-dialog-actions {
+  padding: 16px 24px;
+  gap: 12px;
+
+  .mat-mdc-button,
+  .mat-mdc-raised-button {
+    .mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Estados de validação
+.mat-mdc-form-field {
+  &.mat-form-field-invalid {
+    .mat-mdc-text-field-wrapper {
+      .mat-mdc-form-field-outline {
+        .mat-mdc-notched-outline-notch {
+          border-color: #f44336;
+        }
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .dialog-container {
+    min-width: 300px;
+    max-width: 90vw;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 16px;
+  }
+
+  .clima-form {
+    gap: 12px;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 12px 16px;
+    flex-direction: column-reverse;
+
+    .mat-mdc-button,
+    .mat-mdc-raised-button {
+      width: 100%;
+      margin: 4px 0;
+    }
+  }
+}
+
+// Melhorias visuais
+.mat-mdc-form-field-outline {
+  .mat-mdc-notched-outline-notch {
+    border-width: 2px;
+  }
+}
+
+.mat-mdc-raised-button {
+  &:disabled {
+    background-color: rgba(0, 0, 0, 0.12) !important;
+    color: rgba(0, 0, 0, 0.26) !important;
+  }
+}
+
+// Animações
+.clima-form {
+  .mat-mdc-form-field {
+    transition: all 0.3s ease;
+
+    &:focus-within {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.checkbox-container {
+  .mat-mdc-checkbox {
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}

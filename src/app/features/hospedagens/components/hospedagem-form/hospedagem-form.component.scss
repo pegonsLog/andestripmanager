@@ -1,0 +1,395 @@
+.hospedagem-form-card {
+  max-width: 800px;
+  margin: 0 auto;
+
+  mat-card-header {
+    margin-bottom: 16px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1976d2;
+
+      mat-icon {
+        font-size: 1.8rem;
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+    }
+  }
+}
+
+.hospedagem-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-section {
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #424242;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+
+  &.single-column {
+    flex-direction: column;
+  }
+
+  mat-form-field {
+    &.full-width {
+      flex: 1;
+      width: 100%;
+    }
+
+    &.half-width {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    &.third-width {
+      flex: 1;
+      min-width: 150px;
+    }
+  }
+}
+
+.estacionamento-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+
+  mat-icon {
+    color: #1976d2;
+    margin-right: 4px;
+  }
+}
+
+.estadia-resumo {
+  margin-top: 16px;
+
+  .resumo-card {
+    background-color: #f5f5f5;
+    border-left: 4px solid #1976d2;
+
+    mat-card-content {
+      padding: 16px;
+    }
+  }
+
+  .resumo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .resumo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .label {
+      font-weight: 500;
+      color: #666;
+    }
+
+    .value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    &.total {
+      border-top: 1px solid #ddd;
+      padding-top: 8px;
+      margin-top: 8px;
+
+      .label,
+      .value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1976d2;
+      }
+    }
+  }
+}
+
+.form-actions {
+  padding: 16px 24px;
+  gap: 12px;
+
+  button {
+    min-width: 120px;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .hospedagem-form-card {
+    margin: 16px;
+    max-width: none;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 8px;
+
+    mat-form-field {
+      &.half-width,
+      &.third-width {
+        width: 100%;
+      }
+    }
+  }
+
+  .resumo-info {
+    .resumo-item {
+      font-size: 0.9rem;
+
+      &.total {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// Estados de erro
+mat-form-field {
+  &.mat-form-field-invalid {
+    .mat-form-field-outline-thick {
+      color: #f44336;
+    }
+  }
+}
+
+// Customização dos ícones nos campos
+mat-form-field {
+  mat-icon[matSuffix] {
+    color: #666;
+    font-size: 1.2rem;
+
+    &:hover {
+      color: #1976d2;
+    }
+  }
+}
+
+// Animações
+.hospedagem-form-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Loading state
+button[disabled] {
+  mat-icon {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Estilos para Sistema de Avaliação
+.avaliacao-panel {
+  margin-top: 16px;
+
+  .mat-expansion-panel-header {
+    font-weight: 500;
+  }
+}
+
+.avaliacao-content {
+  padding: 16px 0;
+}
+
+.avaliacao-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  .avaliacao-label {
+    min-width: 150px;
+    font-weight: 500;
+    color: #666;
+  }
+
+  .avaliacao-slider {
+    flex: 1;
+    max-width: 200px;
+  }
+
+  .avaliacao-numero {
+    min-width: 40px;
+    font-weight: 600;
+    color: #1976d2;
+  }
+}
+
+.avaliacoes-detalhadas {
+  margin-top: 24px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    color: #424242;
+    font-weight: 500;
+  }
+}
+
+.media-avaliacao {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  text-align: center;
+  color: #1976d2;
+}
+
+.estrelas-display {
+  display: flex;
+  gap: 2px;
+  margin-left: 8px;
+
+  mat-icon {
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: #ddd;
+
+    &.estrela-preenchida {
+      color: #ffc107;
+    }
+  }
+}
+
+.avaliacao-valor {
+  font-weight: 600;
+  color: #1976d2;
+  margin-left: 8px;
+}
+
+// Estilos para Upload de Fotos
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  button {
+    min-width: 160px;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+
+  .upload-info {
+    font-size: 0.875rem;
+    color: #666;
+    margin: 0;
+  }
+}
+
+.fotos-galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.foto-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .foto-preview {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .remover-foto {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: rgba(255, 255, 255, 0.9);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 1);
+    }
+  }
+}
+
+// Responsividade para avaliação
+@media (max-width: 768px) {
+  .avaliacao-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .avaliacao-label {
+      min-width: auto;
+    }
+
+    .avaliacao-slider {
+      width: 100%;
+      max-width: none;
+    }
+  }
+
+  .fotos-galeria {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .foto-item .foto-preview {
+    height: 120px;
+  }
+}

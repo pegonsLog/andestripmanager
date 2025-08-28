@@ -173,7 +173,7 @@
                             <!-- Filtro por Status -->
                             <mat-form-field appearance="outline" class="status-filter">
                                 <mat-label>Status</mat-label>
-                                <mat-select [value]="statusFilter$ | async"
+                                <mat-select [value]="currentStatusFilter"
                                     (selectionChange)="alterarFiltroStatus($event.value)">
                                     <mat-option value="todas">Todas</mat-option>
                                     <mat-option [value]="StatusViagem.PLANEJADA">Planejadas</mat-option>
@@ -185,17 +185,16 @@
                             <!-- Ordenação -->
                             <div class="sort-controls">
                                 <span class="sort-label font-regular">Ordenar por:</span>
-                                <mat-button-toggle-group [value]="sortBy$ | async"
+                                <mat-button-toggle-group [value]="currentSortBy"
                                     (change)="alterarOrdenacao($event.value)" class="sort-toggle">
                                     <mat-button-toggle value="dataInicio">Data Início</mat-button-toggle>
                                     <mat-button-toggle value="nome">Nome</mat-button-toggle>
                                     <mat-button-toggle value="custoTotal">Custo</mat-button-toggle>
                                 </mat-button-toggle-group>
 
-                                <button mat-icon-button (click)="alterarOrdenacao((sortBy$ | async)!)"
-                                    [matTooltip]="(sortDirection$ | async) === 'asc' ? 'Crescente' : 'Decrescente'">
-                                    <mat-icon>{{ (sortDirection$ | async) === 'asc' ? 'arrow_upward' : 'arrow_downward'
-                                        }}</mat-icon>
+                                <button mat-icon-button (click)="alterarDirecaoOrdenacao()"
+                                    [matTooltip]="getTooltipOrdenacao()">
+                                    <mat-icon>{{ getIconeOrdenacao() }}</mat-icon>
                                 </button>
                             </div>
                         </div>
@@ -208,9 +207,9 @@
                                     <mat-icon matChipRemove>cancel</mat-icon>
                                 </mat-chip>
 
-                                <mat-chip *ngIf="(statusFilter$ | async) !== 'todas'" removable
+                                <mat-chip *ngIf="currentStatusFilter !== 'todas'" removable
                                     (removed)="alterarFiltroStatus('todas')">
-                                    Status: {{ getTextoFiltroStatus((statusFilter$ | async)!) }}
+                                    Status: {{ getTextoFiltroStatus(currentStatusFilter) }}
                                     <mat-icon matChipRemove>cancel</mat-icon>
                                 </mat-chip>
                             </div>

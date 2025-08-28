@@ -1,0 +1,86 @@
+<div class="photo-upload-container" [class.compact]="compactMode">
+
+    <!-- Área de Upload -->
+    <div class="upload-area" [class.drag-over]="dragOver" [class.disabled]="!canAddMorePhotos()"
+        (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)"
+        *ngIf="canAddMorePhotos()">
+
+        <div class="upload-content">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+
+            <p class="upload-text">
+                <strong>Clique para selecionar</strong> ou arraste fotos aqui
+            </p>
+
+            <p class="upload-hint">
+                Formatos aceitos: JPG, PNG, WebP (máx. 10MB cada)
+            </p>
+
+            <input type="file" #fileInput [accept]="'image/jpeg,image/jpg,image/png,image/webp'"
+                [multiple]="allowMultiple" [disabled]="!canAddMorePhotos()" (change)="onFileSelected($event)"
+                style="display: none;">
+
+            <button mat-raised-button color="primary" [disabled]="!canAddMorePhotos()" (click)="fileInput.click()">
+                <mat-icon>add_photo_alternate</mat-icon>
+                {{ getUploadButtonText() }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Barra de Progresso -->
+    <div class="progress-container" *ngIf="isUploading">
+        <mat-progress-bar mode="determinate" [value]="uploadProgressValue"></mat-progress-bar>
+        <p class="progress-text">Enviando fotos... {{ uploadProgressValue.toFixed(0) }}%</p>
+    </div>
+
+    <!-- Galeria de Fotos -->
+    <div class="photo-gallery" *ngIf="showGallery && photos.length > 0">
+        <h4 class="gallery-title" *ngIf="!compactMode">
+            <mat-icon>photo_library</mat-icon>
+            Fotos ({{ photos.length }}/{{ maxPhotos }})
+        </h4>
+
+        <div class="photos-grid" [class.compact]="compactMode">
+            <div class="photo-item" *ngFor="let photo of photos; trackBy: trackByUrl">
+
+                <!-- Imagem -->
+                <div class="photo-container">
+                    <img [src]="photo.url" [alt]="photo.name" (click)="openPhoto(photo)" loading="lazy">
+
+                    <!-- Overlay com ações -->
+                    <div class="photo-overlay">
+                        <button mat-icon-button color="primary" matTooltip="Visualizar" (click)="openPhoto(photo)">
+                            <mat-icon>zoom_in</mat-icon>
+                        </button>
+
+                        <button mat-icon-button color="warn" matTooltip="Remover" [disabled]="disabled"
+                            (click)="removePhoto(photo)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Informações da foto (modo não compacto) -->
+                <div class="photo-info" *ngIf="!compactMode">
+                    <p class="photo-name" [title]="photo.name">{{ photo.name }}</p>
+                    <p class="photo-size">{{ formatFileSize(photo.size) }}</p>
+                    <p class="photo-date" *ngIf="photo.uploadedAt">
+                        {{ photo.uploadedAt | date:'dd/MM/yyyy HH:mm':'pt-BR' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <div class="empty-state" *ngIf="showGallery && photos.length === 0 && !canAddMorePhotos()">
+        <mat-icon class="empty-icon">photo</mat-icon>
+        <p class="empty-text">Nenhuma foto adicionada</p>
+    </div>
+
+    <!-- Informações do limite -->
+    <div class="limit-info" *ngIf="!compactMode && maxPhotos > 1">
+        <mat-icon>info</mat-icon>
+        <span>Máximo de {{ maxPhotos }} fotos permitidas</span>
+    </div>
+</div>
