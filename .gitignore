@@ -47,9 +47,6 @@ coverage/
 firebase-debug.log
 firestore-debug.log
 
-# Kiro (opcional - pode remover se quiser versionar)
-.kiro/
-
 # Arquivos temporários
 *.tmp
 *.temp
