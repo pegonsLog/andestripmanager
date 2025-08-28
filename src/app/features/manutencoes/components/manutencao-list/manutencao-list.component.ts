@@ -158,7 +158,7 @@ export class ManutencaoListComponent implements OnInit, OnDestroy {
             if (this.viagemId) {
                 manutencoes$ = this.manutencoesService.recuperarPorViagem(this.viagemId);
             } else {
-                manutencoes$ = this.manutencoesService.recuperarPorUsuario(usuarioAtual.uid);
+                manutencoes$ = this.manutencoesService.recuperarPorUsuario(usuarioAtual.id!);
             }
 
             manutencoes$
@@ -191,7 +191,7 @@ export class ManutencaoListComponent implements OnInit, OnDestroy {
             const usuarioAtual = await this.authService.getCurrentUser();
             if (!usuarioAtual) return;
 
-            this.estatisticas$ = this.manutencoesService.recuperarEstatisticas(usuarioAtual.uid);
+            this.estatisticas$ = this.manutencoesService.recuperarEstatisticas(usuarioAtual.id!);
         } catch (error) {
             console.error('Erro ao carregar estatísticas:', error);
         }
@@ -398,10 +398,11 @@ export class ManutencaoListComponent implements OnInit, OnDestroy {
 
         return textos.join(' ou ');
     }
-}  /**
 
-   * TrackBy function para otimizar a renderização da lista
-   */
-trackByManutencao(index: number, manutencao: Manutencao): string {
-    return manutencao.id || index.toString();
+    /**
+     * TrackBy function para otimizar a renderização da lista
+     */
+    trackByManutencao(index: number, manutencao: Manutencao): string {
+        return manutencao.id || index.toString();
+    }
 }

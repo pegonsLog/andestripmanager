@@ -257,6 +257,123 @@ export class MockDataFactory {
             ...overrides
         };
     }
+
+    /**
+     * Cria clima mock
+     */
+    static createClima(overrides: Partial<Clima> = {}): Clima {
+        return {
+            id: 'clima-123',
+            usuarioId: 'user-123',
+            diaViagemId: 'dia-123',
+            data: '2024-06-01',
+            cidade: 'São Paulo',
+            coordenadas: { lat: -23.5505, lng: -46.6333 },
+            previsao: {
+                temperaturaMin: 18,
+                temperaturaMax: 28,
+                condicao: 'ensolarado' as any,
+                descricao: 'Céu limpo',
+                chanceChuva: 10,
+                vento: 15,
+                umidade: 65,
+                pressao: 1013,
+                visibilidade: 10,
+                indiceUV: 8
+            },
+            observado: {
+                temperatura: 25,
+                condicao: 'ensolarado' as any,
+                choveu: false,
+                observacoes: 'Dia perfeito para viajar'
+            },
+            criadoEm: Timestamp.now(),
+            atualizadoEm: Timestamp.now(),
+            ...overrides
+        };
+    }
+
+    /**
+     * Cria previsão do tempo mock
+     */
+    static createPrevisaoTempo(overrides: any = {}): any {
+        return {
+            temperaturaMin: 18,
+            temperaturaMax: 28,
+            condicao: 'ensolarado',
+            descricao: 'Céu limpo',
+            chanceChuva: 10,
+            vento: 15,
+            umidade: 65,
+            pressao: 1013,
+            visibilidade: 10,
+            indiceUV: 8,
+            ...overrides
+        };
+    }
+
+    /**
+     * Cria clima observado mock
+     */
+    static createClimaObservado(overrides: any = {}): any {
+        return {
+            temperatura: 25,
+            condicao: 'ensolarado',
+            choveu: false,
+            observacoes: 'Dia perfeito para viajar',
+            ...overrides
+        };
+    }
+
+    /**
+     * Cria manutenção mock
+     */
+    static createManutencao(overrides: Partial<Manutencao> = {}): Manutencao {
+        return {
+            id: 'manutencao-123',
+            usuarioId: 'user-123',
+            viagemId: 'viagem-123',
+            tipo: 'pre-viagem' as any,
+            data: '2024-06-01',
+            descricao: 'Manutenção preventiva completa',
+            itens: [
+                {
+                    nome: 'Troca de óleo',
+                    categoria: 'motor' as any,
+                    custo: 80,
+                    observacoes: 'Óleo sintético'
+                }
+            ],
+            custo: 150,
+            local: 'Oficina Central',
+            criadoEm: Timestamp.now(),
+            atualizadoEm: Timestamp.now(),
+            ...overrides
+        };
+    }
+
+    /**
+     * Cria diário de bordo mock
+     */
+    static createDiarioBordo(overrides: Partial<DiarioBordo> = {}): DiarioBordo {
+        return {
+            id: 'diario-123',
+            usuarioId: 'user-123',
+            viagemId: 'viagem-123',
+            diaViagemId: 'dia-123',
+            data: '2024-06-01',
+            titulo: 'Primeiro dia da viagem',
+            conteudo: 'Hoje começou nossa aventura! O dia estava perfeito para viajar.',
+            fotos: ['https://storage.url/foto1.jpg', 'https://storage.url/foto2.jpg'],
+            publico: false,
+            tags: ['aventura', 'viagem', 'motocicleta'],
+            criadoEm: Timestamp.now(),
+            atualizadoEm: Timestamp.now(),
+            criadoPor: 'user-123',
+            atualizadoPor: 'user-123',
+            ...overrides
+        };
+    }
 }
 
 /**

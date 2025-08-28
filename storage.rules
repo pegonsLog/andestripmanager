@@ -1,0 +1,58 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Regras para fotos de perfil
+    match /users/{userId}/profile/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Regras para fotos de viagens
+    match /viagens/{viagemId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/viagens/$(viagemId)) &&
+        get(/databases/$(database)/documents/viagens/$(viagemId)).data.usuarioId == request.auth.uid;
+    }
+
+    // Regras para fotos de paradas
+    match /paradas/{paradaId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/paradas/$(paradaId)) &&
+        get(/databases/$(database)/documents/paradas/$(paradaId)).data.usuarioId == request.auth.uid;
+    }
+
+    // Regras para fotos de hospedagens
+    match /hospedagens/{hospedagemId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/hospedagens/$(hospedagemId)) &&
+        get(/databases/$(database)/documents/hospedagens/$(hospedagemId)).data.usuarioId == request.auth.uid;
+    }
+
+    // Regras para comprovantes de custos
+    match /custos/{custoId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/custos/$(custoId)) &&
+        get(/databases/$(database)/documents/custos/$(custoId)).data.usuarioId == request.auth.uid;
+    }
+
+    // Regras para fotos do diário de bordo
+    match /diario-bordo/{diarioId}/{allPaths=**} {
+      // Leitura pública se o diário for público
+      allow read: if request.auth != null && (
+        get(/databases/$(database)/documents/diario-bordo/$(diarioId)).data.publico == true ||
+        get(/databases/$(database)/documents/diario-bordo/$(diarioId)).data.usuarioId == request.auth.uid
+      );
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/diario-bordo/$(diarioId)) &&
+        get(/databases/$(database)/documents/diario-bordo/$(diarioId)).data.usuarioId == request.auth.uid;
+    }
+
+    // Regras para backups
+    match /backups/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

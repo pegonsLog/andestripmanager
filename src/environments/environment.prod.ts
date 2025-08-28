@@ -1,5 +1,6 @@
 export const environment = {
     production: true,
+    staging: false,
     firebase: {
         apiKey: "AIzaSyAp4EW44oPvCZKixAE7dIg2UHHb_I5WQ0Y",
         authDomain: "andestripmanager.firebaseapp.com",
@@ -14,5 +15,7 @@ export const environment = {
         baseUrl: "https://api.openweathermap.org/data/2.5",
         units: "metric", // Celsius
         lang: "pt_br"
-    }
+    },
+    debug: false,
+    logLevel: 'error'
 };

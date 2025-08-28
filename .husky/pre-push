@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Executando verificações pré-push..."
+
+# Verificar se está na branch correta para deploy
+CURRENT_BRANCH=$(git branch --show-current)
+
+if [ "$CURRENT_BRANCH" = "main" ]; then
+    echo "⚠️ Push para branch main - executando verificações completas..."
+    
+    # Executar testes E2E
+    echo "🧪 Executando testes E2E..."
+    npm run e2e:ci
+    
+    echo "✅ Verificações para produção concluídas!"
+elif [ "$CURRENT_BRANCH" = "develop" ]; then
+    echo "🔧 Push para branch develop - executando verificações de staging..."
+    
+    # Executar build de staging
+    echo "🔨 Testando build de staging..."
+    npm run build:staging
+    
+    echo "✅ Verificações para staging concluídas!"
+fi
+
+echo "✅ Verificações pré-push concluídas!"

@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Executando verificações pré-commit..."
+
+# Executar lint
+echo "📝 Verificando código com ESLint..."
+npm run lint
+
+# Executar testes unitários
+echo "🧪 Executando testes unitários..."
+npm run test:ci
+
+echo "✅ Verificações pré-commit concluídas!"

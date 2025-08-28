@@ -1,0 +1,236 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        viewport: [
+          { name: 'desktop', width: 1280, height: 720 },
+          { name: 'tablet', width: 768, height: 1024 },
+          { name: 'mobile', width: 375, height: 667 }
+        ]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Instalar dependências
+      run: npm ci
+      
+    - name: Build da aplicação
+      run: npm run build
+      
+    - name: Executar testes E2E - ${{ matrix.viewport.name }}
+      uses: cypress-io/github-action@v6
+      with:
+        start: npm start
+        wait-on: 'http://localhost:4200'
+        wait-on-timeout: 120
+        config: viewportWidth=${{ matrix.viewport.width }},viewportHeight=${{ matrix.viewport.height }}
+        spec: |
+          cypress/e2e/01-autenticacao.cy.ts
+          cypress/e2e/02-gerenciamento-viagens.cy.ts
+          cypress/e2e/03-funcionalidades-offline.cy.ts
+          cypress/e2e/04-responsividade.cy.ts
+          cypress/e2e/05-fluxo-completo-usuario.cy.ts
+        browser: chrome
+        headless: true
+        
+    - name: Upload screenshots em caso de falha
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: cypress-screenshots-${{ matrix.viewport.name }}
+        path: cypress/screenshots
+        
+    - name: Upload vídeos dos testes
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cypress-videos-${{ matrix.viewport.name }}
+        path: cypress/videos
+
+  e2e-tests-offline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Instalar dependências
+      run: npm ci
+      
+    - name: Build da aplicação
+      run: npm run build
+      
+    - name: Executar testes de funcionalidades offline
+      uses: cypress-io/github-action@v6
+      with:
+        start: npm start
+        wait-on: 'http://localhost:4200'
+        wait-on-timeout: 120
+        spec: cypress/e2e/03-funcionalidades-offline.cy.ts
+        browser: chrome
+        headless: true
+        config: |
+          defaultCommandTimeout=15000,
+          requestTimeout=15000,
+          responseTimeout=15000
+        
+    - name: Upload artefatos de teste offline
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cypress-offline-results
+        path: |
+          cypress/screenshots
+          cypress/videos
+
+  e2e-tests-cross-browser:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        browser: [chrome, firefox, edge]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Instalar dependências
+      run: npm ci
+      
+    - name: Build da aplicação
+      run: npm run build
+      
+    - name: Executar testes E2E - ${{ matrix.browser }}
+      uses: cypress-io/github-action@v6
+      with:
+        start: npm start
+        wait-on: 'http://localhost:4200'
+        wait-on-timeout: 120
+        browser: ${{ matrix.browser }}
+        headless: true
+        spec: |
+          cypress/e2e/01-autenticacao.cy.ts
+          cypress/e2e/02-gerenciamento-viagens.cy.ts
+        
+    - name: Upload resultados cross-browser
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cypress-results-${{ matrix.browser }}
+        path: |
+          cypress/screenshots
+          cypress/videos
+
+  performance-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Instalar dependências
+      run: npm ci
+      
+    - name: Build da aplicação para produção
+      run: npm run build --prod
+      
+    - name: Executar testes de performance
+      uses: cypress-io/github-action@v6
+      with:
+        start: npx http-server dist/andestripmanager -p 4200
+        wait-on: 'http://localhost:4200'
+        wait-on-timeout: 120
+        spec: cypress/e2e/05-fluxo-completo-usuario.cy.ts
+        browser: chrome
+        headless: true
+        config: |
+          defaultCommandTimeout=30000,
+          requestTimeout=30000,
+          responseTimeout=30000,
+          video=true,
+          screenshotOnRunFailure=true
+        
+    - name: Upload relatórios de performance
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-results
+        path: |
+          cypress/screenshots
+          cypress/videos
+          cypress/reports
+
+  accessibility-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Instalar dependências
+      run: |
+        npm ci
+        npm install --save-dev cypress-axe
+        
+    - name: Build da aplicação
+      run: npm run build
+      
+    - name: Executar testes de acessibilidade
+      uses: cypress-io/github-action@v6
+      with:
+        start: npm start
+        wait-on: 'http://localhost:4200'
+        wait-on-timeout: 120
+        spec: cypress/e2e/04-responsividade.cy.ts
+        browser: chrome
+        headless: true
+        
+    - name: Upload relatórios de acessibilidade
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-results
+        path: |
+          cypress/screenshots
+          cypress/videos

@@ -1,0 +1,9 @@
+{
+  "kind": "identitytoolkit#VerifyPasswordResponse",
+  "localId": "test-user-123",
+  "email": "teste@andestripmanager.com",
+  "displayName": "Usuário de Teste",
+  "idToken": "mock-id-token",
+  "refreshToken": "mock-refresh-token",
+  "expiresIn": "3600"
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "viagem-1",
+    "nome": "Viagem para Campos do Jordão",
+    "descricao": "Viagem de fim de semana para as montanhas",
+    "dataInicio": "2024-06-01",
+    "dataFim": "2024-06-03",
+    "status": "planejada",
+    "orcamento": 1500,
+    "custoTotal": 0,
+    "usuarioId": "test-user-123"
+  },
+  {
+    "id": "viagem-2",
+    "nome": "Rota dos Cânions",
+    "descricao": "Aventura pelos cânions do sul do Brasil",
+    "dataInicio": "2024-07-15",
+    "dataFim": "2024-07-22",
+    "status": "em-andamento",
+    "orcamento": 3000,
+    "custoTotal": 1200,
+    "usuarioId": "test-user-123"
+  }
+]

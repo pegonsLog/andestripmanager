@@ -244,7 +244,7 @@ export class ManutencaoFormComponent implements OnInit, OnDestroy {
                 const formValue = this.manutencaoForm.value;
                 const manutencaoData: Manutencao = {
                     ...formValue,
-                    usuarioId: usuarioAtual.uid,
+                    usuarioId: usuarioAtual.id!,
                     viagemId: this.viagemId,
                     data: this.formatarData(formValue.data),
                     proximaManutencaoData: formValue.proximaManutencaoData ?

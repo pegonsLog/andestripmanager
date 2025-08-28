@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Firestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Manutencao, ItemManutencao, CategoriaManutencao } from '../models/manutencao.interface';
 import { TipoManutencao } from '../models/enums';
-import { BaseService } from '../core/services/base.service';
+import { BaseFirestoreService } from '../core/services/base.service';
 
 /**
  * Serviço para gerenciamento de manutenções da motocicleta
@@ -12,10 +12,10 @@ import { BaseService } from '../core/services/base.service';
 @Injectable({
     providedIn: 'root'
 })
-export class ManutencoesService extends BaseService<Manutencao> {
+export class ManutencoesService extends BaseFirestoreService<Manutencao> {
     protected collectionName = 'manutencoes';
 
-    constructor(protected override firestore: AngularFirestore) {
+    constructor(protected override firestore: Firestore) {
         super(firestore);
     }
 
@@ -25,13 +25,7 @@ export class ManutencoesService extends BaseService<Manutencao> {
      * @returns Observable com lista de manutenções ordenadas por data
      */
     recuperarPorUsuario(usuarioId: string): Observable<Manutencao[]> {
-        return this.firestore
-            .collection<Manutencao>(this.collectionName, ref =>
-                ref
-                    .where('usuarioId', '==', usuarioId)
-                    .orderBy('data', 'desc')
-            )
-            .valueChanges({ idField: 'id' });
+        return this.recuperarPorOutroParametro('usuarioId', usuarioId);
     }
 
     /**
@@ -40,13 +34,7 @@ export class ManutencoesService extends BaseService<Manutencao> {
      * @returns Observable com lista de manutenções da viagem
      */
     recuperarPorViagem(viagemId: string): Observable<Manutencao[]> {
-        return this.firestore
-            .collection<Manutencao>(this.collectionName, ref =>
-                ref
-                    .where('viagemId', '==', viagemId)
-                    .orderBy('data', 'desc')
-            )
-            .valueChanges({ idField: 'id' });
+        return this.recuperarPorOutroParametro('viagemId', viagemId);
     }
 
     /**
@@ -64,14 +52,9 @@ export class ManutencoesService extends BaseService<Manutencao> {
      * @returns Observable com lista de manutenções filtradas
      */
     recuperarPorTipo(usuarioId: string, tipo: TipoManutencao): Observable<Manutencao[]> {
-        return this.firestore
-            .collection<Manutencao>(this.collectionName, ref =>
-                ref
-                    .where('usuarioId', '==', usuarioId)
-                    .where('tipo', '==', tipo)
-                    .orderBy('data', 'desc')
-            )
-            .valueChanges({ idField: 'id' });
+        return this.recuperarPorUsuario(usuarioId).pipe(
+            map(manutencoes => manutencoes.filter(m => m.tipo === tipo))
+        );
     }
 
     /**
@@ -82,15 +65,11 @@ export class ManutencoesService extends BaseService<Manutencao> {
      * @returns Observable com lista de manutenções do período
      */
     recuperarPorPeriodo(usuarioId: string, dataInicio: string, dataFim: string): Observable<Manutencao[]> {
-        return this.firestore
-            .collection<Manutencao>(this.collectionName, ref =>
-                ref
-                    .where('usuarioId', '==', usuarioId)
-                    .where('data', '>=', dataInicio)
-                    .where('data', '<=', dataFim)
-                    .orderBy('data', 'desc')
-            )
-            .valueChanges({ idField: 'id' });
+        return this.recuperarPorUsuario(usuarioId).pipe(
+            map(manutencoes => manutencoes.filter(m => 
+                m.data >= dataInicio && m.data <= dataFim
+            ))
+        );
     }
 
     /**

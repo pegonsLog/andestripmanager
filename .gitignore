@@ -46,7 +46,17 @@ coverage/
 .firebase/
 firebase-debug.log
 firestore-debug.log
+.firebaserc
+
+# Deploy e CI/CD
+backups/
+backup-*.tar.gz
+monitoring-*.log
+stats.json
 
 # Arquivos temporários
 *.tmp
 *.temp
+
+# Husky
+.husky/_

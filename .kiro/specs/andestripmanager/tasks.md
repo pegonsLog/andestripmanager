@@ -342,7 +342,12 @@
   - Implementar testes de eventos e outputs
   - _Requisitos: Todos os requisitos de interface_
 
-- [ ] 16.2 Implementar testes de integração para serviços
+- [x] 16.2 Implementar testes de integração para serviços
+
+
+
+
+
 
   - Criar testes para todos os serviços de negócio
   - Implementar testes de integração com Firebase
@@ -350,7 +355,12 @@
   - Criar testes de tratamento de erros
   - _Requisitos: Todos os requisitos de dados_
 
-- [ ] 16.3 Desenvolver testes E2E
+- [x] 16.3 Desenvolver testes E2E
+
+
+
+
+
 
   - Implementar testes de fluxos completos de usuário
   - Criar testes de criação e gerenciamento de viagens
@@ -358,7 +368,12 @@
   - Implementar testes de responsividade
   - _Requisitos: Todos os requisitos funcionais_
 
-- [ ] 17. Configurar deployment e CI/CD
+- [x] 17. Configurar deployment e CI/CD
+
+
+
+
+
   - Configurar build de produção otimizado
   - Implementar deploy automático no Firebase Hosting
   - Configurar variáveis de ambiente para diferentes ambientes

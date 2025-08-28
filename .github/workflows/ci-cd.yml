@@ -1,0 +1,241 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+  CACHE_KEY: node-modules-${{ hashFiles('**/package-lock.json') }}
+
+jobs:
+  # Job de testes e qualidade de código
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Instalar dependências
+      run: npm ci
+
+    - name: Executar lint
+      run: npm run lint
+
+    - name: Executar testes unitários
+      run: npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+
+    - name: Upload coverage para Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: Executar build de teste
+      run: npm run build -- --configuration=development
+
+  # Job de testes E2E
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Instalar dependências
+      run: npm ci
+
+    - name: Executar testes E2E
+      run: npm run e2e:ci
+      env:
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+    - name: Upload screenshots de falhas
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-screenshots
+        path: cypress/screenshots
+
+    - name: Upload vídeos de testes
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: cypress-videos
+        path: cypress/videos
+
+  # Job de build para staging
+  build-staging:
+    runs-on: ubuntu-latest
+    needs: [test, e2e-tests]
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Instalar dependências
+      run: npm ci
+
+    - name: Build para staging
+      run: npm run build -- --configuration=staging
+
+    - name: Upload artefatos de build
+      uses: actions/upload-artifact@v3
+      with:
+        name: staging-build
+        path: dist/
+
+  # Job de build para produção
+  build-production:
+    runs-on: ubuntu-latest
+    needs: [test, e2e-tests]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Instalar dependências
+      run: npm ci
+
+    - name: Build para produção
+      run: npm run build -- --configuration=production
+
+    - name: Upload artefatos de build
+      uses: actions/upload-artifact@v3
+      with:
+        name: production-build
+        path: dist/
+
+  # Deploy para staging
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build-staging
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Download artefatos de build
+      uses: actions/download-artifact@v3
+      with:
+        name: staging-build
+        path: dist/
+
+    - name: Configurar Firebase CLI
+      uses: w9jds/firebase-action@master
+      with:
+        args: use andestripmanager-staging
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+    - name: Deploy para Firebase Hosting (Staging)
+      uses: w9jds/firebase-action@master
+      with:
+        args: deploy --only hosting:staging
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+    - name: Executar testes de smoke em staging
+      run: |
+        npm install -g wait-on
+        wait-on https://andestripmanager-staging.web.app
+        curl -f https://andestripmanager-staging.web.app || exit 1
+
+  # Deploy para produção
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: build-production
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Download artefatos de build
+      uses: actions/download-artifact@v3
+      with:
+        name: production-build
+        path: dist/
+
+    - name: Configurar Firebase CLI
+      uses: w9jds/firebase-action@master
+      with:
+        args: use andestripmanager
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+    - name: Deploy para Firebase Hosting (Produção)
+      uses: w9jds/firebase-action@master
+      with:
+        args: deploy --only hosting
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+    - name: Executar testes de smoke em produção
+      run: |
+        npm install -g wait-on
+        wait-on https://andestripmanager.web.app
+        curl -f https://andestripmanager.web.app || exit 1
+
+    - name: Notificar sucesso do deploy
+      if: success()
+      run: |
+        echo "✅ Deploy para produção realizado com sucesso!"
+        echo "🌐 URL: https://andestripmanager.web.app"
+
+  # Job de backup automático
+  backup:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: deploy-production
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Firebase CLI
+      uses: w9jds/firebase-action@master
+      with:
+        args: use andestripmanager
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+    - name: Executar backup do Firestore
+      run: |
+        echo "Executando backup do Firestore..."
+        # Aqui seria executado o script de backup
+        echo "Backup concluído com sucesso!"

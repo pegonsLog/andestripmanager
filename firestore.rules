@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Função auxiliar para verificar se o usuário é o proprietário
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Função para verificar se o documento existe
+    function documentExists(path) {
+      return exists(path);
+    }
+
+    // Usuários - só podem acessar seus próprios dados
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Viagens - só o proprietário pode acessar
+    match /viagens/{viagemId} {
+      allow read, write: if isOwner(resource.data.usuarioId);
+      allow create: if isOwner(request.resource.data.usuarioId);
+    }
+
+    // Dias de viagem - só o proprietário pode acessar
+    match /dias-viagem/{diaId} {
+      allow read, write: if isOwner(resource.data.usuarioId);
+      allow create: if isOwner(request.resource.data.usuarioId);
+    }
+
+    // Paradas - só o proprietário pode acessar
+    match /paradas/{paradaId} {
+      allow read, write: if isOwner(resource.data.usuarioId);
+      allow create: if isOwner(request.resource.data.usuarioId);
+    }
+
+    // Hospedagens - só o proprietário pode acessar
+    match /hospedagens/{hospedagemId} {
+      allow read, write: if isOwner(resource.data.usuarioId);
+      allow create: if isOwner(request.resource.data.usuarioId);
+    }
+
+    // Custos - só o proprietário pode acessar
+    match /custos/{custoId} {
+      allow read, write: if isOwner(resource.data.usuarioId);
+      allow create: if isOwner(request.resource.data.usuarioId);
+    }
+
+    // Clima - só o proprietário pode acessar
+    match /clima/{climaId} {
+      allow read, write: if isOwner(resource.data.usuarioId);
+      allow create: if isOwner(request.resource.data.usuarioId);
+    }
+
+    // Manutenções - só o proprietário pode acessar
+    match /manutencoes/{manutencaoId} {
+      allow read, write: if isOwner(resource.data.usuarioId);
+      allow create: if isOwner(request.resource.data.usuarioId);
+    }
+
+    // Diário de bordo - leitura pública se marcado como público
+    match /diario-bordo/{diarioId} {
+      allow read: if resource.data.publico == true || isOwner(resource.data.usuarioId);
+      allow write: if isOwner(resource.data.usuarioId);
+      allow create: if isOwner(request.resource.data.usuarioId);
+    }
+  }
+}
