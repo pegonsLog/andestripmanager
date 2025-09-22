@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { environment } from '../../../../environments/environment';
 
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -45,6 +46,14 @@ export class LoginComponent implements OnInit {
 
     ngOnInit(): void {
         this.initForm();
+        // Pré-preenche os campos automaticamente em ambiente de desenvolvimento (fora de produção)
+        // e evita fazê-lo durante testes unitários (onde o objeto global jasmine está presente)
+        if (!environment.production && typeof window !== 'undefined' && typeof (window as any).jasmine === 'undefined') {
+            this.loginForm.patchValue({
+                email: 'teste@andestripmanager.com',
+                senha: 'senha123'
+            });
+        }
     }
 
     /**

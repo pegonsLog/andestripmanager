@@ -41,7 +41,29 @@ export class AuthService {
     private initAuthListener(): void {
         onAuthStateChanged(this.auth, async (user: User | null) => {
             if (user) {
-                const userData = await this.getUserData(user.uid);
+                // Buscar dados do usuário no Firestore
+                let userData = await this.getUserData(user.uid);
+
+                // Se não existir documento do usuário, cria um documento padrão
+                if (!userData) {
+                    const novoUsuario: Usuario = {
+                        id: user.uid,
+                        email: user.email || '',
+                        nome: user.displayName || (user.email ? user.email.split('@')[0] : ''),
+                        criadoEm: new Date() as any,
+                        atualizadoEm: new Date() as any
+                    };
+
+                    try {
+                        await this.createUserDocument(novoUsuario);
+                        userData = novoUsuario;
+                    } catch (e) {
+                        // Em caso de falha na criação do documento, mantém autenticado mas sem dados estendidos
+                        // Contudo, para evitar quebra em serviços que exigem id, garantimos o id ao menos
+                        userData = novoUsuario;
+                    }
+                }
+
                 this.currentUserSubject.next(userData);
                 this.isAuthenticatedSubject.next(true);
             } else {
