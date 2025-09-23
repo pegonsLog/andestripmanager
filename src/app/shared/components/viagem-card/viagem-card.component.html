@@ -10,7 +10,7 @@
         </mat-card-title>
 
         <mat-card-subtitle class="font-regular">
-            {{ formatarData(viagem.dataInicio) }} - {{ formatarData(viagem.dataFim) }}
+            {{ viagem.dataInicio | date:'dd/MM/yyyy' }} - {{ viagem.dataFim | date:'dd/MM/yyyy' }}
         </mat-card-subtitle>
 
         <!-- Menu de ações -->

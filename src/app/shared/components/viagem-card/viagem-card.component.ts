@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 
 // Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -24,7 +24,8 @@ import { Viagem, StatusViagem } from '../../../models';
         MatChipsModule,
         MatMenuModule,
         MatTooltipModule,
-        MatDividerModule
+        MatDividerModule,
+        DatePipe
     ],
     templateUrl: './viagem-card.component.html',
     styleUrls: ['./viagem-card.component.scss'],
@@ -130,12 +131,6 @@ export class ViagemCardComponent {
         }
     }
 
-    /**
-     * Formata data para exibição
-     */
-    formatarData(data: string): string {
-        return new Date(data).toLocaleDateString('pt-BR');
-    }
 
     /**
      * Formata valor monetário

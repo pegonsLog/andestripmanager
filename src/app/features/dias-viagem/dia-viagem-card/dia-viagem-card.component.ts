@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,7 +22,8 @@ import { DiaViagem } from '../../../models';
         MatIconModule,
         MatChipsModule,
         MatTooltipModule,
-        MatMenuModule
+        MatMenuModule,
+        DatePipe
     ],
     templateUrl: './dia-viagem-card.component.html',
     styleUrls: ['./dia-viagem-card.component.scss'],

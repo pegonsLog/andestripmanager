@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -47,6 +48,7 @@ import { GaleriaFotosComponent } from './galeria-fotos.component';
         MatExpansionModule,
         MatDatepickerModule,
         MatNativeDateModule,
+        MatSelectModule,
         FotoUploadComponent,
         GaleriaFotosComponent
     ],

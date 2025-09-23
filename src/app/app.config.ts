@@ -11,11 +11,15 @@ import { getStorage, provideStorage } from '@angular/fire/storage';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
+// Locale e formato de datas/material
+import { DEFAULT_CURRENCY_CODE } from '@angular/core';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
+
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 
 // Registrar localização pt-BR
-registerLocaleData(localePt);
+registerLocaleData(localePt, 'pt-BR');
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,6 +30,8 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000'
     }),
     { provide: LOCALE_ID, useValue: 'pt-BR' },
+    { provide: DEFAULT_CURRENCY_CODE, useValue: 'BRL' },
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' },
     // Configuração do Firebase
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),

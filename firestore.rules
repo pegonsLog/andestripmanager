@@ -6,6 +6,13 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
+    // Verifica se a viagem pertence ao usuário autenticado
+    function ownsViagemId(viagemId) {
+      return viagemId != null &&
+             request.auth != null &&
+             get(/databases/$(database)/documents/viagens/$(viagemId)).data.usuarioId == request.auth.uid;
+    }
+
     // Função para verificar se o documento existe
     function documentExists(path) {
       return exists(path);
@@ -24,26 +31,26 @@ service cloud.firestore {
 
     // Dias de viagem - só o proprietário pode acessar
     match /dias-viagem/{diaId} {
-      allow read, write: if isOwner(resource.data.usuarioId);
-      allow create: if isOwner(request.resource.data.usuarioId);
+      allow read, write: if isOwner(resource.data.usuarioId) || ownsViagemId(resource.data.viagemId);
+      allow create: if isOwner(request.resource.data.usuarioId) || ownsViagemId(request.resource.data.viagemId);
     }
 
     // Paradas - só o proprietário pode acessar
     match /paradas/{paradaId} {
-      allow read, write: if isOwner(resource.data.usuarioId);
-      allow create: if isOwner(request.resource.data.usuarioId);
+      allow read, write: if isOwner(resource.data.usuarioId) || ownsViagemId(resource.data.viagemId);
+      allow create: if isOwner(request.resource.data.usuarioId) || ownsViagemId(request.resource.data.viagemId);
     }
 
     // Hospedagens - só o proprietário pode acessar
     match /hospedagens/{hospedagemId} {
-      allow read, write: if isOwner(resource.data.usuarioId);
-      allow create: if isOwner(request.resource.data.usuarioId);
+      allow read, write: if isOwner(resource.data.usuarioId) || ownsViagemId(resource.data.viagemId);
+      allow create: if isOwner(request.resource.data.usuarioId) || ownsViagemId(request.resource.data.viagemId);
     }
 
     // Custos - só o proprietário pode acessar
     match /custos/{custoId} {
-      allow read, write: if isOwner(resource.data.usuarioId);
-      allow create: if isOwner(request.resource.data.usuarioId);
+      allow read, write: if isOwner(resource.data.usuarioId) || ownsViagemId(resource.data.viagemId);
+      allow create: if isOwner(request.resource.data.usuarioId) || ownsViagemId(request.resource.data.viagemId);
     }
 
     // Clima - só o proprietário pode acessar

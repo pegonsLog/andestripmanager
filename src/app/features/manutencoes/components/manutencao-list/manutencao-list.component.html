@@ -24,7 +24,7 @@
                         <div class="estatistica-label">Custo Médio</div>
                     </div>
                     <div class="estatistica-item" *ngIf="stats.ultimaManutencao">
-                        <div class="estatistica-valor">{{ formatarData(stats.ultimaManutencao.data) }}</div>
+                        <div class="estatistica-valor">{{ stats.ultimaManutencao.data | date:'dd/MM/yyyy' }}</div>
                         <div class="estatistica-label">Última Manutenção</div>
                     </div>
                 </div>
@@ -134,7 +134,7 @@
                         <mat-card-title>{{ manutencao.descricao }}</mat-card-title>
                         <mat-card-subtitle>
                             <div class="manutencao-info">
-                                <span>{{ formatarData(manutencao.data) }}</span>
+                                <span>{{ manutencao.data | date:'dd/MM/yyyy' }}</span>
                                 <span>{{ manutencao.quilometragem.toLocaleString('pt-BR') }} km</span>
                             </div>
                         </mat-card-subtitle>

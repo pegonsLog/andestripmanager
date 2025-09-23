@@ -84,7 +84,7 @@
                     <div class="info-content">
                         <span class="info-label">Período</span>
                         <span class="info-value">
-                            {{ formatarData(viagem()!.dataInicio) }} - {{ formatarData(viagem()!.dataFim) }}
+                            {{ viagem()!.dataInicio | date:'dd/MM/yyyy' }} - {{ viagem()!.dataFim | date:'dd/MM/yyyy' }}
                         </span>
                     </div>
                 </div>
@@ -264,7 +264,7 @@
                                     <div mat-card-avatar class="dia-avatar">
                                         <span>{{ dia.numeroDia }}</span>
                                     </div>
-                                    <mat-card-title>{{ formatarData(dia.data) }}</mat-card-title>
+                                    <mat-card-title>{{ dia.data | date:'dd/MM/yyyy' }}</mat-card-title>
                                     <mat-card-subtitle>
                                         {{ dia.origem }} → {{ dia.destino }}
                                     </mat-card-subtitle>
@@ -394,7 +394,7 @@
                                     </div>
                                     <mat-card-title>{{ custo.descricao }}</mat-card-title>
                                     <mat-card-subtitle>
-                                        {{ getCategoriaTexto(custo.categoria) }} • {{ formatarData(custo.data) }}
+                                        {{ getCategoriaTexto(custo.categoria) }} • {{ custo.data | date:'dd/MM/yyyy' }}
                                     </mat-card-subtitle>
                                 </mat-card-header>
                                 <mat-card-content>

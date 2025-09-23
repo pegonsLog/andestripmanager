@@ -40,7 +40,7 @@
                         <mat-select (selectionChange)="filtrarPorData($event.value)" [value]="filtroData$ | async">
                             <mat-option value="">Todas as datas</mat-option>
                             <mat-option *ngFor="let data of obterDatasUnicas()" [value]="data">
-                                {{ formatarData(data) }}
+                                {{ data | date:'dd/MM/yyyy' }}
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
@@ -173,7 +173,7 @@
                         </mat-card-title>
                         <mat-card-subtitle>
                             <div class="entrada-meta">
-                                <span class="data">{{ formatarData(entrada.data) }}</span>
+                                <span class="data">{{ entrada.data | date:'dd/MM/yyyy' }}</span>
                                 <span class="timestamp">{{ formatarTimestamp(entrada.criadoEm) }}</span>
                                 <span class="dia-viagem" *ngIf="entrada.diaViagemId">
                                     {{ obterNomeDiaViagem(entrada.diaViagemId) }}

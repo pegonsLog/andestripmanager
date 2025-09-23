@@ -172,7 +172,8 @@
                                         <div class="custo-info">
                                             <div class="custo-descricao">{{ custo.descricao }}</div>
                                             <div class="custo-detalhes">
-                                                <span class="custo-data">{{ formatarData(custo.data) }}</span>
+                                                <span class="custo-data">{{ custo.data | date:'dd/MM/yyyy' }}</span>
+
                                                 <span *ngIf="custo.hora" class="custo-hora">{{ custo.hora }}</span>
                                                 <span *ngIf="custo.local" class="custo-local">{{ custo.local }}</span>
                                             </div>
@@ -203,7 +204,7 @@
                                         <div class="custo-info">
                                             <div class="custo-descricao">{{ custo.descricao }}</div>
                                             <div class="custo-detalhes">
-                                                <span class="custo-data">{{ formatarData(custo.data) }}</span>
+                                                <span class="custo-data">{{ custo.data | date:'dd/MM/yyyy' }}</span>
                                                 <span *ngIf="custo.hora" class="custo-hora">{{ custo.hora }}</span>
                                                 <span *ngIf="custo.local" class="custo-local">{{ custo.local }}</span>
                                                 <span *ngIf="custo.metodoPagamento" class="custo-pagamento">

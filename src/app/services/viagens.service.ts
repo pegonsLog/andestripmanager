@@ -290,12 +290,13 @@ export class ViagensService extends BaseFirestoreService<Viagem> {
         try {
             console.log(`[INFO] Coletando dados relacionados para backup da viagem ${viagemId}`);
 
+            // Para evitar necessidade de índices compostos, buscamos apenas por igualdade em viagemId (sem orderBy)
             const [viagem, dias, paradas, hospedagens, custos] = await Promise.all([
                 this.recuperarPorId(viagemId).toPromise(),
-                this.diasViagemService.listarDiasViagem(viagemId).toPromise(),
-                this.paradasService.listarParadasViagem(viagemId).toPromise(),
-                this.hospedagensService.listarHospedagensViagem(viagemId).toPromise(),
-                this.custosService.listarCustosViagem(viagemId).toPromise()
+                this.diasViagemService.recuperarPorOutroParametro('viagemId', viagemId).toPromise(),
+                this.paradasService.recuperarPorOutroParametro('viagemId', viagemId).toPromise(),
+                this.hospedagensService.recuperarPorOutroParametro('viagemId', viagemId).toPromise(),
+                this.custosService.recuperarPorOutroParametro('viagemId', viagemId).toPromise()
             ]);
 
             const backup = {
@@ -342,17 +343,18 @@ export class ViagensService extends BaseFirestoreService<Viagem> {
      */
     private async excluirDadosRelacionados(viagemId: string): Promise<void> {
         const etapas = [
-            { nome: 'custos', service: this.custosService, metodo: 'listarCustosViagem' },
-            { nome: 'hospedagens', service: this.hospedagensService, metodo: 'listarHospedagensViagem' },
-            { nome: 'paradas', service: this.paradasService, metodo: 'listarParadasViagem' },
-            { nome: 'dias', service: this.diasViagemService, metodo: 'listarDiasViagem' }
+            { nome: 'custos', service: this.custosService },
+            { nome: 'hospedagens', service: this.hospedagensService },
+            { nome: 'paradas', service: this.paradasService },
+            { nome: 'dias', service: this.diasViagemService }
         ];
 
         for (const etapa of etapas) {
             try {
                 console.log(`[INFO] Excluindo ${etapa.nome} da viagem ${viagemId}`);
 
-                const dados = await (etapa.service as any)[etapa.metodo](viagemId).toPromise();
+                // Evitar orderBy para não exigir índices compostos no Firestore durante exclusão
+                const dados = await (etapa.service as any).recuperarPorOutroParametro('viagemId', viagemId).toPromise();
 
                 if (dados && dados.length > 0) {
                     console.log(`[INFO] Encontrados ${dados.length} ${etapa.nome} para excluir`);

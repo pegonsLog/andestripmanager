@@ -16,7 +16,7 @@
 
                 <mat-card-title>
                     <div class="titulo-container">
-                        <span class="data">{{ formatarData(dados.dia.data) }}</span>
+                        <span class="data">{{ dados.dia.data | date:'dd/MM/yyyy' }}</span>
                         <div class="rota">
                             <span class="origem">{{ dados.dia.origem }}</span>
                             <mat-icon class="seta">arrow_forward</mat-icon>

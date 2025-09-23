@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 
 import { Hospedagem, TipoHospedagem } from '../../../../models';
@@ -20,7 +21,9 @@ import { Hospedagem, TipoHospedagem } from '../../../../models';
         MatIconModule,
         MatChipsModule,
         MatTooltipModule,
-        MatMenuModule
+        MatMenuModule,
+        MatDividerModule,
+        DatePipe
     ],
     templateUrl: './hospedagem-card.component.html',
     styleUrls: ['./hospedagem-card.component.scss'],

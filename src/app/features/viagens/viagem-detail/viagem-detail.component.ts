@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
 import { takeUntil, switchMap, tap, catchError } from 'rxjs/operators';
@@ -45,6 +46,7 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../sh
         MatChipsModule,
         MatTooltipModule,
         MatDividerModule,
+        DatePipe,
         ViagemFormComponent
     ],
     templateUrl: './viagem-detail.component.html',

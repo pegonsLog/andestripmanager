@@ -58,7 +58,7 @@
                 <div class="info-content">
                     <span class="info-label">Check-in/out:</span>
                     <span class="info-value">
-                        {{ formatarData(hospedagem.dataCheckIn) }} - {{ formatarData(hospedagem.dataCheckOut) }}
+                        {{ hospedagem.dataCheckIn | date:'dd/MM/yyyy' }} - {{ hospedagem.dataCheckOut | date:'dd/MM/yyyy' }}
                     </span>
                     <span class="info-extra">({{ calcularDiasEstadia() }} noites)</span>
                 </div>
