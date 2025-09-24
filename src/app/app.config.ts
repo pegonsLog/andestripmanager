@@ -4,6 +4,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideServiceWorker } from '@angular/service-worker';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
+import localePtExtra from '@angular/common/locales/extra/pt';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
@@ -18,8 +19,8 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 
-// Registrar localização pt-BR
-registerLocaleData(localePt, 'pt-BR');
+// Registrar localização pt-BR (inclui dados extras para formatos completos)
+registerLocaleData(localePt, 'pt-BR', localePtExtra);
 
 export const appConfig: ApplicationConfig = {
   providers: [

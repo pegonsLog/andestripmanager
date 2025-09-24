@@ -1,11 +1,11 @@
 <!-- Loading Spinner -->
-<div *ngIf="isLoading()" class="loading-container">
+<div *ngIf="isLoading()" class="loading-container mat-typography" style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;">
     <mat-spinner diameter="50"></mat-spinner>
     <p>Carregando dados da viagem...</p>
 </div>
 
 <!-- Conteúdo Principal -->
-<div *ngIf="!isLoading() && viagem()" class="viagem-detail-container">
+<div *ngIf="!isLoading() && viagem()" class="viagem-detail-container mat-typography" style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;">
 
     <!-- Cabeçalho da Viagem -->
     <mat-card class="header-card">
@@ -477,7 +477,7 @@
 </div>
 
 <!-- Estado de Erro -->
-<div *ngIf="!isLoading() && !viagem()" class="error-container">
+<div *ngIf="!isLoading() && !viagem()" class="error-container mat-typography" style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;">
     <mat-icon class="error-icon">error_outline</mat-icon>
     <h2>Viagem não encontrada</h2>
     <p>A viagem solicitada não foi encontrada ou você não tem permissão para visualizá-la.</p>

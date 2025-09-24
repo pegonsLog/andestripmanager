@@ -269,6 +269,30 @@
   }
 }
 
+/* Marca visual: logo nos estados vazios (Exportação) */
+.empty-state::before {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: url("/assets/logoAndesTripNoBackground.png") no-repeat center/contain;
+  margin: 0 auto 16px auto;
+  opacity: 0.9;
+}
+
+.empty-state .empty-icon,
+.empty-state mat-icon {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .empty-state::before {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+  }
+}
+
 // Responsividade
 @media (max-width: 768px) {
   .exportacao-container {

@@ -160,6 +160,7 @@
                 line-height: 1.4;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
+                line-clamp: 2; /* padrão */
                 -webkit-box-orient: vertical;
                 overflow: hidden;
               }
@@ -406,4 +407,28 @@
 button:focus-visible {
   outline: 2px solid var(--primary-color, #1976d2);
   outline-offset: 2px;
+}
+
+/* Marca visual: logo nos estados vazios (Paradas) */
+.empty-state .empty-content::before {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: url("/assets/logoAndesTripNoBackground.png") no-repeat center/contain;
+  margin: 0 auto 16px auto;
+  opacity: 0.9;
+}
+
+.empty-state .empty-content .empty-icon,
+.empty-state .empty-content mat-icon {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .empty-state .empty-content::before {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+  }
 }

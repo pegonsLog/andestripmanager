@@ -1,8 +1,7 @@
 .login-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  min-height: 80vh;
   padding: 20px;
   background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
 }
@@ -13,6 +12,12 @@
   padding: 0;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  // Centralizar cabeçalho do card (MatCardHeader)
+  .mat-mdc-card-header {
+    display: flex;
+    justify-content: center;
+  }
 }
 
 .header-content {
@@ -26,12 +31,19 @@
   align-items: center;
   margin-bottom: 10px;
 
-  .logo-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    color: #1976d2;
+  // Exibir o logo do app acima do título
+  &::before {
+    content: "";
+    display: block;
+    width: 128px;
+    height: 125px;
+    background: url("/assets/logoAndesTripNoBackground.png") no-repeat center/contain;
     margin-bottom: 8px;
+  }
+
+  .logo-icon {
+    // Oculta o ícone Material para usar o logo
+    display: none;
   }
 
   h1 {
@@ -125,6 +137,11 @@
 
   .logo h1 {
     font-size: 20px;
+  }
+
+  .logo::before {
+    width: 52px;
+    height: 52px;
   }
 
   .login-form {

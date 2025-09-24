@@ -1,4 +1,4 @@
-<div class="dashboard-container">
+<div class="dashboard-container mat-typography" style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;">
     <!-- Header com boas-vindas -->
     <div class="dashboard-header">
         <div class="welcome-section">
@@ -44,7 +44,7 @@
 
         <!-- Estatísticas -->
         <div class="statistics-section">
-            <h2 class="font-semibold section-title">Estatísticas</h2>
+            <h3 class="font-semibold section-title">Estatísticas</h3>
 
             <mat-grid-list cols="4" rowHeight="120px" gutterSize="16px" class="statistics-grid">
                 <mat-grid-tile>
@@ -112,7 +112,7 @@
         <!-- Viagens Recentes -->
         <div class="recent-trips-section">
             <div class="section-header">
-                <h2 class="font-semibold section-title">Viagens Recentes</h2>
+                <h3 class="font-semibold section-title">Viagens Recentes</h3>
                 <button mat-button color="primary" (click)="verTodasViagens()" class="font-medium">
                     Ver Todas
                     <mat-icon>arrow_forward</mat-icon>
@@ -148,7 +148,7 @@
         <!-- Todas as Viagens com Filtros -->
         <div class="all-trips-section" *ngIf="(viagens$ | async)?.length">
             <div class="section-header">
-                <h2 class="font-semibold section-title">Todas as Viagens</h2>
+                <h3 class="font-semibold section-title">Todas as Viagens</h3>
                 <div class="header-controls">
                     <button mat-stroked-button color="primary" (click)="limparFiltros()" *ngIf="hasFiltrosAtivos()"
                         class="font-medium">
@@ -264,7 +264,7 @@
 
         <!-- Ações Rápidas -->
         <div class="quick-actions-section">
-            <h2 class="font-semibold section-title">Ações Rápidas</h2>
+            <h3 class="font-semibold section-title">Ações Rápidas</h3>
 
             <div class="actions-grid">
                 <mat-card class="action-card" (click)="criarNovaViagem()">

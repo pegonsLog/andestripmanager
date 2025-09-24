@@ -28,7 +28,8 @@
     "prebuild": "npm run lint",
     "postbuild": "npm run analyze",
     "analyze": "npx webpack-bundle-analyzer dist/andestripmanager/stats.json",
-    "serve:prod": "npx http-server dist/andestripmanager -p 8080 -c-1"
+    "serve:prod": "npx http-server dist/andestripmanager -p 8080 -c-1",
+    "icons:generate": "node generate-icons.js"
   },
   "private": true,
   "dependencies": {
@@ -37,9 +38,9 @@
     "@angular/common": "18.2.14",
     "@angular/compiler": "18.2.14",
     "@angular/core": "18.2.14",
-    "@angular/localize": "18.2.14",
     "@angular/fire": "^18.0.1",
     "@angular/forms": "18.2.14",
+    "@angular/localize": "18.2.14",
     "@angular/material": "18.2.14",
     "@angular/platform-browser": "18.2.14",
     "@angular/platform-browser-dynamic": "18.2.14",
@@ -53,13 +54,13 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "18.2.20",
     "@angular-devkit/core": "^18.2.0",
-    "@angular/cli": "^18.2.0",
-    "@angular/compiler-cli": "18.2.14",
     "@angular-eslint/builder": "^18.0.0",
     "@angular-eslint/eslint-plugin": "^18.0.0",
     "@angular-eslint/eslint-plugin-template": "^18.0.0",
     "@angular-eslint/schematics": "^18.0.0",
     "@angular-eslint/template-parser": "^18.0.0",
+    "@angular/cli": "^18.2.0",
+    "@angular/compiler-cli": "18.2.14",
     "@cypress/schematic": "^4.1.1",
     "@types/jasmine": "~5.1.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
@@ -74,6 +75,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.4",
     "start-server-and-test": "^2.0.13",
     "typescript": "~5.4.0",
     "webpack-bundle-analyzer": "^4.10.0"

@@ -1,9 +1,8 @@
-<div class="custos-container">
+<div class="custos-container mat-typography" style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;">
 
     <!-- Header com estatísticas -->
     <div class="custos-header" *ngIf="obterEstatisticas() | async as stats">
         <div class="stats-grid">
-
             <div class="stat-item total">
                 <div class="stat-value">{{ formatarMoeda(stats.total) }}</div>
                 <div class="stat-label">Total Geral</div>
@@ -80,7 +79,7 @@
         <mat-tab label="Filtros">
             <ng-template matTabContent>
                 <div class="tab-content">
-                    <app-custos-filtros [viagemId]="viagemId" [custos]="custosFiltrados$ | async"
+                    <app-custos-filtros [viagemId]="viagemId" [custos]="(custosFiltrados$ | async) ?? []"
                         (filtrosAplicados)="onFiltrosAplicados($event)" (exportarSolicitado)="onExportacao($event)"
                         (uploadComprovante)="onUploadComprovante($event)">
                     </app-custos-filtros>

@@ -4,6 +4,36 @@
   margin: 0 auto;
   min-height: 100vh;
   background-color: #f5f5f5;
+  position: relative;
+  font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+
+  // Conteúdo acima da marca d'água
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  // Força Montserrat especificamente em títulos dentro do dashboard
+  h1,
+  h3 {
+    font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+    font-size: 22px !important;
+    font-weight: 400 !important;
+  }
+
+  // Marca d'água com o logo Andes Trip
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: min(40vw, 420px);
+    height: min(40vw, 420px);
+    background: url("/assets/logoAndesTripNoBackground.png") no-repeat center/contain;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 // Header Section
@@ -19,13 +49,13 @@
 
   .welcome-section {
     h1 {
-      font-size: 2rem;
       margin: 0 0 0.5rem 0;
       color: #333;
+      font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
     }
 
     .subtitle {
-      font-size: 1rem;
+      font-size: 0.9375rem;
       color: #666;
       margin: 0;
     }
@@ -68,9 +98,9 @@
     gap: 1rem;
 
     mat-icon {
-      font-size: 2rem;
-      width: 2rem;
-      height: 2rem;
+      font-size: 1.75rem;
+      width: 1.75rem;
+      height: 1.75rem;
     }
 
     p {
@@ -89,7 +119,7 @@
 
 // Section Titles
 .section-title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   margin: 0 0 1rem 0;
   color: #333;
 }
@@ -136,9 +166,9 @@
       width: 100%;
 
       .stat-icon {
-        font-size: 2rem;
-        width: 2rem;
-        height: 2rem;
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
 
         &.primary {
           color: #1976d2;
@@ -159,13 +189,13 @@
         flex-direction: column;
 
         .stat-number {
-          font-size: 1.5rem;
+          font-size: 1.375rem;
           line-height: 1.2;
           color: #333;
         }
 
         .stat-label {
-          font-size: 0.875rem;
+          font-size: 0.8125rem;
           color: #666;
           line-height: 1.2;
         }
@@ -191,13 +221,22 @@
     align-items: center;
     padding: 3rem 2rem;
     text-align: center;
+    position: relative;
+
+    // Logo acima do título no estado vazio
+    &::before {
+      content: "";
+      display: block;
+      width: 80px;
+      height: 80px;
+      background: url("/assets/logoAndesTripNoBackground.png") no-repeat center/contain;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
 
     .empty-icon {
-      font-size: 4rem;
-      width: 4rem;
-      height: 4rem;
-      color: #ccc;
-      margin-bottom: 1rem;
+      // Oculta o ícone Material para usar o logo do app
+      display: none;
     }
 
     h3 {
@@ -330,14 +369,15 @@
       padding: 2rem 1rem;
 
       .action-icon {
-        font-size: 3rem;
-        width: 3rem;
-        height: 3rem;
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
         color: #1976d2;
         margin-bottom: 1rem;
       }
 
       h3 {
+        font-size: 1.125rem;
         margin: 0 0 0.5rem 0;
         color: #333;
       }
@@ -345,7 +385,7 @@
       p {
         margin: 0;
         color: #666;
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
       }
     }
   }
@@ -361,6 +401,14 @@
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 1rem;
+    
+    &::after {
+      right: 8px;
+      bottom: 8px;
+      width: 45vw;
+      height: 45vw;
+      opacity: 0.05;
+    }
   }
 
   .dashboard-header {

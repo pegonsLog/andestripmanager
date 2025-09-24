@@ -1,113 +1,21 @@
-<div class="alertas-container" *ngIf="alertas.length > 0">
+<div class="alertas-container mat-typography" *ngIf="alertas.length > 0" style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;">
     <!-- Título -->
     <div class="alertas-header" *ngIf="showTitle">
         <h3>
             <mat-icon [style.color]="temAlertasAltos() ? '#F44336' : '#FF9800'">
                 {{ temAlertasAltos() ? 'warning' : 'info' }}
             </mat-icon>
-            Alertas Climáticos
+            Alertas climáticos
         </h3>
         <span class="resumo-alertas">{{ obterResumoAlertas() }}</span>
     </div>
-
-    <!-- Lista de Alertas - Expandível -->
-    <mat-expansion-panel *ngIf="expandable" class="alertas-expansion">
-        <mat-expansion-panel-header>
-            <mat-panel-title>
-                <mat-icon>{{ temAlertasAltos() ? 'warning' : 'info' }}</mat-icon>
-                {{ obterResumoAlertas() }}
-            </mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <div class="alertas-list">
-            <div *ngFor="let alerta of alertas" class="alerta-item" [ngClass]="obterClasseSeveridade(alerta.severidade)"
-                [class.alerta-inativo]="!alertaAtivo(alerta)">
-
-                <div class="alerta-header">
-                    <mat-icon [style.color]="obterCorAlerta(alerta.severidade)">
-                        {{ obterIconeAlerta(alerta.tipo) }}
-                    </mat-icon>
-                    <div class="alerta-info">
-                        <h4>{{ alerta.titulo }}</h4>
-                        <span class="alerta-severidade">
-                            Severidade: {{ obterTextoSeveridade(alerta.severidade) }}
-                        </span>
-                    </div>
-                    <mat-chip [style.background-color]="obterCorAlerta(alerta.severidade)" [style.color]="'white'">
-                        {{ obterTextoSeveridade(alerta.severidade) }}
-                    </mat-chip>
-                </div>
-
-                <div class="alerta-content">
-                    <p>{{ alerta.descricao }}</p>
-
-                    <div class="alerta-timing">
-                        <small>
-                            <mat-icon>schedule</mat-icon>
-                            Início: {{ formatarDataAlerta(alerta.inicio) }}
-                        </small>
-                        <small *ngIf="alerta.fim">
-                            <mat-icon>event</mat-icon>
-                            Fim: {{ formatarDataAlerta(alerta.fim) }}
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </mat-expansion-panel>
-
-    <!-- Lista de Alertas - Simples -->
-    <div *ngIf="!expandable" class="alertas-list">
-        <div *ngFor="let alerta of alertas" class="alerta-item" [ngClass]="obterClasseSeveridade(alerta.severidade)"
-            [class.alerta-inativo]="!alertaAtivo(alerta)">
-
-            <div class="alerta-header">
-                <mat-icon [style.color]="obterCorAlerta(alerta.severidade)">
-                    {{ obterIconeAlerta(alerta.tipo) }}
-                </mat-icon>
-                <div class="alerta-info">
-                    <h4>{{ alerta.titulo }}</h4>
-                    <span class="alerta-severidade">
-                        Severidade: {{ obterTextoSeveridade(alerta.severidade) }}
-                    </span>
-                </div>
-                <mat-chip [style.background-color]="obterCorAlerta(alerta.severidade)" [style.color]="'white'">
-                    {{ obterTextoSeveridade(alerta.severidade) }}
-                </mat-chip>
-            </div>
-
-            <div class="alerta-content">
-                <p>{{ alerta.descricao }}</p>
-
-                <div class="alerta-timing">
-                    <small>
-                        <mat-icon>schedule</mat-icon>
-                        Início: {{ formatarDataAlerta(alerta.inicio) }}
-                    </small>
-                    <small *ngIf="alerta.fim">
-                        <mat-icon>event</mat-icon>
-                        Fim: {{ formatarDataAlerta(alerta.fim) }}
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chips de Resumo Rápido -->
-    <div class="alertas-chips" *ngIf="!expandable && alertas.length > 3">
-        <mat-chip-listbox>
-            <mat-chip-option *ngFor="let severidade of ['alta', 'media', 'baixa']"
-                [style.background-color]="obterCorAlerta(severidade as any)" [style.color]="'white'"
-                [disabled]="obterAlertasPorSeveridade(severidade as any).length === 0">
-                {{ obterAlertasPorSeveridade(severidade as any).length }}
-                {{ obterTextoSeveridade(severidade as any) }}
-            </mat-chip-option>
+{{ ... }}
         </mat-chip-listbox>
     </div>
 </div>
 
 <!-- Estado vazio -->
-<div class="empty-state" *ngIf="alertas.length === 0">
+<div class="empty-state mat-typography" *ngIf="alertas.length === 0" style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;">
     <mat-icon>check_circle</mat-icon>
     <p>Nenhum alerta climático no momento</p>
     <small>As condições climáticas estão favoráveis para a viagem</small>

@@ -319,3 +319,27 @@ button {
     transform: translateY(0);
   }
 }
+
+/* Marca visual: logo nos estados vazios (Custos) */
+.empty-state::before {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: url("assets/logoAndesTripNoBackground.png") no-repeat center/contain;
+  margin: 0 auto 24px auto;
+  opacity: 0.9;
+}
+
+.empty-state .empty-icon,
+.empty-state mat-icon {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .empty-state::before {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 16px;
+  }
+}
