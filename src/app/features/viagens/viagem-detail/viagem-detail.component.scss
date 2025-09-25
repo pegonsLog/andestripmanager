@@ -4,6 +4,13 @@ $accent: #ff4081;
 $warn: #f44336;
 $success: #4caf50;
 
+/* Força Montserrat em todo o componente Viagem Detail */
+:host,
+.viagem-detail-container {
+  font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif !important;
+  --mdc-typography-font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+}
+
 .viagem-detail-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -186,9 +193,10 @@ $success: #4caf50;
 .stats-section {
   h3 {
     margin: 0 0 1rem 0;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.87);
+    font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
   }
 
   .stats-grid {
@@ -248,9 +256,10 @@ $success: #4caf50;
 .observacoes-section {
   h3 {
     margin: 0 0 1rem 0;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.87);
+    font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
   }
 
   .observacoes-content {
@@ -270,9 +279,10 @@ $success: #4caf50;
 .quick-actions {
   h3 {
     margin: 0 0 1rem 0;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.87);
+    font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
   }
 
   .actions-grid {
@@ -321,9 +331,10 @@ $success: #4caf50;
 
   h3 {
     margin: 0 0 1rem 0;
-    font-size: 24px;
+    font-size: 16px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.6);
+    font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
   }
 
   p {

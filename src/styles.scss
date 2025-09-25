@@ -13,7 +13,10 @@ $montserrat-font-family: 'Montserrat, "Helvetica Neue", Arial, sans-serif';
 // Inicializa tokens base do Material
 @include mat.core();
 
-// Cria um tema com tipografia customizada (API v18)
+// Removido: paletas M2 (define-palette) — API descontinuada no Angular Material v18.
+// As cores são controladas via CSS custom properties abaixo (ex.: --brand-primary).
+
+// Cria um tema com cores e tipografia customizadas (API v18/M3)
 $app-theme: mat.define-theme((
   typography: (
     brand-family: $montserrat-font-family,
@@ -35,6 +38,14 @@ $app-theme: mat.define-theme((
 :root {
   // Força os componentes MDC/Material a herdarem Montserrat
   --mdc-typography-font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+  /* Andes Trip - Variáveis globais de marca */
+  --brand-primary: rgb(1, 57, 98); /* Azul escuro (primary) */
+  --brand-accent: rgb(140, 178, 79); /* Verde Andes (accent utilitário) */
+  --brand-andes: rgb(140, 178, 79);
+  --brand-laranja: rgb(243, 153, 44);
+  --brand-verde-escuro: rgb(68, 98, 62);
+  --brand-verde-claro: rgb(154, 190, 80);
+  --brand-warn: rgb(243, 153, 44); /* Laranja (warn) */
 }
 
 // Garante as CSS vars de tipografia também nos contêineres do Material
@@ -238,15 +249,265 @@ label,
   font-weight: 700;
 }
 
-// Customizações para o tema brasileiro
-.primary-bg {
-  background-color: #1976d2;
+  // Customizações para o tema brasileiro
+  .primary-bg {
+    background-color: var(--brand-primary);
+    color: #ffffff !important; // garante contraste em texto direto
+  }
+
+  // Garante contraste (texto branco) em elementos internos quando o fundo é primário
+  .primary-bg .mat-mdc-card-title,
+  .primary-bg .mat-mdc-card-subtitle,
+  .primary-bg .mat-mdc-card-content,
+  .primary-bg .mat-mdc-card-footer,
+  .primary-bg .mat-mdc-list-item,
+  .primary-bg .mat-mdc-menu-item,
+  .primary-bg .mat-mdc-chip,
+  .primary-bg .mat-mdc-tab .mdc-tab__text-label,
+  .primary-bg .mat-mdc-paginator,
+  .primary-bg .mat-mdc-table,
+  .primary-bg .mat-mdc-tooltip,
+  .primary-bg .mat-icon,
+  .primary-bg a,
+  .primary-bg p,
+  .primary-bg h1,
+  .primary-bg h2,
+  .primary-bg h3,
+  .primary-bg h4,
+  .primary-bg h5,
+  .primary-bg h6,
+  .primary-bg span,
+  .primary-bg label,
+  .primary-bg .mdc-button__label {
+    color: #ffffff !important;
+  }
+
+  // Exceções: em containers primary-bg, botões primários com fundo claro
+  // devem manter texto/ícone em azul marinho no estado normal
+  .primary-bg .mat-mdc-stroked-button.mat-primary,
+  .primary-bg .mat-mdc-button.mat-primary,
+  .primary-bg .mat-mdc-icon-button.mat-primary {
+    color: var(--brand-primary) !important;
+
+    .mdc-button__label,
+    .mat-icon {
+      color: var(--brand-primary) !important;
+      fill: var(--brand-primary) !important;
+    }
+  }
+
+  // Utilitário para apenas cor do texto, útil em fundos primários definidos manualmente
+  .on-primary {
+    color: #ffffff !important;
+  }
+
+  // Utilitário: ao passar o mouse, aplica fundo primário e garante texto branco
+  .hover-primary {
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover,
+    &:active,
+    &:focus-visible {
+      background-color: var(--brand-primary) !important;
+      color: #ffffff !important;
+    }
+
+    // Garante contraste também para elementos internos comuns
+    &:hover .mat-icon,
+    &:hover .mdc-button__label,
+    &:hover a,
+    &:hover p,
+    &:hover h1,
+    &:hover h2,
+    &:hover h3,
+    &:hover h4,
+    &:hover h5,
+    &:hover h6,
+    &:hover span,
+    &:hover label {
+      color: #ffffff !important;
+    }
+  }
+
+.accent-bg {
+  background-color: var(--brand-accent);
   color: white;
 }
 
-.accent-bg {
-  background-color: #4caf50;
-  color: white;
+/* Angular Material (MDC) - Overrides globais para color="primary" */
+.mat-primary { color: var(--brand-primary) !important; }
+
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-color: var(--brand-primary);
+  --mdc-filled-button-label-text-color: #ffffff;
+  background-color: var(--brand-primary) !important; // garante fundo azul em qualquer contexto
+  color: #ffffff;
+  // Garante contraste de rótulo e ícone
+  .mdc-button__label,
+  .mat-icon {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+
+  // Estado desabilitado: fundo branco e texto/ícone AZUL MARINHO (contraste adequado)
+  &.mdc-button--disabled,
+  &[disabled] {
+    --mdc-filled-button-disabled-container-color: #ffffff;
+    --mdc-filled-button-disabled-label-text-color: var(--brand-primary);
+    background-color: #ffffff !important;
+    color: var(--brand-primary) !important;
+    opacity: 1 !important; // remove dimming padrão para manter contraste
+
+    .mdc-button__label,
+    .mat-icon {
+      color: var(--brand-primary) !important;
+      fill: var(--brand-primary) !important;
+    }
+    .mdc-button__label {
+      opacity: 1 !important; // evita texto esmaecido no desabilitado
+    }
+  }
+}
+
+/* Botões sem color (fundo branco/transparente) — padrão global do app */
+/* Raised / Unelevated (sem color) */
+.mat-mdc-raised-button:not(.mat-primary):not(.mat-accent):not(.mat-warn),
+.mat-mdc-unelevated-button:not(.mat-primary):not(.mat-accent):not(.mat-warn) {
+  background-color: #ffffff;
+  color: var(--brand-primary);
+  .mdc-button__label, .mat-icon { color: var(--brand-primary); fill: var(--brand-primary); }
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary); color: #ffffff; }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed); color: #ffffff; }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon { color: #ffffff; fill: #ffffff; }
+}
+
+/* Stroked / Outlined (sem color) */
+.mat-mdc-stroked-button:not(.mat-primary):not(.mat-accent):not(.mat-warn) {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  .mdc-button__label, .mat-icon { color: var(--brand-primary); fill: var(--brand-primary); }
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary); color: #ffffff; }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed); color: #ffffff; }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon { color: #ffffff; fill: #ffffff; }
+}
+
+/* Text (sem color) */
+.mat-mdc-button:not(.mat-primary):not(.mat-accent):not(.mat-warn) {
+  color: var(--brand-primary);
+  .mdc-button__label, .mat-icon { color: var(--brand-primary); fill: var(--brand-primary); }
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary); color: #ffffff; }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed); color: #ffffff; }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon { color: #ffffff; fill: #ffffff; }
+}
+
+/* Icon Button (sem color) */
+.mat-mdc-icon-button:not(.mat-primary):not(.mat-accent):not(.mat-warn) {
+  color: var(--brand-primary);
+  .mat-icon { color: var(--brand-primary); fill: var(--brand-primary); }
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary); }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed); }
+  &:hover .mat-icon,
+  &:active .mat-icon { color: #ffffff; fill: #ffffff; }
+}
+
+// Reforço de especificidade para raised/unelevated primário DESABILITADO (texto/ícones azuis sobre fundo branco)
+.mat-mdc-raised-button.mat-primary.mdc-button--disabled,
+.mat-mdc-raised-button.mat-primary[disabled],
+.mat-mdc-unelevated-button.mat-primary.mdc-button--disabled,
+.mat-mdc-unelevated-button.mat-primary[disabled] {
+  color: var(--brand-primary) !important;
+}
+.mat-mdc-raised-button.mat-primary.mdc-button--disabled .mdc-button__label,
+.mat-mdc-raised-button.mat-primary[disabled] .mdc-button__label,
+.mat-mdc-unelevated-button.mat-primary.mdc-button--disabled .mdc-button__label,
+.mat-mdc-unelevated-button.mat-primary[disabled] .mdc-button__label {
+  color: var(--brand-primary) !important;
+  opacity: 1 !important;
+}
+.mat-mdc-raised-button.mat-primary.mdc-button--disabled .mat-icon,
+.mat-mdc-raised-button.mat-primary[disabled] .mat-icon,
+.mat-mdc-unelevated-button.mat-primary.mdc-button--disabled .mat-icon,
+.mat-mdc-unelevated-button.mat-primary[disabled] .mat-icon {
+  color: var(--brand-primary) !important;
+  fill: var(--brand-primary) !important;
+}
+
+.mat-mdc-stroked-button.mat-primary {
+  --mdc-outlined-button-outline-color: var(--brand-primary);
+  --mdc-outlined-button-label-text-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.mat-mdc-button.mat-primary {
+  --mdc-text-button-label-text-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+// FABs com cor primária devem ter texto/ícone brancos
+.mat-mdc-fab.mat-primary,
+.mat-mdc-mini-fab.mat-primary {
+  background-color: var(--brand-primary);
+  color: #ffffff !important;
+  .mat-icon {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+}
+
+.mat-mdc-form-field.mat-primary {
+  --mdc-outlined-text-field-focus-outline-color: var(--brand-primary);
+  --mdc-outlined-text-field-focus-label-text-color: var(--brand-primary);
+  --mdc-filled-text-field-focus-active-indicator-color: var(--brand-primary);
+  --mdc-filled-text-field-caret-color: var(--brand-primary);
+}
+
+.mat-mdc-checkbox.mat-primary {
+  --mdc-checkbox-selected-icon-color: var(--brand-primary);
+  --mdc-checkbox-selected-checkmark-color: #ffffff;
+  --mdc-checkbox-selected-focus-icon-color: var(--brand-primary);
+  --mdc-checkbox-selected-hover-icon-color: var(--brand-primary);
+  --mdc-checkbox-selected-pressed-icon-color: var(--brand-primary);
+}
+
+.mat-mdc-radio-button.mat-primary {
+  --mdc-radio-selected-icon-color: var(--brand-primary);
+  --mdc-radio-selected-hover-icon-color: var(--brand-primary);
+  --mdc-radio-selected-pressed-icon-color: var(--brand-primary);
+  --mdc-radio-selected-focus-icon-color: var(--brand-primary);
+}
+
+.mat-mdc-slide-toggle.mat-primary {
+  --mdc-switch-selected-track-color: var(--brand-primary);
+  --mdc-switch-selected-handle-color: var(--brand-primary);
+  --mdc-switch-selected-hover-handle-color: var(--brand-primary);
+  --mdc-switch-selected-focus-handle-color: var(--brand-primary);
+  --mdc-switch-selected-pressed-handle-color: var(--brand-primary);
+}
+
+.mat-mdc-progress-spinner.mat-primary,
+.mat-mdc-progress-bar.mat-primary {
+  --mdc-circular-progress-active-indicator-color: var(--brand-primary);
+  --mdc-linear-progress-active-indicator-color: var(--brand-primary);
+}
+
+.mat-mdc-tab-group.mat-primary,
+.mat-mdc-tab-nav-bar.mat-primary {
+  --mdc-tab-indicator-active-indicator-color: var(--brand-primary);
+}
+.mat-mdc-tab-group.mat-primary .mdc-tab--active .mdc-tab__text-label,
+.mat-mdc-tab-nav-bar.mat-primary .mdc-tab--active .mdc-tab__text-label {
+  color: var(--brand-primary);
 }
 
 // Estilos para snackbar
@@ -447,4 +708,406 @@ label,
     height: 60px;
     margin-bottom: 12px;
   }
+}
+
+/* Angular Material (MDC) - Overrides globais para color="accent" (Verde Andes) */
+.mat-accent { color: var(--brand-accent) !important; }
+
+.mat-mdc-raised-button.mat-accent,
+.mat-mdc-unelevated-button.mat-accent {
+  --mdc-filled-button-container-color: var(--brand-accent);
+  --mdc-filled-button-label-text-color: #ffffff;
+  background-color: var(--brand-accent);
+  color: #ffffff;
+}
+
+.mat-mdc-stroked-button.mat-accent {
+  --mdc-outlined-button-outline-color: var(--brand-accent);
+  --mdc-outlined-button-label-text-color: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: var(--brand-accent);
+}
+
+.mat-mdc-button.mat-accent {
+  --mdc-text-button-label-text-color: var(--brand-accent);
+  color: var(--brand-accent);
+}
+
+.mat-mdc-checkbox.mat-accent {
+  --mdc-checkbox-selected-icon-color: var(--brand-accent);
+  --mdc-checkbox-selected-checkmark-color: #ffffff;
+  --mdc-checkbox-selected-focus-icon-color: var(--brand-accent);
+  --mdc-checkbox-selected-hover-icon-color: var(--brand-accent);
+  --mdc-checkbox-selected-pressed-icon-color: var(--brand-accent);
+}
+
+.mat-mdc-radio-button.mat-accent {
+  --mdc-radio-selected-icon-color: var(--brand-accent);
+  --mdc-radio-selected-hover-icon-color: var(--brand-accent);
+  --mdc-radio-selected-pressed-icon-color: var(--brand-accent);
+  --mdc-radio-selected-focus-icon-color: var(--brand-accent);
+}
+
+.mat-mdc-slide-toggle.mat-accent {
+  --mdc-switch-selected-track-color: var(--brand-accent);
+  --mdc-switch-selected-handle-color: var(--brand-accent);
+  --mdc-switch-selected-hover-handle-color: var(--brand-accent);
+  --mdc-switch-selected-focus-handle-color: var(--brand-accent);
+  --mdc-switch-selected-pressed-handle-color: var(--brand-accent);
+}
+
+.mat-mdc-progress-spinner.mat-accent,
+.mat-mdc-progress-bar.mat-accent {
+  --mdc-circular-progress-active-indicator-color: var(--brand-accent);
+  --mdc-linear-progress-active-indicator-color: var(--brand-accent);
+}
+
+.mat-mdc-tab-group.mat-accent,
+.mat-mdc-tab-nav-bar.mat-accent {
+  --mdc-tab-indicator-active-indicator-color: var(--brand-accent);
+}
+.mat-mdc-tab-group.mat-accent .mdc-tab--active .mdc-tab__text-label,
+.mat-mdc-tab-nav-bar.mat-accent .mdc-tab--active .mdc-tab__text-label {
+  color: var(--brand-accent);
+}
+
+/* Angular Material (MDC) - Overrides globais para color="warn" (Laranja) */
+.mat-warn { color: var(--brand-warn) !important; }
+
+.mat-mdc-raised-button.mat-warn,
+.mat-mdc-unelevated-button.mat-warn {
+  --mdc-filled-button-container-color: var(--brand-warn);
+  --mdc-filled-button-label-text-color: #ffffff;
+  background-color: var(--brand-warn);
+  color: #ffffff;
+}
+
+.mat-mdc-stroked-button.mat-warn {
+  --mdc-outlined-button-outline-color: var(--brand-warn);
+  --mdc-outlined-button-label-text-color: var(--brand-warn);
+  border-color: var(--brand-warn);
+  color: var(--brand-warn);
+}
+
+.mat-mdc-button.mat-warn {
+  --mdc-text-button-label-text-color: var(--brand-warn);
+  color: var(--brand-warn);
+}
+
+.mat-mdc-checkbox.mat-warn {
+  --mdc-checkbox-selected-icon-color: var(--brand-warn);
+  --mdc-checkbox-selected-checkmark-color: #ffffff;
+  --mdc-checkbox-selected-focus-icon-color: var(--brand-warn);
+  --mdc-checkbox-selected-hover-icon-color: var(--brand-warn);
+  --mdc-checkbox-selected-pressed-icon-color: var(--brand-warn);
+}
+
+.mat-mdc-radio-button.mat-warn {
+  --mdc-radio-selected-icon-color: var(--brand-warn);
+  --mdc-radio-selected-hover-icon-color: var(--brand-warn);
+  --mdc-radio-selected-pressed-icon-color: var(--brand-warn);
+  --mdc-radio-selected-focus-icon-color: var(--brand-warn);
+}
+
+.mat-mdc-slide-toggle.mat-warn {
+  --mdc-switch-selected-track-color: var(--brand-warn);
+  --mdc-switch-selected-handle-color: var(--brand-warn);
+  --mdc-switch-selected-hover-handle-color: var(--brand-warn);
+  --mdc-switch-selected-focus-handle-color: var(--brand-warn);
+  --mdc-switch-selected-pressed-handle-color: var(--brand-warn);
+}
+
+.mat-mdc-progress-spinner.mat-warn,
+.mat-mdc-progress-bar.mat-warn {
+  --mdc-circular-progress-active-indicator-color: var(--brand-warn);
+  --mdc-linear-progress-active-indicator-color: var(--brand-warn);
+}
+
+.mat-mdc-tab-group.mat-warn,
+.mat-mdc-tab-nav-bar.mat-warn {
+  --mdc-tab-indicator-active-indicator-color: var(--brand-warn);
+}
+.mat-mdc-tab-group.mat-warn .mdc-tab--active .mdc-tab__text-label,
+.mat-mdc-tab-nav-bar.mat-warn .mdc-tab--active .mdc-tab__text-label {
+  color: var(--brand-warn);
+}
+
+/* Andes Trip - estados de interação (hover/focus/pressed) */
+:root {
+  /* Primary (Azul Escuro) */
+  --brand-primary-hover: rgb(0, 49, 84);   /* ~8-12% mais escuro */
+  --brand-primary-focus: rgb(0, 49, 84);
+  --brand-primary-pressed: rgb(0, 41, 71);
+
+  /* Accent (Verde Andes) */
+  --brand-accent-hover: rgb(123, 162, 68);
+  --brand-accent-focus: rgb(123, 162, 68);
+  --brand-accent-pressed: rgb(107, 143, 59);
+
+  /* Warn (Laranja) */
+  --brand-warn-hover: rgb(220, 134, 31);
+  --brand-warn-focus: rgb(220, 134, 31);
+  --brand-warn-pressed: rgb(201, 119, 22);
+
+  /* Opacidades de overlay para botões outlined/text */
+  --state-hover-overlay: 0.08;
+  --state-focus-overlay: 0.12;
+  --state-pressed-overlay: 0.12;
+}
+
+/***** Primary *****/
+/* Filled/Elevated */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  // Transições globais para botões elevados primários
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, color 0.2s ease;
+  &:hover:not(.mdc-button--disabled) {
+    background-color: var(--brand-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(1, 57, 98, 0.25);
+  }
+  &:active:not(.mdc-button--disabled) {
+    background-color: var(--brand-primary-pressed);
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(1, 57, 98, 0.20);
+  }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(1, 57, 98, 0.24); }
+  // Mantém texto e ícones brancos em todos os estados
+  &,
+  &:hover:not(.mdc-button--disabled),
+  &:active:not(.mdc-button--disabled),
+  &:focus-visible {
+    color: #ffffff !important;
+  }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:focus-visible .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon,
+  &:focus-visible .mat-icon {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+}
+
+/* FAB Primary - estados de interação */
+.mat-mdc-fab.mat-primary,
+.mat-mdc-mini-fab.mat-primary {
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary-hover); }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(1, 57, 98, 0.24); }
+  &,
+  &:hover:not(.mdc-button--disabled),
+  &:active:not(.mdc-button--disabled),
+  &:focus-visible {
+    color: #ffffff !important;
+  }
+  .mat-icon { color: #ffffff !important; fill: #ffffff !important; }
+}
+/* Outlined */
+.mat-mdc-stroked-button.mat-primary {
+  // Estado normal (fundo claro/transparente): texto/ícone AZUL MARINHO
+  &,
+  .mdc-button__label,
+  .mat-icon {
+    color: var(--brand-primary) !important;
+    fill: var(--brand-primary) !important;
+  }
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary); }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(1, 57, 98, 0.24); }
+  // Força texto/ícones brancos nos estados de interação para melhor contraste
+  &:hover:not(.mdc-button--disabled),
+  &:active:not(.mdc-button--disabled),
+  &:focus-visible {
+    color: #ffffff !important;
+  }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:focus-visible .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon,
+  &:focus-visible .mat-icon {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+}
+/* Text */
+.mat-mdc-button.mat-primary {
+  // Estado normal (fundo claro/transparente): texto/ícone AZUL MARINHO
+  &,
+  .mdc-button__label,
+  .mat-icon {
+    color: var(--brand-primary) !important;
+    fill: var(--brand-primary) !important;
+  }
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary); }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(1, 57, 98, 0.24); }
+  // Força texto/ícones brancos nos estados de interação para melhor contraste
+  &:hover:not(.mdc-button--disabled),
+  &:active:not(.mdc-button--disabled),
+  &:focus-visible {
+    color: #ffffff !important;
+  }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:focus-visible .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon,
+  &:focus-visible .mat-icon {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+}
+
+// Icon Button (primary) - mantém branco no hover/active/focus
+.mat-mdc-icon-button.mat-primary {
+  // Estado normal: ícone AZUL MARINHO
+  &,
+  .mat-icon {
+    color: var(--brand-primary) !important;
+    fill: var(--brand-primary) !important;
+  }
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary); }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(1, 57, 98, 0.24); }
+  &:hover:not(.mdc-button--disabled),
+  &:active:not(.mdc-button--disabled),
+  &:focus-visible {
+    color: #ffffff !important;
+  }
+  &:hover .mat-icon,
+  &:active .mat-icon,
+  &:focus-visible .mat-icon {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+}
+
+/***** Accent *****/
+.mat-mdc-raised-button.mat-accent,
+.mat-mdc-unelevated-button.mat-accent {
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-accent-hover); }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-accent-pressed); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(140, 178, 79, 0.24); }
+}
+.mat-mdc-stroked-button.mat-accent {
+  &:hover:not(.mdc-button--disabled) { background-color: rgba(140, 178, 79, var(--state-hover-overlay)); }
+  &:active:not(.mdc-button--disabled) { background-color: rgba(140, 178, 79, var(--state-pressed-overlay)); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(140, 178, 79, 0.24); }
+}
+.mat-mdc-button.mat-accent {
+  &:hover:not(.mdc-button--disabled) { background-color: rgba(140, 178, 79, var(--state-hover-overlay)); }
+  &:active:not(.mdc-button--disabled) { background-color: rgba(140, 178, 79, var(--state-pressed-overlay)); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(140, 178, 79, 0.24); }
+}
+
+/***** Warn *****/
+.mat-mdc-raised-button.mat-warn,
+.mat-mdc-unelevated-button.mat-warn {
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-warn-hover); }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-warn-pressed); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(243, 153, 44, 0.24); }
+}
+.mat-mdc-stroked-button.mat-warn {
+  &:hover:not(.mdc-button--disabled) { background-color: rgba(243, 153, 44, var(--state-hover-overlay)); }
+  &:active:not(.mdc-button--disabled) { background-color: rgba(243, 153, 44, var(--state-pressed-overlay)); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(243, 153, 44, 0.24); }
+}
+.mat-mdc-button.mat-warn {
+  &:hover:not(.mdc-button--disabled) { background-color: rgba(243, 153, 44, var(--state-hover-overlay)); }
+  &:active:not(.mdc-button--disabled) { background-color: rgba(243, 153, 44, var(--state-pressed-overlay)); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(243, 153, 44, 0.24); }
+}
+
+/* Utilitários globais: botões com texto colorido e fundo branco */
+.btn-text-primary,
+.btn-text-accent,
+.btn-text-warn {
+  // Estado base: fundo branco/transparente e texto/ícone na cor da paleta
+  background-color: #ffffff;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, color 0.2s ease;
+
+  &.mat-mdc-stroked-button {
+    border-width: 1px;
+  }
+
+  .mdc-button__label,
+  .mat-icon { color: currentColor; fill: currentColor; }
+}
+
+// Primary (Azul marinho)
+.btn-text-primary {
+  color: var(--brand-primary) !important;
+  .mdc-button__label, .mat-icon { color: var(--brand-primary) !important; fill: var(--brand-primary) !important; }
+
+  &.mat-mdc-stroked-button { border-color: var(--brand-primary) !important; }
+
+  &:hover:not(.mdc-button--disabled) {
+    background-color: var(--brand-primary) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(1, 57, 98, 0.25);
+  }
+  &:active:not(.mdc-button--disabled) {
+    background-color: var(--brand-primary-pressed) !important;
+    color: #ffffff !important;
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(1, 57, 98, 0.20);
+  }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon { color: #ffffff !important; fill: #ffffff !important; }
+}
+
+// Accent (Verde Andes)
+.btn-text-accent {
+  color: var(--brand-accent) !important;
+  .mdc-button__label, .mat-icon { color: var(--brand-accent) !important; fill: var(--brand-accent) !important; }
+
+  &.mat-mdc-stroked-button { border-color: var(--brand-accent) !important; }
+
+  &:hover:not(.mdc-button--disabled) {
+    background-color: var(--brand-accent) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(140, 178, 79, 0.25);
+  }
+  &:active:not(.mdc-button--disabled) {
+    background-color: var(--brand-accent-pressed) !important;
+    color: #ffffff !important;
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(140, 178, 79, 0.20);
+  }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon { color: #ffffff !important; fill: #ffffff !important; }
+}
+
+// Warn (Laranja)
+.btn-text-warn {
+  color: var(--brand-warn) !important;
+  .mdc-button__label, .mat-icon { color: var(--brand-warn) !important; fill: var(--brand-warn) !important; }
+
+  &.mat-mdc-stroked-button { border-color: var(--brand-warn) !important; }
+
+  &:hover:not(.mdc-button--disabled) {
+    background-color: var(--brand-warn) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(243, 153, 44, 0.25);
+  }
+  &:active:not(.mdc-button--disabled) {
+    background-color: var(--brand-warn-pressed) !important;
+    color: #ffffff !important;
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(243, 153, 44, 0.20);
+  }
+  &:hover .mdc-button__label,
+  &:active .mdc-button__label,
+  &:hover .mat-icon,
+  &:active .mat-icon { color: #ffffff !important; fill: #ffffff !important; }
 }

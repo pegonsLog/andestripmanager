@@ -3,7 +3,7 @@
   justify-content: center;
   min-height: 80vh;
   padding: 20px;
-  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+  background: linear-gradient(135deg, #1976d2 0%, #333 100%);
 }
 
 .login-card {
@@ -146,5 +146,26 @@
 
   .login-form {
     padding: 16px;
+  }
+}
+
+/* Regras específicas para o botão de login (raised primary) */
+.login-button.mat-mdc-raised-button[color="primary"] {
+  background-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+  .mdc-button__label,
+  .mat-icon { color: #ffffff !important; fill: #ffffff !important; }
+
+  &:hover:not(.mdc-button--disabled) { background-color: var(--brand-primary-hover) !important; }
+  &:active:not(.mdc-button--disabled) { background-color: var(--brand-primary-pressed) !important; }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(1, 57, 98, 0.24); }
+
+  &.mdc-button--disabled,
+  &[disabled] {
+    background-color: #ffffff !important;
+    color: var(--brand-primary) !important;
+    opacity: 1 !important;
+    .mdc-button__label,
+    .mat-icon { color: var(--brand-primary) !important; fill: var(--brand-primary) !important; }
   }
 }

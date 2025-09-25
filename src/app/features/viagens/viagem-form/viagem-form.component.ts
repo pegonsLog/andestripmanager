@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Subject, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 // Angular Material
@@ -52,7 +52,9 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
     private fb = inject(FormBuilder);
     private viagensService = inject(ViagensService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
     private snackBar = inject(MatSnackBar);
+    private cdr = inject(ChangeDetectorRef);
     private destroy$ = new Subject<void>();
 
     viagemForm!: FormGroup;
@@ -72,10 +74,17 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
         this.initializeForm();
         this.setupFormValidation();
 
-        if (this.viagemId || this.viagem) {
-            this.isEditMode = true;
-            this.loadViagem();
-        }
+        // Observa alterações de parâmetros da rota
+        this.route.paramMap
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(params => {
+                const routeId = params.get('id');
+                this.viagemId = routeId ?? this.viagemId;
+                this.isEditMode = !!(this.viagemId || this.viagem);
+                if (this.isEditMode) {
+                    this.loadViagem();
+                }
+            });
     }
 
     ngOnDestroy(): void {
@@ -125,36 +134,36 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
      */
     private async loadViagem(): Promise<void> {
         if (this.viagem) {
+            console.log('[ViagemForm] Populando formulário a partir de @Input viagem');
             this.populateForm(this.viagem);
             return;
         }
 
-        if (!this.viagemId) return;
+        if (!this.viagemId) {
+            console.warn('[ViagemForm] viagemId ausente na rota. Interrompendo carga.');
+            this.isLoading = false;
+            this.cdr.markForCheck();
+            return;
+        }
 
         this.isLoading = true;
+        this.cdr.markForCheck();
         try {
-            this.viagensService.recuperarPorId(this.viagemId)
-                .pipe(takeUntil(this.destroy$))
-                .subscribe({
-                    next: (viagem) => {
-                        if (viagem) {
-                            this.populateForm(viagem);
-                        } else {
-                            this.showError('Viagem não encontrada');
-                            this.router.navigate(['/viagens']);
-                        }
-                        this.isLoading = false;
-                    },
-                    error: (error) => {
-                        console.error('Erro ao carregar viagem:', error);
-                        this.showError('Erro ao carregar dados da viagem');
-                        this.isLoading = false;
-                    }
-                });
+            console.log('[ViagemForm] Carregando viagem por id:', this.viagemId);
+            const viagem = await firstValueFrom(this.viagensService.recuperarPorId(this.viagemId));
+            if (viagem) {
+                console.log('[ViagemForm] Viagem carregada com sucesso:', viagem.id);
+                this.populateForm(viagem);
+            } else {
+                this.showError('Viagem não encontrada');
+                this.router.navigate(['/viagens']);
+            }
         } catch (error) {
             console.error('Erro ao carregar viagem:', error);
             this.showError('Erro ao carregar dados da viagem');
+        } finally {
             this.isLoading = false;
+            this.cdr.markForCheck();
         }
     }
 
@@ -162,11 +171,26 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
      * Popula o formulário com dados da viagem
      */
     private populateForm(viagem: Viagem): void {
+        const toDate = (val: any): Date | null => {
+            if (!val) return null;
+            if (val instanceof Date) return val;
+            // Firestore Timestamp
+            if (val?.toDate) {
+                try { return val.toDate(); } catch {}
+            }
+            // String ISO ou yyyy-MM-dd
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? null : d;
+        };
+
+        const dataInicio = toDate(viagem.dataInicio) ?? viagem.dataInicio;
+        const dataFim = toDate(viagem.dataFim) ?? viagem.dataFim;
+
         this.viagemForm.patchValue({
             nome: viagem.nome,
             descricao: viagem.descricao || '',
-            dataInicio: viagem.dataInicio,
-            dataFim: viagem.dataFim,
+            dataInicio,
+            dataFim,
             origem: viagem.origem,
             destino: viagem.destino,
             status: viagem.status,
@@ -174,12 +198,17 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
             custoTotal: viagem.custoTotal || null,
             observacoes: viagem.observacoes || ''
         });
+        this.cdr.markForCheck();
     }
 
     /**
      * Salva a viagem (criação ou edição)
      */
     async onSalvar(): Promise<void> {
+        // Evita múltiplos envios simultâneos
+        if (this.isSaving) {
+            return;
+        }
         if (this.viagemForm.invalid) {
             this.markFormGroupTouched();
             this.showError('Por favor, corrija os erros no formulário');
@@ -187,25 +216,45 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
         }
 
         this.isSaving = true;
-        const formData = this.viagemForm.value;
-
+        this.cdr.markForCheck();
         try {
+            const formData = this.viagemForm.value;
+
+            // Normaliza datas para string ISO (compatível com Firestore e pipes)
+            const toIso = (val: any): string | null => {
+                if (!val) return null;
+                if (val instanceof Date) return val.toISOString();
+                if (val?.toDate) {
+                    try { return val.toDate().toISOString(); } catch {}
+                }
+                const d = new Date(val);
+                return isNaN(d.getTime()) ? null : d.toISOString();
+            };
+
+            const payload: Partial<Viagem> = {
+                ...formData,
+                dataInicio: toIso(formData.dataInicio) as any,
+                dataFim: toIso(formData.dataFim) as any
+            };
+
             if (this.isEditMode && (this.viagemId || this.viagem?.id)) {
                 // Edição
                 const id = this.viagemId || this.viagem!.id!;
-                await this.viagensService.altera(id, formData);
+                console.log('[ViagemForm] Salvando (editar) viagem', id, payload);
+                await this.viagensService.altera(id, payload);
                 this.showSuccess('Viagem atualizada com sucesso!');
 
                 // Emitir evento com dados atualizados
                 const viagemAtualizada: Viagem = {
                     ...this.viagem!,
-                    ...formData,
+                    ...payload,
                     id
                 };
                 this.viagemSalva.emit(viagemAtualizada);
             } else {
                 // Criação
-                const novaViagemId = await this.viagensService.criarViagem(formData);
+                console.log('[ViagemForm] Salvando (nova) viagem', payload);
+                const novaViagemId = await this.viagensService.criarViagem(payload as any);
                 this.showSuccess('Viagem criada com sucesso!');
 
                 // Navegar para detalhes da nova viagem
@@ -216,6 +265,7 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
             this.showError('Erro ao salvar viagem. Tente novamente.');
         } finally {
             this.isSaving = false;
+            this.cdr.markForCheck();
         }
     }
 

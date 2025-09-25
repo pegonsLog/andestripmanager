@@ -172,7 +172,7 @@
                 Cancelar
             </button>
 
-            <button mat-raised-button color="primary" type="submit" (click)="onSalvar()"
+            <button mat-raised-button color="primary" type="button" (click)="onSalvar()"
                 [disabled]="viagemForm.invalid || isSaving || isLoading">
                 <mat-spinner *ngIf="isSaving" diameter="20" class="button-spinner"></mat-spinner>
                 <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>

@@ -19,8 +19,8 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 
-// Registrar localização pt-BR (inclui dados extras para formatos completos)
-registerLocaleData(localePt, 'pt-BR', localePtExtra);
+// Registrar localização 'pt' (genérica). Não existe arquivo dedicado 'pt-BR' em @angular/common.
+registerLocaleData(localePt, 'pt', localePtExtra);
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -30,7 +30,7 @@ export const appConfig: ApplicationConfig = {
       enabled: environment.production, // Habilitado apenas em produção
       registrationStrategy: 'registerWhenStable:30000'
     }),
-    { provide: LOCALE_ID, useValue: 'pt-BR' },
+    { provide: LOCALE_ID, useValue: 'pt' },
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'BRL' },
     { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' },
     // Configuração do Firebase

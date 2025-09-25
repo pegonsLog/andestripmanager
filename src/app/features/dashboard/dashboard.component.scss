@@ -65,11 +65,44 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+ 
 
     button {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+
+    // Garante visibilidade do texto no botão "Nova Viagem"
+    .mat-mdc-raised-button.mat-primary {
+      background-color: var(--brand-primary) !important;
+      color: #ffffff !important;
+      .mdc-button__label,
+      .mat-icon { color: #ffffff !important; fill: #ffffff !important; }
+
+      // Transições suaves
+      transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, color 0.2s ease;
+
+      // Hover e Active
+      &:hover:not(.mdc-button--disabled) {
+        background-color: var(--brand-primary-hover) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(1, 57, 98, 0.25);
+      }
+
+      &:active:not(.mdc-button--disabled) {
+        background-color: var(--brand-primary-pressed) !important;
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(1, 57, 98, 0.20);
+      }
+
+      &.mdc-button--disabled,
+      &[disabled] {
+        background-color: #ffffff !important;
+        color: var(--brand-primary) !important;
+        .mdc-button__label,
+        .mat-icon { color: var(--brand-primary) !important; fill: var(--brand-primary) !important; }
+      }
     }
   }
 }
