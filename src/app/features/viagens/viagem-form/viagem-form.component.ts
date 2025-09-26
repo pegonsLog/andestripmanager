@@ -46,6 +46,7 @@ import { dataFuturaValidator, dataFimValidator } from '../../../models/validator
 export class ViagemFormComponent implements OnInit, OnDestroy {
     @Input() viagemId?: string;
     @Input() viagem?: Viagem;
+    @Input() navegarAoSalvar: boolean = true;
     @Output() viagemSalva = new EventEmitter<Viagem>();
     @Output() cancelar = new EventEmitter<void>();
 
@@ -198,6 +199,13 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
             custoTotal: viagem.custoTotal || null,
             observacoes: viagem.observacoes || ''
         });
+
+        // Em modo de edição, permitir datas no passado
+        const dataInicioControl = this.viagemForm.get('dataInicio');
+        if (dataInicioControl) {
+            dataInicioControl.setValidators([Validators.required]);
+            dataInicioControl.updateValueAndValidity();
+        }
         this.cdr.markForCheck();
     }
 
@@ -251,6 +259,11 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
                     id
                 };
                 this.viagemSalva.emit(viagemAtualizada);
+
+                // Se o formulário estiver sendo utilizado na rota de edição, navegar para o dashboard
+                if (this.navegarAoSalvar) {
+                    this.router.navigate(['/dashboard']);
+                }
             } else {
                 // Criação
                 console.log('[ViagemForm] Salvando (nova) viagem', payload);

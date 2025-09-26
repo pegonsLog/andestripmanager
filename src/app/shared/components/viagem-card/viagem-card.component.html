@@ -87,13 +87,13 @@
         <!-- Status e alertas -->
         <div class="viagem-status">
             <div class="status-section">
-                <mat-chip [color]="getCorStatus(viagem.status)" selected>
+                <mat-chip [color]="getCorStatus(viagem.status)">
                     <mat-icon matChipAvatar>{{ getIconeStatus(viagem.status) }}</mat-icon>
                     {{ getTextoStatus(viagem.status) }}
                 </mat-chip>
 
                 <!-- Alerta de atraso -->
-                <mat-chip color="warn" selected *ngIf="isAtrasada()" matTooltip="Viagem atrasada">
+                <mat-chip color="warn" *ngIf="isAtrasada()" matTooltip="Viagem atrasada">
                     <mat-icon matChipAvatar>warning</mat-icon>
                     Atrasada
                 </mat-chip>

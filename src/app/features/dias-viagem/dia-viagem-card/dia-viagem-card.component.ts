@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { DiaViagem } from '../../../models';
+import { MatDivider } from "@angular/material/divider";
 
 /**
  * Componente de card para exibir informações de um dia de viagem
@@ -16,15 +17,16 @@ import { DiaViagem } from '../../../models';
     selector: 'app-dia-viagem-card',
     standalone: true,
     imports: [
-        CommonModule,
-        MatCardModule,
-        MatButtonModule,
-        MatIconModule,
-        MatChipsModule,
-        MatTooltipModule,
-        MatMenuModule,
-        DatePipe
-    ],
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatTooltipModule,
+    MatMenuModule,
+    DatePipe,
+    MatDivider
+],
     templateUrl: './dia-viagem-card.component.html',
     styleUrls: ['./dia-viagem-card.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

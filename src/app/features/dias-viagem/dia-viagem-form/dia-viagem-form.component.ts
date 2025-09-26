@@ -290,10 +290,10 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
     /**
      * Integração com serviço de geocodificação (placeholder)
      */
-    async buscarCoordenadas(endereco: string): Promise<[number, number] | null> {
+    async buscarCoordenadas(endereco: string): Promise<[number, number] | undefined> {
         // TODO: Implementar integração com Google Maps Geocoding API
         console.log('Buscar coordenadas para:', endereco);
-        return null;
+        return undefined;
     }
 
     /**
@@ -309,7 +309,6 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
             this.showError('ID da viagem é obrigatório');
             return;
         }
-
         this.isSaving$.next(true);
 
         try {
@@ -321,19 +320,18 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
 
             const dadosDia: Omit<DiaViagem, 'id' | 'criadoEm' | 'atualizadoEm'> = {
                 viagemId: this.viagemId,
-                usuarioId: '', // Será preenchido pelo serviço
                 data: formData.data.toISOString().split('T')[0],
                 numeroDia: formData.numeroDia,
                 origem: formData.origem,
                 destino: formData.destino,
                 distanciaPlanejada: formData.distanciaPlanejada,
-                horaPartidaPlanejada: formData.horaPartidaPlanejada || undefined,
-                horaChegadaPlanejada: formData.horaChegadaPlanejada || undefined,
-                observacoes: formData.observacoes || undefined,
+                ...(formData.horaPartidaPlanejada ? { horaPartidaPlanejada: formData.horaPartidaPlanejada } : {}),
+                ...(formData.horaChegadaPlanejada ? { horaChegadaPlanejada: formData.horaChegadaPlanejada } : {}),
+                ...(formData.observacoes && formData.observacoes.trim() ? { observacoes: formData.observacoes.trim() } : {}),
                 rota: {
-                    coordenadasOrigemm,
-                    coordenadasDestino,
-                    tempoEstimado: formData.tempoEstimado,
+                    ...(coordenadasOrigemm ? { coordenadasOrigemm } : {}),
+                    ...(coordenadasDestino ? { coordenadasDestino } : {}),
+                    ...(formData.tempoEstimado ? { tempoEstimado: formData.tempoEstimado } : {}),
                     tipoEstrada: formData.tipoEstrada
                 }
             };

@@ -45,83 +45,38 @@
                             <mat-card-header>
                                 <mat-card-title>
                                     <mat-icon>trending_up</mat-icon>
-                                    Operações Mais Comuns
                                 </mat-card-title>
                             </mat-card-header>
                             <mat-card-content>
                                 <div class="operacoes-lista" *ngIf="operacoesMaisComuns.length > 0; else semOperacoes">
                                     <div class="operacao-item" *ngFor="let item of operacoesMaisComuns">
                                         <span class="operacao-nome">{{ item.operacao }}</span>
-                                        <mat-chip color="primary" selected>{{ item.count }}</mat-chip>
+                                        <mat-chip color="primary">{{ item.count }}</mat-chip>
                                     </div>
                                 </div>
                                 <ng-template #semOperacoes>
                                     <p class="sem-dados">Nenhuma operação registrada</p>
                                 </ng-template>
-                            </mat-card-content>
-                        </mat-card>
-
-                        <!-- Erros Mais Comuns -->
-                        <mat-card class="erros-card">
-                            <mat-card-header>
-                                <mat-card-title>
-                                    <mat-icon>error_outline</mat-icon>
-                                    Erros Mais Comuns
+{{ ... }}
                                 </mat-card-title>
                             </mat-card-header>
                             <mat-card-content>
                                 <div class="erros-lista" *ngIf="errosMaisComuns.length > 0; else semErros">
                                     <div class="erro-item" *ngFor="let item of errosMaisComuns">
                                         <span class="erro-nome">{{ item.erro }}</span>
-                                        <mat-chip color="warn" selected>{{ item.count }}</mat-chip>
+                                        <mat-chip color="warn">{{ item.count }}</mat-chip>
                                     </div>
                                 </div>
                                 <ng-template #semErros>
                                     <p class="sem-dados">Nenhum erro registrado</p>
                                 </ng-template>
-                            </mat-card-content>
-                        </mat-card>
-                    </div>
-                </div>
-            </mat-tab>
-
-            <!-- Aba de Logs Detalhados -->
-            <mat-tab label="Logs Detalhados">
-                <div class="logs-container">
-                    <div class="logs-acoes">
-                        <button mat-stroked-button (click)="exportarLogs()">
-                            <mat-icon>download</mat-icon>
-                            Exportar Logs
-                        </button>
-                        <button mat-stroked-button color="warn" (click)="limparLogs()">
-                            <mat-icon>clear_all</mat-icon>
-                            Limpar Logs
-                        </button>
-                    </div>
-
-                    <div class="table-container">
-                        <table mat-table [dataSource]="logs" class="logs-table">
-                            <!-- Coluna Timestamp -->
-                            <ng-container matColumnDef="timestamp">
-                                <th mat-header-cell *matHeaderCellDef>Data/Hora</th>
-                                <td mat-cell *matCellDef="let log">
-                                    <span class="timestamp">{{ formatarTimestamp(log.timestamp) }}</span>
-                                </td>
-                            </ng-container>
-
-                            <!-- Coluna Operação -->
-                            <ng-container matColumnDef="operacao">
-                                <th mat-header-cell *matHeaderCellDef>Operação</th>
-                                <td mat-cell *matCellDef="let log">
-                                    <span class="operacao">{{ log.operacao }}</span>
-                                </td>
-                            </ng-container>
+{{ ... }}
 
                             <!-- Coluna Status -->
                             <ng-container matColumnDef="status">
                                 <th mat-header-cell *matHeaderCellDef>Status</th>
                                 <td mat-cell *matCellDef="let log">
-                                    <mat-chip [color]="getCorStatus(log.status)" selected>
+                                    <mat-chip [color]="getCorStatus(log.status)">
                                         {{ log.status }}
                                     </mat-chip>
                                 </td>
@@ -129,7 +84,7 @@
 
                             <!-- Coluna Tentativa -->
                             <ng-container matColumnDef="tentativa">
-                                <th mat-header-cell *matHeaderCellDef>Tentativa</th>
+{{ ... }}
                                 <td mat-cell *matCellDef="let log">
                                     <span *ngIf="log.tentativa">{{ log.tentativa }}</span>
                                     <span *ngIf="!log.tentativa">-</span>

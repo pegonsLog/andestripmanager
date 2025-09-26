@@ -141,7 +141,9 @@
                                     <mat-card-title>{{ parada.nome }}</mat-card-title>
                                     <mat-card-subtitle>
                                         <mat-chip>{{ getTipoParadaLabel(parada.tipo) }}</mat-chip>
-                                        <span *ngIf="parada.horario" class="horario">{{ parada.horario }}</span>
+                                        <span *ngIf="parada.horaChegada || parada.horaSaida" class="horario">
+                                            {{ parada.horaChegada || '--:--' }}<span *ngIf="parada.horaSaida"> - {{ parada.horaSaida }}</span>
+                                        </span>
                                     </mat-card-subtitle>
                                 </mat-card-header>
 
@@ -158,26 +160,41 @@
                                         </div>
 
                                         <!-- Informações específicas por tipo -->
-                                        <div class="tipo-info" *ngIf="parada.abastecimento">
+                                        <div class="tipo-info" *ngIf="parada.tipo === 'abastecimento' && parada.dadosEspecificos">
                                             <div class="info-item">
                                                 <mat-icon>local_gas_station</mat-icon>
-                                                <span>{{ parada.abastecimento.litros }}L - {{
-                                                    parada.abastecimento.combustivel }}</span>
+                                                <span>
+                                                    {{ (parada.dadosEspecificos as any).quantidade }}L
+                                                    <span *ngIf="(parada.dadosEspecificos as any).tipoCombustivel">
+                                                        - {{ (parada.dadosEspecificos as any).tipoCombustivel }}
+                                                    </span>
+                                                </span>
                                             </div>
-                                            <div class="info-item">
+                                            <div class="info-item" *ngIf="parada.custo">
                                                 <mat-icon>attach_money</mat-icon>
-                                                <span>R$ {{ parada.abastecimento.total.toFixed(2) }}</span>
+                                                <span>R$ {{ parada.custo.toFixed(2) }}</span>
                                             </div>
                                         </div>
 
-                                        <div class="tipo-info" *ngIf="parada.refeicao">
+                                        <div class="tipo-info" *ngIf="parada.tipo === 'refeicao' && parada.dadosEspecificos">
                                             <div class="info-item">
                                                 <mat-icon>restaurant</mat-icon>
-                                                <span>{{ parada.refeicao.tipoRefeicao }}</span>
+                                                <span>{{ (parada.dadosEspecificos as any).tipoRefeicao }}</span>
                                             </div>
-                                            <div class="info-item" *ngIf="parada.refeicao.preco">
+                                            <div class="info-item" *ngIf="parada.custo">
                                                 <mat-icon>attach_money</mat-icon>
-                                                <span>R$ {{ parada.refeicao.preco.toFixed(2) }}</span>
+                                                <span>R$ {{ parada.custo.toFixed(2) }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="tipo-info" *ngIf="parada.tipo === 'ponto-interesse' && parada.dadosEspecificos">
+                                            <div class="info-item" *ngIf="(parada.dadosEspecificos as any).categoria">
+                                                <mat-icon>place</mat-icon>
+                                                <span>{{ (parada.dadosEspecificos as any).categoria }}</span>
+                                            </div>
+                                            <div class="info-item" *ngIf="(parada.dadosEspecificos as any).valorEntrada">
+                                                <mat-icon>attach_money</mat-icon>
+                                                <span>R$ {{ (parada.dadosEspecificos as any).valorEntrada.toFixed(2) }}</span>
                                             </div>
                                         </div>
 

@@ -250,12 +250,11 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy {
         // Limpar marcadores existentes
         this.markers.forEach(marker => marker.setMap(null));
         this.markers = [];
-
         // Adicionar marcadores das paradas
         paradas.forEach((parada, index) => {
             if (parada.coordenadas) {
                 const marker = new google.maps.Marker({
-                    position: { lat: parada.coordenadas.lat, lng: parada.coordenadas.lng },
+                    position: { lat: parada.coordenadas[0], lng: parada.coordenadas[1] },
                     map: this.map,
                     title: parada.nome,
                     icon: this.getMarkerIcon(parada.tipo),
@@ -272,7 +271,7 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy {
                 });
 
                 marker.addListener('click', () => {
-                    infoWindow.open(this.map, marker);
+                    infoWindow.open(this.map!, marker);
                 });
 
                 this.markers.push(marker);
@@ -322,8 +321,9 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy {
         </p>
     `;
 
-        if (parada.horario) {
-            content += `<p style="margin: 0 0 4px 0; font-size: 12px;"><strong>Horário:</strong> ${parada.horario}</p>`;
+        if (parada.horaChegada || parada.horaSaida) {
+            const horario = `${parada.horaChegada || '--:--'}${parada.horaSaida ? ' - ' + parada.horaSaida : ''}`;
+            content += `<p style="margin: 0 0 4px 0; font-size: 12px;"><strong>Horário:</strong> ${horario}</p>`;
         }
 
         if (parada.observacoes) {
@@ -485,8 +485,7 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy {
      */
     centralizarParada(parada: Parada): void {
         if (this.map && parada.coordenadas) {
-            this.map.setCenter({ lat: parada.coordenadas.lat, lng: parada.coordenadas.lng });
+            this.map.setCenter({ lat: parada.coordenadas[0], lng: parada.coordenadas[1] });
             this.map.setZoom(15);
         }
     }
-}

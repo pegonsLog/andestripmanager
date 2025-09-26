@@ -48,6 +48,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/viagens/viagem-form/viagem-form.component').then(c => c.ViagemFormComponent)
             },
             {
+                path: ':viagemId/dias/nova',
+                loadComponent: () => import('./features/dias-viagem/dia-viagem-form/dia-viagem-form.component').then(c => c.DiaViagemFormComponent)
+            },
+            {
+                path: ':viagemId/dias/:diaId/editar',
+                loadComponent: () => import('./features/dias-viagem/dia-viagem-form/dia-viagem-form.component').then(c => c.DiaViagemFormComponent)
+            },
+            {
                 path: ':id',
                 loadComponent: () => import('./features/viagens/viagem-detail/viagem-detail.component').then(c => c.ViagemDetailComponent)
             },

@@ -513,14 +513,15 @@ export class ExportacaoComponent implements OnInit {
             }
         });
     }
-}    /**
- 
-    * Abre dialog de logs de operações
+
+    /**
+     * Abre dialog de logs de operações
      */
-abrirLogs(): void {
-    this.dialog.open(LogsDialogComponent, {
-        width: '1000px',
-        maxWidth: '95vw',
-        height: '80vh'
-    });
+    abrirLogs(): void {
+        this.dialog.open(LogsDialogComponent, {
+            width: '1000px',
+            maxWidth: '95vw',
+            height: '80vh'
+        });
+    }
 }

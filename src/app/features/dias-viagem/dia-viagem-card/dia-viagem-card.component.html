@@ -1,9 +1,5 @@
-<mat-card class="dia-card" [class.completo]="isDiaCompleto()">
+<mat-card>
     <mat-card-header>
-        <div mat-card-avatar class="dia-avatar">
-            <span class="dia-numero">{{ dia.numeroDia }}</span>
-        </div>
-
         <mat-card-title>
             <div class="titulo-container">
                 <span class="data">{{ dia.data | date:'dd/MM/yyyy' }}</span>
@@ -14,16 +10,6 @@
                 </div>
             </div>
         </mat-card-title>
-
-        <mat-card-subtitle>
-            <div class="distancia-info">
-                <mat-icon>route</mat-icon>
-                <span>{{ formatarDistancia(dia.distanciaPlanejada) }}</span>
-                <span *ngIf="dia.rota?.tempoEstimado" class="tempo">
-                    • {{ formatarTempo(dia.rota.tempoEstimado) }}
-                </span>
-            </div>
-        </mat-card-subtitle>
 
         <!-- Menu de ações -->
         <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">

@@ -280,41 +280,7 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
 
             const dialogData: ConfirmationDialogData = {
                 titulo: 'Excluir Viagem',
-                mensagem: `
-                    <div style="text-align: left;">
-                        <p><strong>Tem certeza que deseja excluir a viagem "${viagem.nome}"?</strong></p>
-                        
-                        <p style="color: #f44336; font-weight: 500; margin: 16px 0;">
-                            ⚠️ Esta ação não pode ser desfeita!
-                        </p>
-                        
-                        ${stats.temDadosRelacionados ? `
-                            <p>Os seguintes dados serão <strong>permanentemente removidos</strong>:</p>
-                            <ul style="margin: 12px 0; padding-left: 20px; line-height: 1.6;">
-                                ${stats.totalDias > 0 ? `<li><strong>${stats.totalDias}</strong> ${stats.totalDias === 1 ? 'dia planejado' : 'dias planejados'}</li>` : ''}
-                                ${stats.totalParadas > 0 ? `<li><strong>${stats.totalParadas}</strong> ${stats.totalParadas === 1 ? 'parada registrada' : 'paradas registradas'}</li>` : ''}
-                                ${stats.totalHospedagens > 0 ? `<li><strong>${stats.totalHospedagens}</strong> ${stats.totalHospedagens === 1 ? 'hospedagem' : 'hospedagens'}</li>` : ''}
-                                ${stats.totalCustos > 0 ? `<li><strong>${stats.totalCustos}</strong> ${stats.totalCustos === 1 ? 'registro de custo' : 'registros de custos'} (${this.formatarMoeda(stats.valorTotalCustos)})</li>` : ''}
-                            </ul>
-                            
-                            <div style="background-color: #ffebee; padding: 12px; border-radius: 4px; margin: 16px 0;">
-                                <p style="margin: 0; color: #c62828; font-weight: 500;">
-                                    🗑️ Todos estes dados serão perdidos permanentemente!
-                                </p>
-                            </div>
-                        ` : `
-                            <div style="background-color: #e8f5e8; padding: 12px; border-radius: 4px; margin: 16px 0;">
-                                <p style="margin: 0; color: #2e7d32;">
-                                    ℹ️ Esta viagem não possui dados relacionados.
-                                </p>
-                            </div>
-                        `}
-                        
-                        <p style="font-size: 14px; color: #666; margin-top: 16px;">
-                            Digite "<strong>EXCLUIR</strong>" para confirmar que você entende que esta ação é irreversível.
-                        </p>
-                    </div>
-                `,
+                mensagem: this.buildExcluirMensagem(viagem, stats),
                 textoConfirmar: 'Sim, Excluir Permanentemente',
                 textoCancelar: 'Cancelar',
                 tipo: 'danger',
@@ -337,6 +303,48 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
             console.error('Erro ao obter estatísticas da viagem:', error);
             this.showError('Erro ao carregar informações da viagem. Tente novamente.');
         }
+    }
+
+    /**
+     * Monta a mensagem HTML para confirmação de exclusão, evitando templates aninhados
+     */
+    private buildExcluirMensagem(viagem: Viagem, stats: any): string {
+        const listaItens: string[] = [];
+        if (stats.totalDias > 0) {
+            listaItens.push(`<li><strong>${stats.totalDias}</strong> ${stats.totalDias === 1 ? 'dia planejado' : 'dias planejados'}</li>`);
+        }
+        if (stats.totalParadas > 0) {
+            listaItens.push(`<li><strong>${stats.totalParadas}</strong> ${stats.totalParadas === 1 ? 'parada registrada' : 'paradas registradas'}</li>`);
+        }
+        if (stats.totalHospedagens > 0) {
+            listaItens.push(`<li><strong>${stats.totalHospedagens}</strong> ${stats.totalHospedagens === 1 ? 'hospedagem' : 'hospedagens'}</li>`);
+        }
+        if (stats.totalCustos > 0) {
+            listaItens.push(`<li><strong>${stats.totalCustos}</strong> ${stats.totalCustos === 1 ? 'registro de custo' : 'registros de custos'} (${this.formatarMoeda(stats.valorTotalCustos)})</li>`);
+        }
+
+        const dadosRelacionados = stats.temDadosRelacionados
+            ? (
+                '<p>Os seguintes dados serão <strong>permanentemente removidos</strong>:</p>' +
+                `<ul style="margin: 12px 0; padding-left: 20px; line-height: 1.6;">${listaItens.join('')}</ul>` +
+                '<div style="background-color: #ffebee; padding: 12px; border-radius: 4px; margin: 16px 0;">' +
+                '<p style="margin: 0; color: #c62828; font-weight: 500;">🗑️ Todos estes dados serão perdidos permanentemente!</p>' +
+                '</div>'
+            )
+            : (
+                '<div style="background-color: #e8f5e8; padding: 12px; border-radius: 4px; margin: 16px 0;">' +
+                '<p style="margin: 0; color: #2e7d32;">ℹ️ Esta viagem não possui dados relacionados.</p>' +
+                '</div>'
+            );
+
+        return (
+            '<div style="text-align: left;">' +
+            `<p><strong>Tem certeza que deseja excluir a viagem "${viagem.nome}"?</strong></p>` +
+            '<p style="color: #f44336; font-weight: 500; margin: 16px 0;">⚠️ Esta ação não pode ser desfeita!</p>' +
+            dadosRelacionados +
+            '<p style="font-size: 14px; color: #666; margin-top: 16px;">Digite "<strong>EXCLUIR</strong>" para confirmar que você entende que esta ação é irreversível.</p>' +
+            '</div>'
+        );
     }
 
     /**
@@ -526,9 +534,8 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
     onAdicionarDia(): void {
         const viagem = this.viagem();
         if (viagem?.id) {
-            // Navegar para formulário de novo dia ou abrir modal
-            console.log('Adicionar novo dia para viagem:', viagem.id);
-            this.showSuccess('Funcionalidade de adicionar dia será implementada em breve');
+            // Navegar para o formulário de criação de novo dia
+            this.router.navigate(['/viagens', viagem.id, 'dias', 'nova']);
         }
     }
 
