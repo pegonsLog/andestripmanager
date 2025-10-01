@@ -259,29 +259,13 @@
                         </div>
 
                         <div class="dias-timeline">
-                            <mat-card *ngFor="let dia of diasViagem(); trackBy: trackByFn" class="dia-card">
-                                <mat-card-header>
-                                    <div mat-card-avatar class="dia-avatar">
-                                        <span>{{ dia.numeroDia }}</span>
-                                    </div>
-                                    <mat-card-title>{{ dia.data | date:'dd/MM/yyyy' }}</mat-card-title>
-                                    <mat-card-subtitle>
-                                        {{ dia.origem }} → {{ dia.destino }}
-                                    </mat-card-subtitle>
-                                </mat-card-header>
-                                <mat-card-content>
-                                    <div class="dia-info">
-                                        <span *ngIf="dia.distanciaPercorrida">
-                                            <mat-icon>straighten</mat-icon>
-                                            {{ dia.distanciaPercorrida }} km
-                                        </span>
-                                        <span *ngIf="dia.rota?.tempoEstimado">
-                                            <mat-icon>schedule</mat-icon>
-                                            {{ (dia.rota!.tempoEstimado! / 60) | number:'1.1-1' }}h
-                                        </span>
-                                    </div>
-                                </mat-card-content>
-                            </mat-card>
+                            <app-dia-viagem-card
+                                *ngFor="let dia of diasViagem(); trackBy: trackByFn"
+                                [dia]="dia"
+                                (editar)="onEditarDia($event)"
+                                (visualizar)="onVisualizarDia($event)"
+                                (remover)="onRemoverDia($event)">
+                            </app-dia-viagem-card>
                         </div>
                     </div>
                 </div>

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, signal }
 import { CommonModule, DatePipe } from '@angular/common';
 
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Observable, BehaviorSubject } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil, switchMap, tap, catchError } from 'rxjs/operators';
 
 // Angular Material
@@ -19,7 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 
 // Models e Services
-import { Viagem, StatusViagem, DiaViagem, Parada, Hospedagem, Custo, TipoParada, CategoriaCusto } from '../../../models';
+import { Viagem, StatusViagem, DiaViagem, Parada, Hospedagem, Custo } from '../../../models';
 import { ViagensService } from '../../../services/viagens.service';
 import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { ParadasService } from '../../../services/paradas.service';
@@ -28,6 +28,7 @@ import { CustosService } from '../../../services/custos.service';
 
 // Componentes
 import { ViagemFormComponent } from '../viagem-form/viagem-form.component';
+import { DiaViagemCardComponent } from '../../dias-viagem/dia-viagem-card/dia-viagem-card.component';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../shared/components';
 
 @Component({
@@ -47,7 +48,8 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../sh
         MatTooltipModule,
         MatDividerModule,
         DatePipe,
-        ViagemFormComponent
+        ViagemFormComponent,
+        DiaViagemCardComponent
     ],
     templateUrl: './viagem-detail.component.html',
     styleUrls: ['./viagem-detail.component.scss'],
@@ -308,7 +310,17 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
     /**
      * Monta a mensagem HTML para confirmação de exclusão, evitando templates aninhados
      */
-    private buildExcluirMensagem(viagem: Viagem, stats: any): string {
+    private buildExcluirMensagem(
+        viagem: Viagem,
+        stats: {
+            totalDias: number;
+            totalParadas: number;
+            totalHospedagens: number;
+            totalCustos: number;
+            valorTotalCustos: number;
+            temDadosRelacionados: boolean;
+        }
+    ): string {
         const listaItens: string[] = [];
         if (stats.totalDias > 0) {
             listaItens.push(`<li><strong>${stats.totalDias}</strong> ${stats.totalDias === 1 ? 'dia planejado' : 'dias planejados'}</li>`);
@@ -539,6 +551,98 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * Edita um dia específico da viagem
+     */
+    onEditarDia(dia: DiaViagem): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
+        }
+        const viagem = this.viagem();
+        if (!viagem?.id || !dia.id) return;
+        this.router.navigate(['/viagens', viagem.id, 'dias', dia.id, 'editar']);
+    }
+
+    /**
+     * Visualiza detalhes de um dia (placeholder)
+     */
+    onVisualizarDia(dia: DiaViagem): void {
+        // Poderemos abrir um diálogo com DiaViagemDetailComponent futuramente
+        this.showSuccess(`Visualização do Dia ${dia.numeroDia} estará disponível em breve`);
+    }
+
+    /**
+     * Remove um dia da viagem com confirmação e renumera os restantes
+     */
+    async onRemoverDia(dia: DiaViagem): Promise<void> {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
+        }
+        const viagem = this.viagem();
+        if (!viagem?.id || !dia.id) return;
+
+        const dialogData: ConfirmationDialogData = {
+            titulo: 'Excluir Dia da Viagem',
+            mensagem: `\
+<div style="text-align:left;">
+  <p><strong>Tem certeza que deseja excluir o Dia ${dia.numeroDia}?</strong></p>
+  <p style="margin:8px 0 0 0;">${new Date(dia.data).toLocaleDateString('pt-BR')} • ${dia.origem} → ${dia.destino}</p>
+  <p style="color:#f44336; font-weight:500; margin-top:12px;">Esta ação não pode ser desfeita.</p>
+ </div>`,
+            textoConfirmar: 'Excluir Dia',
+            textoCancelar: 'Cancelar',
+            tipo: 'danger',
+            icone: 'delete_forever'
+        };
+
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '520px',
+            maxWidth: '95vw',
+            data: dialogData,
+            disableClose: true
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (confirmado) => {
+            if (confirmado === true) {
+                try {
+                    await this.diasViagemService.remove(dia.id!);
+                    await this.renumerarDias(viagem.id!);
+                    // Recarregar lista local
+                    const diasAtualizados = await this.diasViagemService.listarDiasViagem(viagem.id!).toPromise();
+                    this.diasViagem.set(diasAtualizados || []);
+                    this.updateEstatisticas();
+                    this.showSuccess(`Dia ${dia.numeroDia} excluído com sucesso!`);
+                } catch (error) {
+                    console.error('Erro ao excluir dia:', error);
+                    this.showError('Erro ao excluir dia. Tente novamente.');
+                }
+            }
+        });
+    }
+
+    /**
+     * Renumera os dias da viagem sequencialmente após exclusão/reordenação
+     */
+    private async renumerarDias(viagemId: string): Promise<void> {
+        const dias = await this.diasViagemService.listarDiasViagem(viagemId).toPromise();
+        if (!dias || dias.length === 0) return;
+
+        const ordenados = [...dias].sort((a, b) => (a.numeroDia || 0) - (b.numeroDia || 0));
+        const updates: Promise<void>[] = [];
+        ordenados.forEach((d, idx) => {
+            const numeroCorreto = idx + 1;
+            if (d.numeroDia !== numeroCorreto && d.id) {
+                updates.push(this.diasViagemService.altera(d.id, { numeroDia: numeroCorreto }));
+            }
+        });
+
+        if (updates.length > 0) {
+            await Promise.all(updates);
+        }
+    }
+
     onAdicionarParada(): void {
         const viagem = this.viagem();
         if (viagem?.id) {
@@ -729,8 +833,8 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
     /**
      * TrackBy function para otimizar renderização de listas
      */
-    trackByFn(index: number, item: any): any {
-        return item.id || index;
+    trackByFn(index: number, item: { id?: string }): string | number {
+        return item.id ?? index;
     }
 
     /**

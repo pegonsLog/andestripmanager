@@ -86,62 +86,86 @@
     }
   }
 
+  // Garante 100% de largura do container de conteúdo do Angular Material (MDC)
+  ::ng-deep .mat-mdc-card-content,
+  ::ng-deep mat-card-content {
+    display: block !important;
+    width: 100% !important;
+    
+    * {
+      box-sizing: border-box;
+    }
+  }
+
   mat-card-content {
     .horarios-container {
-      display: flex;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
       gap: 24px;
-      margin-bottom: 16px;
-      padding: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
       background-color: rgba(0, 0, 0, 0.02);
       border-radius: 8px;
+      width: 100% !important;
+      align-items: center !important;
 
       .horario-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px;
+        white-space: nowrap !important;
+        flex-wrap: nowrap !important;
+        flex-direction: row !important;
 
-        .horario-icon {
+        ::ng-deep .horario-icon {
           color: var(--primary-color, #1976d2);
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
+          font-size: 18px !important;
+          width: 18px !important;
+          height: 18px !important;
+          flex-shrink: 0;
+          display: inline-flex !important;
+          vertical-align: middle !important;
+          margin-right: 4px;
         }
 
-        .horario-info {
-          .horario-label {
-            display: block;
-            font-size: 12px;
-            color: rgba(0, 0, 0, 0.6);
-            font-weight: 500;
-          }
+        .horario-label {
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.6);
+          font-weight: 500;
+          display: inline !important;
+          white-space: nowrap !important;
+          vertical-align: middle;
+        }
 
-          .horario-valores {
-            display: flex;
-            gap: 8px;
-            align-items: center;
+        .horario-valor {
+          font-weight: 600;
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.87);
+          display: inline !important;
+          white-space: nowrap !important;
+          vertical-align: middle;
+        }
 
-            .planejado {
-              font-weight: 500;
-              color: rgba(0, 0, 0, 0.7);
-            }
+        .horario-real {
+          font-weight: 600;
+          font-size: 14px;
+          color: #4caf50;
+          display: inline !important;
+          white-space: nowrap !important;
+          vertical-align: middle;
 
-            .real {
-              font-weight: 600;
-              color: #4caf50;
-
-              &::before {
-                content: "→ ";
-                color: rgba(0, 0, 0, 0.5);
-              }
-            }
+          &::before {
+            content: " → ";
+            color: rgba(0, 0, 0, 0.5);
           }
         }
       }
     }
 
     .progresso-container {
-      margin-bottom: 16px;
-      padding: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
       background-color: rgba(76, 175, 80, 0.05);
       border-radius: 8px;
       border: 1px solid rgba(76, 175, 80, 0.2);
@@ -194,7 +218,7 @@
     }
 
     .clima-container {
-      margin-bottom: 16px;
+      margin-bottom: 20px;
 
       mat-chip-set {
         mat-chip {
@@ -210,8 +234,8 @@
     .observacoes-container {
       display: flex;
       gap: 8px;
-      margin-bottom: 16px;
-      padding: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
       background-color: rgba(255, 193, 7, 0.1);
       border-radius: 8px;
       border-left: 3px solid #ffc107;

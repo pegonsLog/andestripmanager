@@ -1,4 +1,4 @@
-<mat-card>
+<mat-card class="dia-card">
     <mat-card-header>
         <mat-card-title>
             <div class="titulo-container">
@@ -35,27 +35,7 @@
     <mat-card-content>
         <!-- Informações de horário -->
         <div class="horarios-container" *ngIf="dia.horaPartidaPlanejada || dia.horaChegadaPlanejada">
-            <div class="horario-item" *ngIf="dia.horaPartidaPlanejada">
-                <mat-icon class="horario-icon">schedule</mat-icon>
-                <div class="horario-info">
-                    <span class="horario-label">Partida</span>
-                    <div class="horario-valores">
-                        <span class="planejado">{{ dia.horaPartidaPlanejada }}</span>
-                        <span *ngIf="dia.horaPartidaReal" class="real">{{ dia.horaPartidaReal }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="horario-item" *ngIf="dia.horaChegadaPlanejada">
-                <mat-icon class="horario-icon">flag</mat-icon>
-                <div class="horario-info">
-                    <span class="horario-label">Chegada</span>
-                    <div class="horario-valores">
-                        <span class="planejado">{{ dia.horaChegadaPlanejada }}</span>
-                        <span *ngIf="dia.horaChegadaReal" class="real">{{ dia.horaChegadaReal }}</span>
-                    </div>
-                </div>
-            </div>
+            <div class="horario-item" *ngIf="dia.horaPartidaPlanejada"><mat-icon class="horario-icon" inline>schedule</mat-icon><span class="horario-label">Partida:</span> <span class="horario-valor">{{ dia.horaPartidaPlanejada }}</span><span *ngIf="dia.horaPartidaReal" class="horario-real">{{ dia.horaPartidaReal }}</span></div><div class="horario-item" *ngIf="dia.horaChegadaPlanejada"><mat-icon class="horario-icon" inline>flag</mat-icon><span class="horario-label">Chegada:</span> <span class="horario-valor">{{ dia.horaChegadaPlanejada }}</span><span *ngIf="dia.horaChegadaReal" class="horario-real">{{ dia.horaChegadaReal }}</span></div>
         </div>
 
         <!-- Progresso da viagem -->

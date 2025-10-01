@@ -1,4 +1,80 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "custos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "viagemId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "data",
+          "order": "DESCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "dias-viagem",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "viagemId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "numeroDia",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "hospedagens",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "viagemId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dataCheckIn",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "paradas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "viagemId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "horaChegada",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "viagens",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "usuarioId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dataInicio",
+          "order": "DESCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    }
+  ],
   "fieldOverrides": []
 }
