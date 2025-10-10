@@ -30,6 +30,12 @@ import { CustosService } from '../../../services/custos.service';
 import { ViagemFormComponent } from '../viagem-form/viagem-form.component';
 import { DiaViagemCardComponent } from '../../dias-viagem/dia-viagem-card/dia-viagem-card.component';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../shared/components';
+import { ParadaFormDialogComponent, ParadaFormDialogData } from '../../paradas/parada-form-dialog/parada-form-dialog.component';
+import { ParadaDetailDialogComponent, ParadaDetailDialogData } from '../../paradas/parada-detail-dialog/parada-detail-dialog.component';
+import { SelectDiaDialogComponent, SelectDiaDialogData } from '../../paradas/select-dia-dialog/select-dia-dialog.component';
+import { HospedagemFormComponent } from '../../hospedagens/components/hospedagem-form/hospedagem-form.component';
+import { HospedagemDetailDialogComponent, HospedagemDetailDialogData } from '../../hospedagens/components/hospedagem-detail-dialog/hospedagem-detail-dialog.component';
+import { HospedagemCardComponent } from '../../hospedagens/components/hospedagem-card/hospedagem-card.component';
 
 @Component({
     selector: 'app-viagem-detail',
@@ -49,7 +55,8 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../sh
         MatDividerModule,
         DatePipe,
         ViagemFormComponent,
-        DiaViagemCardComponent
+        DiaViagemCardComponent,
+        HospedagemCardComponent
     ],
     templateUrl: './viagem-detail.component.html',
     styleUrls: ['./viagem-detail.component.scss'],
@@ -115,6 +122,48 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadViagem();
+    }
+
+    /**
+     * Retorna ícone para tipo de hospedagem
+     */
+    getIconeHospedagem(tipo: string): string {
+        const icons: { [key: string]: string } = {
+            'hotel': 'hotel',
+            'pousada': 'house',
+            'hostel': 'group',
+            'camping': 'nature',
+            'casa-temporada': 'home',
+            'apartamento': 'apartment',
+            'outros': 'business'
+        };
+        return icons[tipo] || 'hotel';
+    }
+
+    /**
+     * Retorna texto para tipo de hospedagem
+     */
+    getTipoHospedagemTexto(tipo: string): string {
+        const labels: { [key: string]: string } = {
+            'hotel': 'Hotel',
+            'pousada': 'Pousada',
+            'hostel': 'Hostel',
+            'camping': 'Camping',
+            'casa-temporada': 'Casa de Temporada',
+            'apartamento': 'Apartamento',
+            'outros': 'Outros'
+        };
+        return labels[tipo] || tipo;
+    }
+
+    /**
+     * Rótulo de dia para hospedagem
+     */
+    getDiaLabelHospedagem(hospedagem: Hospedagem): string {
+        const dia = this.diasViagem().find(d => d.id === hospedagem.diaViagemId);
+        if (!dia) return 'Dia não encontrado';
+        const data = this.formatarData(dia.data);
+        return dia.numeroDia ? `Dia ${dia.numeroDia} • ${data}` : data;
     }
 
     ngOnDestroy(): void {
@@ -447,7 +496,7 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
         if (!viagem) return;
 
         try {
-            const novaViagem = {
+            const novaViagemBase: Viagem = {
                 ...viagem,
                 nome: `${viagem.nome} (Cópia)`,
                 status: StatusViagem.PLANEJADA,
@@ -455,13 +504,23 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                 distanciaTotal: viagem.distanciaTotal || 0
             };
 
-            // Remove campos que não devem ser copiados
-            delete (novaViagem as any).id;
-            delete (novaViagem as any).criadoEm;
-            delete (novaViagem as any).atualizadoEm;
-            delete (novaViagem as any).estatisticas;
+            // Montar objeto sem campos proibidos (id/usuarioId/auditoria/estatisticas)
+            const dadosParaCriar: Omit<Viagem, 'id' | 'usuarioId' | 'criadoEm' | 'atualizadoEm' | 'estatisticas'> = {
+                nome: novaViagemBase.nome,
+                descricao: novaViagemBase.descricao,
+                dataInicio: novaViagemBase.dataInicio,
+                dataFim: novaViagemBase.dataFim,
+                status: StatusViagem.PLANEJADA,
+                origem: novaViagemBase.origem,
+                destino: novaViagemBase.destino,
+                distanciaTotal: novaViagemBase.distanciaTotal,
+                custoTotal: novaViagemBase.custoTotal,
+                numeroDias: novaViagemBase.numeroDias,
+                fotos: novaViagemBase.fotos,
+                observacoes: novaViagemBase.observacoes
+            };
 
-            const novaViagemId = await this.viagensService.criarViagem(novaViagem);
+            const novaViagemId = await this.viagensService.criarViagem(dadosParaCriar);
             this.showSuccess('Viagem duplicada com sucesso!');
             this.router.navigate(['/viagens', novaViagemId]);
         } catch (error) {
@@ -645,18 +704,284 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
 
     onAdicionarParada(): void {
         const viagem = this.viagem();
-        if (viagem?.id) {
-            console.log('Adicionar nova parada para viagem:', viagem.id);
-            this.showSuccess('Funcionalidade de adicionar parada será implementada em breve');
+        if (!viagem?.id) return;
+
+        const dias = this.diasViagem();
+
+        // Exigir que exista ao menos um dia
+        if (!dias || dias.length === 0) {
+            this.showError('Você precisa criar um dia antes de adicionar uma parada.');
+            this.router.navigate(['/viagens', viagem.id, 'dias', 'nova']);
+            return;
         }
+
+        const abrirFormulario = (diaId: string) => {
+            const data: ParadaFormDialogData = {
+                viagemId: viagem.id!,
+                diaViagemId: diaId
+            };
+
+            const formRef = this.dialog.open(ParadaFormDialogComponent, {
+                width: '720px',
+                maxWidth: '95vw',
+                maxHeight: '90vh',
+                autoFocus: false,
+                data
+            });
+
+            formRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (paradaCriada: Parada | null) => {
+                if (paradaCriada) {
+                    // Recarregar paradas da viagem e atualizar estatísticas
+                    const atualizadas = await this.paradasService.listarParadasViagem(viagem.id!).toPromise();
+                    this.paradas.set(atualizadas || []);
+                    this.updateEstatisticas();
+                }
+            });
+        };
+
+        if (dias.length === 1) {
+            // Único dia: abrir direto
+            const unicoDiaId = dias[0].id;
+            if (unicoDiaId) abrirFormulario(unicoDiaId);
+            return;
+        }
+
+        // Vários dias: abrir diálogo de seleção
+        const dialogRef = this.dialog.open(SelectDiaDialogComponent, {
+            width: '520px',
+            maxWidth: '95vw',
+            data: { dias } as SelectDiaDialogData,
+            disableClose: false
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((diaSelecionadoId: string | null) => {
+            if (diaSelecionadoId) {
+                abrirFormulario(diaSelecionadoId);
+            }
+        });
+    }
+
+    onVisualizarParada(parada: Parada): void {
+        const data: ParadaDetailDialogData = {
+            parada,
+            diaLabel: this.getDiaLabelParada(parada)
+        };
+
+        this.dialog.open(ParadaDetailDialogComponent, {
+            width: '720px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data
+        });
+    }
+
+    onEditarParada(parada: Parada): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
+        }
+        const viagem = this.viagem();
+        if (!viagem?.id || !parada.id) return;
+
+        const data: ParadaFormDialogData = {
+            viagemId: viagem.id!,
+            diaViagemId: parada.diaViagemId,
+            parada
+        };
+
+        const formRef = this.dialog.open(ParadaFormDialogComponent, {
+            width: '720px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data
+        });
+
+        formRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (paradaAtualizada: Parada | null) => {
+            if (paradaAtualizada) {
+                const atualizadas = await this.paradasService.listarParadasViagem(viagem.id!).toPromise();
+                this.paradas.set(atualizadas || []);
+                this.updateEstatisticas();
+                this.showSuccess('Parada atualizada com sucesso!');
+            }
+        });
+    }
+
+    onRemoverParada(parada: Parada): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
+        }
+        const viagem = this.viagem();
+        if (!viagem?.id || !parada.id) return;
+
+        const dialogData: ConfirmationDialogData = {
+            titulo: 'Excluir Parada',
+            mensagem: `Você realmente deseja excluir a parada "${parada.nome}"? Esta ação não pode ser desfeita.`,
+            textoConfirmar: 'Excluir',
+            textoCancelar: 'Cancelar',
+            tipo: 'danger',
+            icone: 'delete_forever'
+        };
+
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '520px',
+            maxWidth: '95vw',
+            data: dialogData,
+            disableClose: true
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (confirmado) => {
+            if (confirmado === true) {
+                try {
+                    await this.paradasService.remove(parada.id!);
+                    const atualizadas = await this.paradasService.listarParadasViagem(viagem.id!).toPromise();
+                    this.paradas.set(atualizadas || []);
+                    this.updateEstatisticas();
+                    this.showSuccess('Parada excluída com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao excluir parada:', error);
+                    this.showError('Erro ao excluir parada. Tente novamente.');
+                }
+            }
+        });
     }
 
     onAdicionarHospedagem(): void {
         const viagem = this.viagem();
-        if (viagem?.id) {
-            console.log('Adicionar nova hospedagem para viagem:', viagem.id);
-            this.showSuccess('Funcionalidade de adicionar hospedagem será implementada em breve');
+        if (!viagem?.id) return;
+
+        const dias = this.diasViagem();
+        if (!dias || dias.length === 0) {
+            this.showError('Você precisa criar um dia antes de adicionar uma hospedagem.');
+            this.router.navigate(['/viagens', viagem.id, 'dias', 'nova']);
+            return;
         }
+
+        const abrirFormulario = (diaId: string) => {
+            const dialogRef = this.dialog.open(HospedagemFormComponent, {
+                width: '800px',
+                maxWidth: '95vw'
+            });
+
+            dialogRef.componentInstance.viagemId = viagem.id!;
+            dialogRef.componentInstance.diaViagemId = diaId;
+
+            dialogRef.componentInstance.hospedagemSalva.pipe(takeUntil(this.destroy$)).subscribe(async () => {
+                const atualizadas = await this.hospedagensService.listarHospedagensViagem(viagem.id!).toPromise();
+                this.hospedagens.set(atualizadas || []);
+                this.updateEstatisticas();
+                dialogRef.close();
+                this.showSuccess('Hospedagem criada com sucesso!');
+            });
+
+            dialogRef.componentInstance.cancelar.pipe(takeUntil(this.destroy$)).subscribe(() => {
+                dialogRef.close();
+            });
+        };
+
+        if (dias.length === 1) {
+            const unicoDiaId = dias[0].id;
+            if (unicoDiaId) abrirFormulario(unicoDiaId);
+            return;
+        }
+
+        const dialogRef = this.dialog.open(SelectDiaDialogComponent, {
+            width: '520px',
+            maxWidth: '95vw',
+            data: { dias } as SelectDiaDialogData,
+            disableClose: false
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((diaSelecionadoId: string | null) => {
+            if (diaSelecionadoId) abrirFormulario(diaSelecionadoId);
+        });
+    }
+
+    onEditarHospedagem(hospedagem: Hospedagem): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
+        }
+        const viagem = this.viagem();
+        if (!viagem?.id || !hospedagem.id) return;
+
+        const dialogRef = this.dialog.open(HospedagemFormComponent, {
+            width: '800px',
+            maxWidth: '95vw'
+        });
+
+        dialogRef.componentInstance.viagemId = viagem.id!;
+        dialogRef.componentInstance.diaViagemId = hospedagem.diaViagemId;
+        dialogRef.componentInstance.hospedagem = hospedagem;
+
+        dialogRef.componentInstance.hospedagemSalva.pipe(takeUntil(this.destroy$)).subscribe(async () => {
+            const atualizadas = await this.hospedagensService.listarHospedagensViagem(viagem.id!).toPromise();
+            this.hospedagens.set(atualizadas || []);
+            this.updateEstatisticas();
+            dialogRef.close();
+            this.showSuccess('Hospedagem atualizada com sucesso!');
+        });
+
+        dialogRef.componentInstance.cancelar.pipe(takeUntil(this.destroy$)).subscribe(() => {
+            dialogRef.close();
+        });
+    }
+
+    onRemoverHospedagem(hospedagem: Hospedagem): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
+        }
+        const viagem = this.viagem();
+        if (!viagem?.id || !hospedagem.id) return;
+
+        const dialogData: ConfirmationDialogData = {
+            titulo: 'Excluir Hospedagem',
+            mensagem: `Você realmente deseja excluir a hospedagem "${hospedagem.nome}"? Esta ação não pode ser desfeita.`,
+            textoConfirmar: 'Excluir',
+            textoCancelar: 'Cancelar',
+            tipo: 'danger',
+            icone: 'delete_forever'
+        };
+
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '520px',
+            maxWidth: '95vw',
+            data: dialogData,
+            disableClose: true
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (confirmado) => {
+            if (confirmado === true) {
+                try {
+                    await this.hospedagensService.remove(hospedagem.id!);
+                    const atualizadas = await this.hospedagensService.listarHospedagensViagem(viagem.id!).toPromise();
+                    this.hospedagens.set(atualizadas || []);
+                    this.updateEstatisticas();
+                    this.showSuccess('Hospedagem excluída com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao excluir hospedagem:', error);
+                    this.showError('Erro ao excluir hospedagem. Tente novamente.');
+                }
+            }
+        });
+    }
+
+    onVisualizarHospedagem(hospedagem: Hospedagem): void {
+        const data: HospedagemDetailDialogData = {
+            hospedagem,
+            diaLabel: this.getDiaLabelHospedagem(hospedagem)
+        };
+
+        this.dialog.open(HospedagemDetailDialogComponent, {
+            width: '720px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data
+        });
     }
 
     onAdicionarCusto(): void {
@@ -865,6 +1190,16 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
             'hospedagem': 'Hospedagem'
         };
         return textos[tipo] || tipo;
+    }
+
+    /**
+     * Retorna o rótulo do dia para uma parada (ex.: "Dia 3 • 12/10/2025")
+     */
+    getDiaLabelParada(parada: Parada): string {
+        const dia = this.diasViagem().find(d => d.id === parada.diaViagemId);
+        if (!dia) return 'Dia não encontrado';
+        const data = this.formatarData(dia.data);
+        return dia.numeroDia ? `Dia ${dia.numeroDia} • ${data}` : data;
     }
 
     /**

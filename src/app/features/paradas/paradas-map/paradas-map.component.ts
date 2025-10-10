@@ -56,7 +56,7 @@ interface ParadaMarker {
     styleUrls: ['./paradas-map.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ParadasMapComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ParadasMapComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
     @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef;
 
     @Input() paradas: Parada[] = [];
@@ -422,6 +422,13 @@ export class ParadasMapComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     getTipoConfig(tipo: TipoParada) {
         return this.tipoIcons[tipo];
+    }
+
+    /**
+     * Obtém contagem de paradas por tipo
+     */
+    getContagemPorTipo(tipo: TipoParada): number {
+        return this.paradas.filter(p => p.tipo === tipo).length;
     }
 
     /**

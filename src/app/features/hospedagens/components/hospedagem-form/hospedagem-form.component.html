@@ -213,9 +213,9 @@
                     <div class="avaliacao-content">
                         <!-- Avaliação Geral -->
                         <div class="avaliacao-item">
-                            <label class="avaliacao-label">Avaliação Geral</label>
-                            <mat-slider min="0" max="5" step="1" [value]="avaliacaoGeral"
-                                (valueChange)="onAvaliacaoGeralChange($event)" class="avaliacao-slider">
+                            <span class="avaliacao-label">Avaliação Geral</span>
+                            <mat-slider min="0" max="5" step="1" class="avaliacao-slider" discrete>
+                                <input matSliderThumb [(ngModel)]="avaliacaoGeral" [ngModelOptions]="{standalone: true}">
                             </mat-slider>
                             <span class="avaliacao-numero">{{ avaliacaoGeral }}/5</span>
                         </div>
@@ -225,9 +225,9 @@
                             <h4>Avaliação Detalhada</h4>
 
                             <div *ngFor="let item of avaliacaoDetalhadaKeys" class="avaliacao-item">
-                                <label class="avaliacao-label">{{ getAvaliacaoLabel(item) }}</label>
-                                <mat-slider min="0" max="5" step="1" [value]="getAvaliacaoDetalhadaValue(item)"
-                                    (valueChange)="onAvaliacaoDetalhadaChange(item, $event)" class="avaliacao-slider">
+                                <span class="avaliacao-label">{{ getAvaliacaoLabel(item) }}</span>
+                                <mat-slider min="0" max="5" step="1" class="avaliacao-slider" discrete>
+                                    <input matSliderThumb [(ngModel)]="avaliacaoDetalhada[item]" [ngModelOptions]="{standalone: true}">
                                 </mat-slider>
                                 <span class="avaliacao-numero">{{ getAvaliacaoDetalhadaValue(item) }}/5</span>
                             </div>

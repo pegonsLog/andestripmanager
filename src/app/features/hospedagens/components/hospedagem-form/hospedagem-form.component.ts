@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -14,7 +14,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { Hospedagem, TipoHospedagem } from '../../../../models';
 import { HospedagensService } from '../../../../services/hospedagens.service';
@@ -26,6 +26,7 @@ import { CustomValidators } from '../../../../models/validators';
     imports: [
         CommonModule,
         ReactiveFormsModule,
+        FormsModule,
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
@@ -94,7 +95,7 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
     uploadingFoto = false;
 
     // Chaves para avaliação detalhada (para usar no template)
-    avaliacaoDetalhadaKeys = Object.keys(this.avaliacaoDetalhada);
+    avaliacaoDetalhadaKeys = Object.keys(this.avaliacaoDetalhada) as Array<keyof typeof this.avaliacaoDetalhada>;
 
     ngOnInit(): void {
         this.isEditMode = !!this.hospedagem;
@@ -103,9 +104,6 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
         if (this.hospedagem) {
             this.preencherFormulario();
         }
-
-        // Observar mudanças nas datas para calcular número de noites
-        this.observarMudancasDatas();
     }
 
     ngOnDestroy(): void {
@@ -155,42 +153,6 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
         }
     }
 
-    private observarMudancasDatas(): void {
-        const dataCheckIn = this.hospedagemForm.get('dataCheckIn');
-        const dataCheckOut = this.hospedagemForm.get('dataCheckOut');
-
-        if (dataCheckIn && dataCheckOut) {
-            dataCheckIn.valueChanges
-                .pipe(takeUntil(this.destroy$))
-                .subscribe(() => this.calcularNumeroNoites());
-
-            dataCheckOut.valueChanges
-                .pipe(takeUntil(this.destroy$))
-                .subscribe(() => this.calcularNumeroNoites());
-        }
-    }
-
-    private calcularNumeroNoites(): void {
-        const checkIn = this.hospedagemForm.get('dataCheckIn')?.value;
-        const checkOut = this.hospedagemForm.get('dataCheckOut')?.value;
-
-        if (checkIn && checkOut) {
-            const dataCheckIn = new Date(checkIn);
-            const dataCheckOut = new Date(checkOut);
-
-            if (dataCheckOut > dataCheckIn) {
-                const diffTime = dataCheckOut.getTime() - dataCheckIn.getTime();
-                const numeroNoites = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                // Atualizar o valor total se houver valor da diária
-                const valorDiaria = this.hospedagemForm.get('valorDiaria')?.value || 0;
-                if (valorDiaria > 0) {
-                    // Não há campo valorTotal no formulário, será calculado no serviço
-                }
-            }
-        }
-    }
-
     get numeroNoites(): number {
         const checkIn = this.hospedagemForm.get('dataCheckIn')?.value;
         const checkOut = this.hospedagemForm.get('dataCheckOut')?.value;
@@ -222,7 +184,6 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
                 const dadosHospedagem: Omit<Hospedagem, 'id' | 'criadoEm' | 'atualizadoEm'> = {
                     diaViagemId: this.diaViagemId,
                     viagemId: this.viagemId,
-                    usuarioId: '', // Será preenchido pelo serviço base
                     nome: formValue.nome,
                     tipo: formValue.tipo,
                     endereco: formValue.endereco,
@@ -238,18 +199,23 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
                     telefone: formValue.telefone || undefined,
                     email: formValue.email || undefined,
                     siteOficial: formValue.siteOficial || undefined,
-                    observacoes: formValue.observacoes || undefined
+                    observacoes: formValue.observacoes || undefined,
+                    avaliacao: this.avaliacaoGeral || undefined,
+                    avaliacaoDetalhada: this.avaliacaoDetalhada.qualidadeQuarto > 0 ? this.avaliacaoDetalhada : undefined
                 };
 
+                let hospedagemId: string;
+                
                 if (this.isEditMode && this.hospedagem?.id) {
                     await this.hospedagensService.altera(this.hospedagem.id, dadosHospedagem);
+                    hospedagemId = this.hospedagem.id;
                     this.snackBar.open('Hospedagem atualizada com sucesso!', 'Fechar', { duration: 3000 });
                 } else {
-                    const id = await this.hospedagensService.criarHospedagem(dadosHospedagem);
+                    hospedagemId = await this.hospedagensService.criarHospedagem(dadosHospedagem);
                     this.snackBar.open('Hospedagem criada com sucesso!', 'Fechar', { duration: 3000 });
                 }
 
-                this.hospedagemSalva.emit({ ...dadosHospedagem, id: this.hospedagem?.id || '' } as Hospedagem);
+                this.hospedagemSalva.emit({ ...dadosHospedagem, id: hospedagemId } as Hospedagem);
 
             } catch (error) {
                 console.error('Erro ao salvar hospedagem:', error);
@@ -333,10 +299,8 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
         this.avaliacaoGeral = valor;
     }
 
-    onAvaliacaoDetalhadaChange(campo: string, valor: number): void {
-        if (campo in this.avaliacaoDetalhada) {
-            (this.avaliacaoDetalhada as any)[campo] = valor;
-        }
+    onAvaliacaoDetalhadaChange(campo: keyof typeof this.avaliacaoDetalhada, valor: number): void {
+        this.avaliacaoDetalhada[campo] = valor;
     }
 
     getAvaliacaoMedia(): number {
@@ -395,8 +359,8 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
     }
 
     // Labels para avaliação detalhada
-    getAvaliacaoLabel(campo: string): string {
-        const labels: Record<string, string> = {
+    getAvaliacaoLabel(campo: keyof typeof this.avaliacaoDetalhada): string {
+        const labels: Record<keyof typeof this.avaliacaoDetalhada, string> = {
             qualidadeQuarto: 'Qualidade do Quarto',
             qualidadeAtendimento: 'Atendimento',
             limpeza: 'Limpeza',
@@ -406,10 +370,10 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
             cafeManha: 'Café da Manhã',
             wifi: 'Wi-Fi'
         };
-        return labels[campo] || campo;
+        return labels[campo];
     }
 
-    getAvaliacaoDetalhadaValue(campo: string): number {
-        return (this.avaliacaoDetalhada as any)[campo] || 0;
+    getAvaliacaoDetalhadaValue(campo: keyof typeof this.avaliacaoDetalhada): number {
+        return this.avaliacaoDetalhada[campo] || 0;
     }
 }

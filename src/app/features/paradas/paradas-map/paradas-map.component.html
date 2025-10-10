@@ -70,7 +70,7 @@
                         </div>
                         <span class="legend-label">{{ getTipoConfig(tipo).label }}</span>
                         <span class="legend-count">
-                            ({{ paradas.filter(p => p.tipo === tipo).length }})
+                            ({{ getContagemPorTipo(tipo) }})
                         </span>
                     </div>
                 </div>

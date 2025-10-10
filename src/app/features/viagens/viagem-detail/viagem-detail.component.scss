@@ -9,6 +9,228 @@ $success: #4caf50;
 .viagem-detail-container {
   font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif !important;
   --mdc-typography-font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden; // força esconder overflow em todo o componente
+}
+
+/* Esconde overflow na lista de paradas dentro da aba */
+.viagem-detail-container .paradas-list {
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Paradas - padronização dos cards ao estilo dos cards de dias */
+.parada-card {
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+  overflow: hidden; // garante que conteúdo não escape lateralmente
+  width: 100%;
+  box-sizing: border-box;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .parada-avatar {
+    background-color: var(--primary-color, #1976d2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  mat-card-header {
+    min-width: 0; // permite encolher dentro de flex
+    .titulo-container {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      .rota {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .nome {
+          font-weight: 600;
+          font-size: 16px;
+          color: rgba(0, 0, 0, 0.87);
+          min-width: 0;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
+      }
+
+      .subinfo {
+        margin-top: 4px;
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.6);
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+    }
+
+    .menu-button {
+      margin-left: auto;
+    }
+  }
+
+  // Garantir largura total do conteúdo
+  ::ng-deep .mat-mdc-card-content,
+  ::ng-deep mat-card-content {
+    display: block !important;
+    width: 100% !important;
+    * { box-sizing: border-box; }
+  }
+
+  // Evita overflow em seções do card
+  mat-card-header, mat-card-content, mat-card-actions {
+    min-width: 0;
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  mat-card-content {
+    .horarios-container {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important; // permite quebrar em duas linhas em telas estreitas
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background-color: rgba(0, 0, 0, 0.02);
+      border-radius: 8px;
+      width: 100% !important;
+      align-items: center !important;
+      overflow-x: hidden; // impede que a seção cause scroll horizontal
+
+      .horario-item {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px;
+        white-space: normal !important; // evita forçar uma única linha
+        flex: 1 1 220px; // base razoável para quebrar em telas menores
+        min-width: 0; // permite encolher sem estourar o container
+
+        .horario-icon {
+          color: var(--primary-color, #1976d2);
+          font-size: 18px !important;
+          width: 18px !important;
+          height: 18px !important;
+          flex-shrink: 0;
+          display: inline-flex !important;
+          vertical-align: middle !important;
+          margin-right: 4px;
+        }
+
+        .horario-label {
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.6);
+          font-weight: 500;
+        }
+
+        .horario-valor {
+          font-weight: 600;
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.87);
+        }
+      }
+    }
+
+    .custo-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+
+      .custo-label { color: rgba(0, 0, 0, 0.6); }
+      .custo-valor { font-weight: 600; }
+    }
+
+    .local-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      color: rgba(0, 0, 0, 0.8);
+    }
+
+    .observacoes-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background-color: rgba(255, 193, 7, 0.1);
+      border-radius: 8px;
+      border-left: 3px solid #ffc107;
+      width: 100%;
+      box-sizing: border-box;
+
+      .observacoes-icon {
+        color: #ff9800;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .observacoes-texto {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.4;
+        color: rgba(0, 0, 0, 0.7);
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+    }
+
+    .fotos-container {
+      .fotos-preview {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background-color: rgba(156, 39, 176, 0.1);
+        border-radius: 8px;
+        color: #9c27b0;
+        font-size: 14px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+
+  mat-card-actions {
+    button {
+      mat-icon {
+        margin-right: 4px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .parada-card {
+    mat-card-content {
+      .horarios-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  }
 }
 
 .viagem-detail-container {
@@ -18,6 +240,7 @@ $success: #4caf50;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  overflow-x: hidden; // evita scroll horizontal no container principal
 
   @media (max-width: 768px) {
     padding: 1rem;
@@ -178,6 +401,10 @@ $success: #4caf50;
         padding: 1rem;
       }
     }
+
+    .mat-mdc-tab-body-content {
+      overflow-x: hidden; // evita scroll horizontal do body
+    }
   }
 }
 
@@ -195,6 +422,7 @@ $success: #4caf50;
 
 .tab-content {
   min-height: 400px;
+  overflow-x: hidden; // evita scroll horizontal dentro da aba
 }
 
 /* Resumo */

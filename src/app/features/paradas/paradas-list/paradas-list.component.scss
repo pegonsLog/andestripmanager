@@ -1,6 +1,7 @@
 .paradas-list-container {
   width: 100%;
   font-family: "Montserrat", sans-serif;
+  overflow-x: hidden; // previne scroll horizontal no container raiz
 }
 
 // Header
@@ -52,6 +53,7 @@
 
 // Lista de Paradas
 .paradas-list {
+  overflow-x: hidden; // impede scroll horizontal na área da lista
   .loading-container {
     display: flex;
     flex-direction: column;
@@ -80,11 +82,19 @@
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 1.5rem;
     padding: 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden; // evita scroll horizontal
+    overflow-x: hidden; // evita scroll horizontal no container
 
     .parada-card {
       cursor: pointer;
       transition: all 0.3s ease;
       border: 1px solid transparent;
+      overflow: hidden; // garante que conteúdo interno não escape
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden; // garante que conteúdo não escape lateralmente
 
       &:hover {
         transform: translateY(-2px);
@@ -93,6 +103,8 @@
       }
 
       mat-card-header {
+        min-width: 0; // permite encolher dentro do grid
+        max-width: 100%;
         .parada-avatar {
           width: 40px;
           height: 40px;
@@ -114,16 +126,24 @@
           font-weight: 600;
           font-size: 1.1rem;
           color: var(--text-primary, #333);
+          min-width: 0;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         mat-card-subtitle {
           font-family: "Montserrat", sans-serif;
           color: var(--text-secondary, #666);
           font-size: 0.9rem;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
       }
 
       mat-card-content {
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden;
         .parada-info {
           display: flex;
           flex-direction: column;
@@ -134,6 +154,15 @@
             align-items: flex-start;
             gap: 0.5rem;
             font-size: 0.9rem;
+            flex-wrap: wrap; // permite quebra de linha
+            min-width: 0; // permite encolher em layouts flex
+
+            span {
+              min-width: 0;
+              overflow-wrap: anywhere; // quebra palavras muito longas
+              word-break: break-word;
+              white-space: normal; // evita nowrap implícito
+            }
 
             .info-icon {
               font-size: 1.2rem;
@@ -147,6 +176,8 @@
             .endereco-text {
               color: var(--text-secondary, #666);
               line-height: 1.4;
+              overflow-wrap: anywhere;
+              word-break: break-word;
             }
 
             .custo-text {
@@ -162,7 +193,9 @@
                 -webkit-line-clamp: 2;
                 line-clamp: 2; /* padrão */
                 -webkit-box-orient: vertical;
-                overflow: hidden;
+                overflow: hidden; // mantém clamp
+                overflow-wrap: anywhere; // evita overflow por palavras longas
+                word-break: break-word;
               }
             }
 
@@ -179,6 +212,7 @@
 
       mat-card-actions {
         padding: 0.5rem 1rem 1rem 1rem;
+        overflow-x: hidden; // evita que ações causem overflow
 
         button {
           &:hover {

@@ -304,16 +304,79 @@
                                     <div mat-card-avatar class="parada-avatar">
                                         <mat-icon>{{ getIconeParada(parada.tipo) }}</mat-icon>
                                     </div>
-                                    <mat-card-title>{{ parada.nome }}</mat-card-title>
-                                    <mat-card-subtitle>
-                                        {{ getTipoParadaTexto(parada.tipo) }}
-                                        <span *ngIf="parada.horaChegada"> • {{ parada.horaChegada }}</span>
-                                    </mat-card-subtitle>
+                                    <mat-card-title>
+                                        <div class="titulo-container">
+                                            <span class="nome">{{ parada.nome }}</span>
+                                            <div class="subinfo">{{ getDiaLabelParada(parada) }} • {{ getTipoParadaTexto(parada.tipo) }}</div>
+                                        </div>
+                                    </mat-card-title>
+
+                                    <!-- Menu de ações -->
+                                    <button mat-icon-button [matMenuTriggerFor]="menuParada" class="menu-button">
+                                        <mat-icon>more_vert</mat-icon>
+                                    </button>
+                                    <mat-menu #menuParada="matMenu">
+                                        <button mat-menu-item (click)="onVisualizarParada(parada)">
+                                            <mat-icon>visibility</mat-icon>
+                                            <span>Visualizar</span>
+                                        </button>
+                                        <button mat-menu-item (click)="onEditarParada(parada)" [disabled]="!podeEditar()">
+                                            <mat-icon>edit</mat-icon>
+                                            <span>Editar</span>
+                                        </button>
+                                        <mat-divider></mat-divider>
+                                        <button mat-menu-item (click)="onRemoverParada(parada)" class="delete-action" [disabled]="!podeEditar()">
+                                            <mat-icon>delete</mat-icon>
+                                            <span>Remover</span>
+                                        </button>
+                                    </mat-menu>
                                 </mat-card-header>
+
                                 <mat-card-content>
-                                    <p *ngIf="parada.endereco">{{ parada.endereco }}</p>
-                                    <p *ngIf="parada.observacoes">{{ parada.observacoes }}</p>
+                                    <!-- Horários -->
+                                    <div class="horarios-container" *ngIf="parada.horaChegada || parada.horaSaida">
+                                        <div class="horario-item" *ngIf="parada.horaChegada"><mat-icon class="horario-icon" inline>schedule</mat-icon><span class="horario-label">Chegada:</span> <span class="horario-valor">{{ parada.horaChegada }}</span></div>
+                                        <div class="horario-item" *ngIf="parada.horaSaida"><mat-icon class="horario-icon" inline>flag</mat-icon><span class="horario-label">Saída:</span> <span class="horario-valor">{{ parada.horaSaida }}</span></div>
+                                    </div>
+
+                                    <!-- Custo -->
+                                    <div class="custo-container" *ngIf="parada.custo">
+                                        <mat-icon inline>attach_money</mat-icon>
+                                        <span class="custo-label">Custo:</span>
+                                        <span class="custo-valor">{{ formatarMoeda(parada.custo!) }}</span>
+                                    </div>
+
+                                    <!-- Local -->
+                                    <div class="local-container" *ngIf="parada.endereco">
+                                        <mat-icon inline>place</mat-icon>
+                                        <span>{{ parada.endereco }}</span>
+                                    </div>
+
+                                    <!-- Observações -->
+                                    <div class="observacoes-container" *ngIf="parada.observacoes">
+                                        <mat-icon class="observacoes-icon">note</mat-icon>
+                                        <p class="observacoes-texto">{{ parada.observacoes }}</p>
+                                    </div>
+
+                                    <!-- Fotos -->
+                                    <div class="fotos-container" *ngIf="parada.fotos && parada.fotos.length > 0">
+                                        <div class="fotos-preview">
+                                            <mat-icon>photo_library</mat-icon>
+                                            <span>{{ parada.fotos.length }} foto(s)</span>
+                                        </div>
+                                    </div>
                                 </mat-card-content>
+
+                                <mat-card-actions align="end">
+                                    <button mat-button (click)="onVisualizarParada(parada)">
+                                        <mat-icon>visibility</mat-icon>
+                                        Detalhes
+                                    </button>
+                                    <button mat-button color="primary" (click)="onEditarParada(parada)" [disabled]="!podeEditar()">
+                                        <mat-icon>edit</mat-icon>
+                                        Editar
+                                    </button>
+                                </mat-card-actions>
                             </mat-card>
                         </div>
                     </div>
@@ -328,7 +391,7 @@
                 </ng-template>
 
                 <div class="tab-content">
-                    <div class="placeholder-content">
+                    <div *ngIf="hospedagens().length === 0" class="placeholder-content">
                         <mat-icon class="placeholder-icon">hotel</mat-icon>
                         <h3>Hospedagens</h3>
                         <p>Gerencie reservas, custos e avaliações das hospedagens.</p>
@@ -336,6 +399,26 @@
                             <mat-icon>add</mat-icon>
                             Adicionar Hospedagem
                         </button>
+                    </div>
+
+                    <div *ngIf="hospedagens().length > 0" class="content-list">
+                        <div class="list-header">
+                            <h3>Hospedagens ({{ hospedagens().length }})</h3>
+                            <button mat-raised-button color="primary" (click)="onAdicionarHospedagem()">
+                                <mat-icon>add</mat-icon>
+                                Adicionar Hospedagem
+                            </button>
+                        </div>
+
+                        <div class="hospedagens-list">
+                            <app-hospedagem-card
+                                *ngFor="let h of hospedagens(); trackBy: trackByFn"
+                                [hospedagem]="h"
+                                (visualizar)="onVisualizarHospedagem($event)"
+                                (editar)="onEditarHospedagem($event)"
+                                (excluir)="onRemoverHospedagem($event)">
+                            </app-hospedagem-card>
+                        </div>
                     </div>
                 </div>
             </mat-tab>
