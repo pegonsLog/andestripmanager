@@ -11,7 +11,7 @@ export const environment = {
         measurementId: "G-63GWRS6QVR"
     },
     weather: {
-        apiKey: "YOUR_OPENWEATHER_API_KEY", // Substitua pela sua chave da OpenWeatherMap
+        apiKey: "de983f57a293bcb2358f6f182d5fb76e", // Substitua pela sua chave da OpenWeatherMap
         baseUrl: "https://api.openweathermap.org/data/2.5",
         units: "metric", // Celsius
         lang: "pt_br"

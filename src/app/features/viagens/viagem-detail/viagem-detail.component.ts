@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, signal }
 import { CommonModule, DatePipe } from '@angular/common';
 
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, BehaviorSubject } from 'rxjs';
-import { takeUntil, switchMap, tap, catchError } from 'rxjs/operators';
+import { Subject, BehaviorSubject, of } from 'rxjs';
+import { takeUntil, switchMap, catchError } from 'rxjs/operators';
 
 // Angular Material
 import { MatTabsModule } from '@angular/material/tabs';
@@ -20,11 +20,15 @@ import { MatDividerModule } from '@angular/material/divider';
 
 // Models e Services
 import { Viagem, StatusViagem, DiaViagem, Parada, Hospedagem, Custo } from '../../../models';
+import { Manutencao } from '../../../models/manutencao.interface';
+import { DiarioBordo } from '../../../models/diario-bordo.interface';
 import { ViagensService } from '../../../services/viagens.service';
 import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { ParadasService } from '../../../services/paradas.service';
 import { HospedagensService } from '../../../services/hospedagens.service';
 import { CustosService } from '../../../services/custos.service';
+import { ManutencoesService } from '../../../services/manutencoes.service';
+import { DiarioBordoService } from '../../../services/diario-bordo.service';
 
 // Componentes
 import { ViagemFormComponent } from '../viagem-form/viagem-form.component';
@@ -36,6 +40,12 @@ import { SelectDiaDialogComponent, SelectDiaDialogData } from '../../paradas/sel
 import { HospedagemFormComponent } from '../../hospedagens/components/hospedagem-form/hospedagem-form.component';
 import { HospedagemDetailDialogComponent, HospedagemDetailDialogData } from '../../hospedagens/components/hospedagem-detail-dialog/hospedagem-detail-dialog.component';
 import { HospedagemCardComponent } from '../../hospedagens/components/hospedagem-card/hospedagem-card.component';
+import { CustoFormDialogComponent, CustoFormDialogData } from '../../custos/components/custo-form-dialog/custo-form-dialog.component';
+import { ManutencaoFormDialogComponent, ManutencaoFormDialogData } from '../../manutencoes/components/manutencao-form-dialog/manutencao-form-dialog.component';
+import { ManutencaoCardComponent } from '../../manutencoes/components/manutencao-card/manutencao-card.component';
+import { DiarioEntradaFormDialogComponent, DiarioEntradaFormDialogData } from '../../diario/components/diario-entrada-form-dialog/diario-entrada-form-dialog.component';
+import { DiarioEntradaCardComponent } from '../../diario/components/diario-entrada-card/diario-entrada-card.component';
+import { ClimaViagemComponent } from '../../clima/components/clima-viagem/clima-viagem.component';
 
 @Component({
     selector: 'app-viagem-detail',
@@ -56,7 +66,10 @@ import { HospedagemCardComponent } from '../../hospedagens/components/hospedagem
         DatePipe,
         ViagemFormComponent,
         DiaViagemCardComponent,
-        HospedagemCardComponent
+        HospedagemCardComponent,
+        ManutencaoCardComponent,
+        DiarioEntradaCardComponent,
+        ClimaViagemComponent
     ],
     templateUrl: './viagem-detail.component.html',
     styleUrls: ['./viagem-detail.component.scss'],
@@ -70,6 +83,8 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
     private paradasService = inject(ParadasService);
     private hospedagensService = inject(HospedagensService);
     private custosService = inject(CustosService);
+    private manutencoesService = inject(ManutencoesService);
+    private diarioBordoService = inject(DiarioBordoService);
     private snackBar = inject(MatSnackBar);
     private dialog = inject(MatDialog);
     private destroy$ = new Subject<void>();
@@ -89,18 +104,24 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
     paradas = signal<Parada[]>([]);
     hospedagens = signal<Hospedagem[]>([]);
     custos = signal<Custo[]>([]);
+    manutencoes = signal<Manutencao[]>([]);
+    entradasDiario = signal<DiarioBordo[]>([]);
 
     // Estatísticas calculadas
     estatisticas = signal<{
         totalDias: number;
         totalParadas: number;
         totalHospedagens: number;
+        totalManutencoes: number;
+        totalEntradasDiario: number;
         custoTotal: number;
         distanciaTotal: number;
     }>({
         totalDias: 0,
         totalParadas: 0,
         totalHospedagens: 0,
+        totalManutencoes: 0,
+        totalEntradasDiario: 0,
         custoTotal: 0,
         distanciaTotal: 0
     });
@@ -175,6 +196,8 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
      * Carrega dados da viagem
      */
     private loadViagem(): void {
+        this.isLoading.set(true);
+        
         this.route.params
             .pipe(
                 takeUntil(this.destroy$),
@@ -185,12 +208,12 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                     }
                     return this.viagensService.recuperarPorId(viagemId);
                 }),
-                tap(() => this.isLoading.set(true)),
                 catchError(error => {
                     console.error('Erro ao carregar viagem:', error);
                     this.showError('Erro ao carregar dados da viagem');
+                    this.isLoading.set(false);
                     this.router.navigate(['/viagens']);
-                    throw error;
+                    return of(undefined);
                 })
             )
             .subscribe({
@@ -270,6 +293,32 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                 }
             });
 
+        // Carregar manutenções da viagem
+        this.manutencoesService.recuperarPorViagem(viagemId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (manutencoes) => {
+                    this.manutencoes.set(manutencoes);
+                    this.updateEstatisticas();
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar manutenções:', error);
+                }
+            });
+
+        // Carregar entradas do diário
+        this.diarioBordoService.obterEntradasDaViagem(viagemId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (entradas) => {
+                    this.entradasDiario.set(entradas);
+                    this.updateEstatisticas();
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar entradas do diário:', error);
+                }
+            });
+
         this.isLoadingRelatedData.set(false);
     }
 
@@ -281,6 +330,8 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
         const paradas = this.paradas();
         const hospedagens = this.hospedagens();
         const custos = this.custos();
+        const manutencoes = this.manutencoes();
+        const entradasDiario = this.entradasDiario();
 
         const distanciaTotal = dias.reduce((total, dia) => total + (dia.distanciaPercorrida || 0), 0);
         const custoTotal = custos.reduce((total, custo) => total + custo.valor, 0);
@@ -289,9 +340,31 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
             totalDias: dias.length,
             totalParadas: paradas.length,
             totalHospedagens: hospedagens.length,
+            totalManutencoes: manutencoes.length,
+            totalEntradasDiario: entradasDiario.length,
             custoTotal,
             distanciaTotal
         });
+    }
+
+    /**
+     * Carrega os custos da viagem
+     */
+    private carregarCustos(): void {
+        const viagem = this.viagem();
+        if (!viagem?.id) return;
+
+        this.custosService.listarCustosViagem(viagem.id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (custos) => {
+                    this.custos.set(custos);
+                    this.updateEstatisticas();
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar custos:', error);
+                }
+            });
     }
 
     /**
@@ -594,6 +667,20 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                     this.custosService.listarCustosViagem(viagemId)
                         .pipe(takeUntil(this.destroy$))
                         .subscribe(custos => this.custos.set(custos));
+                }
+                break;
+            case 6: // Manutenção
+                if (this.manutencoes().length === 0) {
+                    this.manutencoesService.recuperarPorViagem(viagemId)
+                        .pipe(takeUntil(this.destroy$))
+                        .subscribe(manutencoes => this.manutencoes.set(manutencoes));
+                }
+                break;
+            case 7: // Diário
+                if (this.entradasDiario().length === 0) {
+                    this.diarioBordoService.obterEntradasDaViagem(viagemId)
+                        .pipe(takeUntil(this.destroy$))
+                        .subscribe(entradas => this.entradasDiario.set(entradas));
                 }
                 break;
         }
@@ -986,34 +1073,234 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
 
     onAdicionarCusto(): void {
         const viagem = this.viagem();
-        if (viagem?.id) {
-            console.log('Adicionar novo custo para viagem:', viagem.id);
-            this.showSuccess('Funcionalidade de adicionar custo será implementada em breve');
-        }
-    }
+        if (!viagem?.id) return;
 
-    onAtualizarPrevisaoTempo(): void {
-        const viagem = this.viagem();
-        if (viagem?.id) {
-            console.log('Atualizar previsão do tempo para viagem:', viagem.id);
-            this.showSuccess('Funcionalidade de previsão do tempo será implementada em breve');
-        }
+        const dialogData: CustoFormDialogData = {
+            viagemId: viagem.id
+        };
+
+        const dialogRef = this.dialog.open(CustoFormDialogComponent, {
+            width: '720px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data: dialogData
+        });
+
+        dialogRef.afterClosed().subscribe(custo => {
+            if (custo) {
+                this.showSuccess('Custo adicionado com sucesso!');
+                this.carregarCustos();
+            }
+        });
     }
 
     onRegistrarManutencao(): void {
         const viagem = this.viagem();
-        if (viagem?.id) {
-            console.log('Registrar manutenção para viagem:', viagem.id);
-            this.showSuccess('Funcionalidade de manutenção será implementada em breve');
+        if (!viagem?.id) return;
+
+        const dialogData: ManutencaoFormDialogData = {
+            viagemId: viagem.id
+        };
+
+        const dialogRef = this.dialog.open(ManutencaoFormDialogComponent, {
+            width: '900px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data: dialogData
+        });
+
+        dialogRef.afterClosed().subscribe(async (manutencao: Manutencao | null) => {
+            if (manutencao) {
+                this.showSuccess('Manutenção registrada com sucesso!');
+                // Recarregar manutenções
+                const atualizadas = await this.manutencoesService.recuperarPorViagem(viagem.id!).toPromise();
+                this.manutencoes.set(atualizadas || []);
+                this.updateEstatisticas();
+            }
+        });
+    }
+
+    onVisualizarManutencao(manutencao: Manutencao): void {
+        // TODO: Implementar dialog de visualização de manutenção
+        console.log('Visualizar manutenção:', manutencao.id);
+        this.showSuccess('Visualização detalhada será implementada em breve');
+    }
+
+    onEditarManutencao(manutencao: Manutencao): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
         }
+        const viagem = this.viagem();
+        if (!viagem?.id || !manutencao.id) return;
+
+        const dialogData: ManutencaoFormDialogData = {
+            viagemId: viagem.id,
+            manutencao
+        };
+
+        const dialogRef = this.dialog.open(ManutencaoFormDialogComponent, {
+            width: '900px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data: dialogData
+        });
+
+        dialogRef.afterClosed().subscribe(async (manutencaoAtualizada: Manutencao | null) => {
+            if (manutencaoAtualizada) {
+                this.showSuccess('Manutenção atualizada com sucesso!');
+                const atualizadas = await this.manutencoesService.recuperarPorViagem(viagem.id!).toPromise();
+                this.manutencoes.set(atualizadas || []);
+                this.updateEstatisticas();
+            }
+        });
+    }
+
+    onRemoverManutencao(manutencao: Manutencao): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
+        }
+        const viagem = this.viagem();
+        if (!viagem?.id || !manutencao.id) return;
+
+        const dialogData: ConfirmationDialogData = {
+            titulo: 'Excluir Manutenção',
+            mensagem: `Você realmente deseja excluir o registro de manutenção "${manutencao.descricao}"? Esta ação não pode ser desfeita.`,
+            textoConfirmar: 'Excluir',
+            textoCancelar: 'Cancelar',
+            tipo: 'danger',
+            icone: 'delete_forever'
+        };
+
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '520px',
+            maxWidth: '95vw',
+            data: dialogData,
+            disableClose: true
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (confirmado) => {
+            if (confirmado === true) {
+                try {
+                    await this.manutencoesService.remove(manutencao.id!);
+                    const atualizadas = await this.manutencoesService.recuperarPorViagem(viagem.id!).toPromise();
+                    this.manutencoes.set(atualizadas || []);
+                    this.updateEstatisticas();
+                    this.showSuccess('Manutenção excluída com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao excluir manutenção:', error);
+                    this.showError('Erro ao excluir manutenção. Tente novamente.');
+                }
+            }
+        });
     }
 
     onNovaEntradaDiario(): void {
         const viagem = this.viagem();
-        if (viagem?.id) {
-            console.log('Nova entrada no diário para viagem:', viagem.id);
-            this.showSuccess('Funcionalidade de diário será implementada em breve');
+        if (!viagem?.id) return;
+
+        const dialogData: DiarioEntradaFormDialogData = {
+            viagemId: viagem.id
+        };
+
+        const dialogRef = this.dialog.open(DiarioEntradaFormDialogComponent, {
+            width: '700px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data: dialogData
+        });
+
+        dialogRef.afterClosed().subscribe(async (sucesso: boolean) => {
+            if (sucesso) {
+                this.showSuccess('Entrada criada com sucesso!');
+                // Recarregar entradas
+                const atualizadas = await this.diarioBordoService.obterEntradasDaViagem(viagem.id!).toPromise();
+                this.entradasDiario.set(atualizadas || []);
+                this.updateEstatisticas();
+            }
+        });
+    }
+
+    onVisualizarEntradaDiario(entrada: DiarioBordo): void {
+        // TODO: Implementar dialog de visualização detalhada
+        console.log('Visualizar entrada:', entrada.id);
+        this.showSuccess('Visualização detalhada será implementada em breve');
+    }
+
+    onEditarEntradaDiario(entrada: DiarioBordo): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
         }
+        const viagem = this.viagem();
+        if (!viagem?.id || !entrada.id) return;
+
+        const dialogData: DiarioEntradaFormDialogData = {
+            viagemId: viagem.id,
+            entrada
+        };
+
+        const dialogRef = this.dialog.open(DiarioEntradaFormDialogComponent, {
+            width: '700px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data: dialogData
+        });
+
+        dialogRef.afterClosed().subscribe(async (sucesso: boolean) => {
+            if (sucesso) {
+                this.showSuccess('Entrada atualizada com sucesso!');
+                const atualizadas = await this.diarioBordoService.obterEntradasDaViagem(viagem.id!).toPromise();
+                this.entradasDiario.set(atualizadas || []);
+                this.updateEstatisticas();
+            }
+        });
+    }
+
+    onRemoverEntradaDiario(entrada: DiarioBordo): void {
+        if (!this.podeEditar()) {
+            this.showError('Esta viagem não pode ser editada.');
+            return;
+        }
+        const viagem = this.viagem();
+        if (!viagem?.id || !entrada.id) return;
+
+        const dialogData: ConfirmationDialogData = {
+            titulo: 'Excluir Entrada do Diário',
+            mensagem: `Você realmente deseja excluir a entrada "${entrada.titulo || 'Sem título'}"? Esta ação não pode ser desfeita.`,
+            textoConfirmar: 'Excluir',
+            textoCancelar: 'Cancelar',
+            tipo: 'danger',
+            icone: 'delete_forever'
+        };
+
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '520px',
+            maxWidth: '95vw',
+            data: dialogData,
+            disableClose: true
+        });
+
+        dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (confirmado) => {
+            if (confirmado === true) {
+                try {
+                    await this.diarioBordoService.removerEntrada(entrada.id!);
+                    const atualizadas = await this.diarioBordoService.obterEntradasDaViagem(viagem.id!).toPromise();
+                    this.entradasDiario.set(atualizadas || []);
+                    this.updateEstatisticas();
+                    this.showSuccess('Entrada excluída com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao excluir entrada:', error);
+                    this.showError('Erro ao excluir entrada. Tente novamente.');
+                }
+            }
+        });
     }
 
     /**

@@ -15,7 +15,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { DiaViagem } from '../../../models';
+import { DiaViagem, Viagem } from '../../../models';
 import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { ViagensService } from '../../../services/viagens.service';
 
@@ -68,7 +68,10 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
 
     // Dados
     diaAtual?: DiaViagem;
+    viagemAtual?: Viagem;
     proximoNumeroDia = 1;
+    diasDisponiveis: Date[] = [];
+    diasJaCadastrados: string[] = [];
 
     // Opções para selects
     tiposEstrada = [
@@ -86,6 +89,7 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
             this.isEditMode = true;
             this.loadDiaData();
         } else if (this.viagemId) {
+            this.loadViagemData();
             this.loadProximoNumeroDia();
         }
     }
@@ -100,6 +104,7 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
      */
     private initializeForm(): void {
         this.diaForm = this.fb.group({
+            dataDisponivel: [''],
             data: ['', [Validators.required]],
             numeroDia: [1, [Validators.required, Validators.min(1)]],
             origem: ['', [Validators.required, Validators.minLength(2)]],
@@ -111,6 +116,15 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
             tipoEstrada: ['rodovia'],
             observacoes: ['']
         });
+
+        // Quando selecionar um dia disponível, atualiza o campo data
+        this.diaForm.get('dataDisponivel')?.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((data) => {
+                if (data) {
+                    this.diaForm.patchValue({ data }, { emitEvent: false });
+                }
+            });
 
         // Validação customizada para datas sequenciais
         this.diaForm.get('data')?.valueChanges
@@ -163,6 +177,27 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
     }
 
     /**
+     * Carrega dados da viagem
+     */
+    private loadViagemData(): void {
+        if (!this.viagemId) return;
+
+        this.viagensService.recuperarPorId(this.viagemId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (viagem) => {
+                    if (viagem) {
+                        this.viagemAtual = viagem;
+                        this.calcularDiasDisponiveis();
+                    }
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar viagem:', error);
+                }
+            });
+    }
+
+    /**
      * Carrega o próximo número de dia disponível
      */
     private loadProximoNumeroDia(): void {
@@ -174,11 +209,41 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
                 next: (dias) => {
                     this.proximoNumeroDia = dias.length + 1;
                     this.diaForm.patchValue({ numeroDia: this.proximoNumeroDia });
+                    
+                    // Armazena as datas já cadastradas
+                    this.diasJaCadastrados = dias.map(d => d.data);
+                    this.calcularDiasDisponiveis();
                 },
                 error: (error) => {
                     console.error('Erro ao carregar dias existentes:', error);
                 }
             });
+    }
+
+    /**
+     * Calcula os dias disponíveis do período da viagem excluindo os já cadastrados
+     */
+    private calcularDiasDisponiveis(): void {
+        if (!this.viagemAtual) return;
+
+        const dataInicio = new Date(this.viagemAtual.dataInicio);
+        const dataFim = new Date(this.viagemAtual.dataFim);
+        const dias: Date[] = [];
+
+        // Gera todas as datas do período
+        const dataAtual = new Date(dataInicio);
+        while (dataAtual <= dataFim) {
+            const dataStr = dataAtual.toISOString().split('T')[0];
+            
+            // Adiciona apenas se não estiver já cadastrada
+            if (!this.diasJaCadastrados.includes(dataStr)) {
+                dias.push(new Date(dataAtual));
+            }
+            
+            dataAtual.setDate(dataAtual.getDate() + 1);
+        }
+
+        this.diasDisponiveis = dias;
     }
 
     /**
@@ -444,5 +509,20 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
         const mins = minutos % 60;
 
         return `${horas}h ${mins}min`;
+    }
+
+    /**
+     * Formata data para exibição no seletor
+     */
+    formatarDataSeletor(data: Date): string {
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        
+        const diaSemana = diasSemana[data.getDay()];
+        const dia = data.getDate().toString().padStart(2, '0');
+        const mes = meses[data.getMonth()];
+        const ano = data.getFullYear();
+        
+        return `${diaSemana}, ${dia} ${mes} ${ano}`;
     }
 }

@@ -169,8 +169,8 @@ export class ErrorHandlerService {
 
         let tipo = TipoErro.DESCONHECIDO;
         let mensagemUsuario = 'Ocorreu um erro inesperado';
-        let mensagemTecnica = error?.message || 'Erro desconhecido';
-        let codigo = error?.code;
+        const mensagemTecnica = error?.message || 'Erro desconhecido';
+        const codigo = error?.code;
         let podeRetentar = true;
         let acoesSugeridas: string[] = [];
 

@@ -1,26 +1,27 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Função auxiliar para verificar se o usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
     // Função auxiliar para verificar se o usuário é o proprietário
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
     // Verifica se a viagem pertence ao usuário autenticado
     function ownsViagemId(viagemId) {
       return viagemId != null &&
-             request.auth != null &&
+             isAuthenticated() &&
              get(/databases/$(database)/documents/viagens/$(viagemId)).data.usuarioId == request.auth.uid;
-    }
-
-    // Função para verificar se o documento existe
-    function documentExists(path) {
-      return exists(path);
     }
 
     // Usuários - só podem acessar seus próprios dados
     match /users/{userId} {
       allow read, write: if isOwner(userId);
+      allow create: if isAuthenticated();
     }
 
     // Viagens - só o proprietário pode acessar

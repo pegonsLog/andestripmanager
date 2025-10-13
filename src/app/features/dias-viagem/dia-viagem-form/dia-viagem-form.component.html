@@ -17,8 +17,31 @@
         </div>
 
         <!-- Formulário -->
-        <form [formGroup]="diaForm" (ngSubmit)="onSalvar()" *ngIf="!(isLoading$ | async)">
+        <form [formGroup]="diaForm" (ngSubmit)="onSalvar()" *ngIf="(isLoading$ | async) === false">
             <mat-card-content>
+                <!-- Seletor de Dias Disponíveis (apenas no modo de criação) -->
+                <div class="form-row" *ngIf="!isEditMode && diasDisponiveis.length > 0">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Selecione um dia disponível do período da viagem</mat-label>
+                        <mat-select formControlName="dataDisponivel">
+                            <mat-option *ngFor="let dia of diasDisponiveis" [value]="dia">
+                                {{ formatarDataSeletor(dia) }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matSuffix>event_available</mat-icon>
+                        <mat-hint>Selecione uma data ou use o calendário abaixo</mat-hint>
+                    </mat-form-field>
+                </div>
+
+                <!-- Aviso se não houver dias disponíveis -->
+                <div class="alert-container" *ngIf="!isEditMode && diasDisponiveis.length === 0 && viagemAtual">
+                    <mat-icon class="alert-icon">warning</mat-icon>
+                    <div class="alert-content">
+                        <p><strong>Atenção:</strong> Todos os dias do período da viagem já foram cadastrados.</p>
+                        <p>Período: {{ viagemAtual.dataInicio | date:'dd/MM/yyyy' }} até {{ viagemAtual.dataFim | date:'dd/MM/yyyy' }}</p>
+                    </div>
+                </div>
+
                 <!-- Linha 1: Data e Número do Dia -->
                 <div class="form-row">
                     <mat-form-field appearance="outline" class="form-field">
@@ -27,6 +50,7 @@
                         <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
                         <mat-datepicker #datePicker></mat-datepicker>
                         <mat-error>{{ getErrorMessage('data') }}</mat-error>
+                        <mat-hint *ngIf="!isEditMode">Ou selecione acima um dia disponível</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="form-field">
@@ -131,7 +155,7 @@
                 <button mat-raised-button color="primary" type="submit"
                     [disabled]="diaForm.invalid || (isSaving$ | async)">
                     <mat-spinner diameter="20" *ngIf="isSaving$ | async"></mat-spinner>
-                    <mat-icon *ngIf="!(isSaving$ | async)">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+                    <mat-icon *ngIf="(isSaving$ | async) === false">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
                     {{ (isSaving$ | async) ? 'Salvando...' : (isEditMode ? 'Salvar' : 'Criar Dia') }}
                 </button>
             </mat-card-actions>

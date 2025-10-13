@@ -487,15 +487,7 @@
                 </ng-template>
 
                 <div class="tab-content">
-                    <div class="placeholder-content">
-                        <mat-icon class="placeholder-icon">wb_sunny</mat-icon>
-                        <h3>Informações Climáticas</h3>
-                        <p>Acompanhe a previsão do tempo e registre condições observadas.</p>
-                        <button mat-raised-button color="primary" (click)="onAtualizarPrevisaoTempo()">
-                            <mat-icon>refresh</mat-icon>
-                            Atualizar Previsão
-                        </button>
-                    </div>
+                    <app-clima-viagem [viagemId]="viagem()!.id!"></app-clima-viagem>
                 </div>
             </mat-tab>
 
@@ -507,7 +499,7 @@
                 </ng-template>
 
                 <div class="tab-content">
-                    <div class="placeholder-content">
+                    <div *ngIf="manutencoes().length === 0" class="placeholder-content">
                         <mat-icon class="placeholder-icon">build</mat-icon>
                         <h3>Controle de Manutenção</h3>
                         <p>Registre manutenções preventivas e corretivas da motocicleta.</p>
@@ -515,6 +507,27 @@
                             <mat-icon>add</mat-icon>
                             Registrar Manutenção
                         </button>
+                    </div>
+
+                    <div *ngIf="manutencoes().length > 0" class="content-list">
+                        <div class="list-header">
+                            <h3>Manutenções ({{ manutencoes().length }})</h3>
+                            <button mat-raised-button color="primary" (click)="onRegistrarManutencao()">
+                                <mat-icon>add</mat-icon>
+                                Registrar Manutenção
+                            </button>
+                        </div>
+
+                        <div class="manutencoes-list">
+                            <app-manutencao-card
+                                *ngFor="let manutencao of manutencoes(); trackBy: trackByFn"
+                                [manutencao]="manutencao"
+                                [podeEditar]="podeEditar()"
+                                (visualizar)="onVisualizarManutencao($event)"
+                                (editar)="onEditarManutencao($event)"
+                                (excluir)="onRemoverManutencao($event)">
+                            </app-manutencao-card>
+                        </div>
                     </div>
                 </div>
             </mat-tab>
@@ -527,7 +540,7 @@
                 </ng-template>
 
                 <div class="tab-content">
-                    <div class="placeholder-content">
+                    <div *ngIf="entradasDiario().length === 0" class="placeholder-content">
                         <mat-icon class="placeholder-icon">book</mat-icon>
                         <h3>Diário de Bordo</h3>
                         <p>Documente suas experiências, fotos e memórias da viagem.</p>
@@ -535,6 +548,27 @@
                             <mat-icon>add</mat-icon>
                             Nova Entrada
                         </button>
+                    </div>
+
+                    <div *ngIf="entradasDiario().length > 0" class="content-list">
+                        <div class="list-header">
+                            <h3>Entradas do Diário ({{ entradasDiario().length }})</h3>
+                            <button mat-raised-button color="primary" (click)="onNovaEntradaDiario()">
+                                <mat-icon>add</mat-icon>
+                                Nova Entrada
+                            </button>
+                        </div>
+
+                        <div class="diario-list">
+                            <app-diario-entrada-card
+                                *ngFor="let entrada of entradasDiario(); trackBy: trackByFn"
+                                [entrada]="entrada"
+                                [podeEditar]="podeEditar()"
+                                (visualizar)="onVisualizarEntradaDiario($event)"
+                                (editar)="onEditarEntradaDiario($event)"
+                                (excluir)="onRemoverEntradaDiario($event)">
+                            </app-diario-entrada-card>
+                        </div>
                     </div>
                 </div>
             </mat-tab>

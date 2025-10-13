@@ -35,6 +35,7 @@ export interface ClimaObservado {
  */
 export interface Clima extends BaseEntity {
     diaViagemId: string;
+    usuarioId: string;
     data: string; // YYYY-MM-DD
     cidade: string;
     coordenadas: {

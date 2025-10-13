@@ -1,0 +1,112 @@
+<mat-card class="manutencao-card">
+    <mat-card-header>
+        <div mat-card-avatar class="manutencao-avatar" [class]="'avatar-' + getCorTipo(manutencao.tipo)">
+            <mat-icon>{{ getIconeTipo(manutencao.tipo) }}</mat-icon>
+        </div>
+        
+        <mat-card-title>
+            <div class="titulo-container">
+                <span class="descricao">{{ manutencao.descricao }}</span>
+                <mat-chip [color]="getCorTipo(manutencao.tipo)">
+                    {{ getLabelTipo(manutencao.tipo) }}
+                </mat-chip>
+            </div>
+        </mat-card-title>
+        
+        <mat-card-subtitle>
+            <div class="subtitle-info">
+                <span class="data">
+                    <mat-icon inline>event</mat-icon>
+                    {{ formatarData(manutencao.data) }}
+                </span>
+                <span class="quilometragem">
+                    <mat-icon inline>speed</mat-icon>
+                    {{ manutencao.quilometragem.toLocaleString('pt-BR') }} km
+                </span>
+            </div>
+        </mat-card-subtitle>
+
+        <!-- Menu de ações -->
+        <button mat-icon-button [matMenuTriggerFor]="menuManutencao" class="menu-button">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menuManutencao="matMenu">
+            <button mat-menu-item (click)="onVisualizar()">
+                <mat-icon>visibility</mat-icon>
+                <span>Visualizar</span>
+            </button>
+            <button mat-menu-item (click)="onEditar()" [disabled]="!podeEditar">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="onExcluir()" class="delete-action" [disabled]="!podeEditar">
+                <mat-icon>delete</mat-icon>
+                <span>Excluir</span>
+            </button>
+        </mat-menu>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Custo -->
+        <div class="info-row custo-info">
+            <mat-icon>attach_money</mat-icon>
+            <span class="label">Custo Total:</span>
+            <span class="valor-destaque">{{ formatarMoeda(manutencao.custo) }}</span>
+        </div>
+
+        <!-- Local e Oficina -->
+        <div class="info-row" *ngIf="manutencao.local || manutencao.oficina">
+            <mat-icon>place</mat-icon>
+            <div class="info-content">
+                <span *ngIf="manutencao.local">{{ manutencao.local }}</span>
+                <span *ngIf="manutencao.oficina" class="oficina">{{ manutencao.oficina }}</span>
+            </div>
+        </div>
+
+        <!-- Itens/Serviços -->
+        <div class="itens-info" *ngIf="manutencao.itensServicos && manutencao.itensServicos.length > 0">
+            <div class="itens-header">
+                <mat-icon>list</mat-icon>
+                <span class="label">{{ manutencao.itensServicos.length }} item(ns) de serviço</span>
+            </div>
+            <div class="itens-preview">
+                <mat-chip-listbox>
+                    <mat-chip *ngFor="let item of manutencao.itensServicos.slice(0, 3)">
+                        {{ item.nome }}
+                    </mat-chip>
+                    <mat-chip *ngIf="manutencao.itensServicos.length > 3">
+                        +{{ manutencao.itensServicos.length - 3 }} mais
+                    </mat-chip>
+                </mat-chip-listbox>
+            </div>
+        </div>
+
+        <!-- Próxima Manutenção -->
+        <div class="proxima-manutencao" *ngIf="manutencao.proximaManutencaoKm || manutencao.proximaManutencaoData">
+            <mat-icon>schedule</mat-icon>
+            <div class="proxima-info">
+                <span class="label">Próxima Manutenção:</span>
+                <span *ngIf="manutencao.proximaManutencaoKm">{{ manutencao.proximaManutencaoKm.toLocaleString('pt-BR') }} km</span>
+                <span *ngIf="manutencao.proximaManutencaoData">{{ formatarData(manutencao.proximaManutencaoData) }}</span>
+            </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="observacoes" *ngIf="manutencao.observacoes">
+            <mat-icon>note</mat-icon>
+            <p class="observacoes-texto">{{ manutencao.observacoes }}</p>
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+        <button mat-button (click)="onVisualizar()">
+            <mat-icon>visibility</mat-icon>
+            Detalhes
+        </button>
+        <button mat-button color="primary" (click)="onEditar()" [disabled]="!podeEditar">
+            <mat-icon>edit</mat-icon>
+            Editar
+        </button>
+    </mat-card-actions>
+</mat-card>

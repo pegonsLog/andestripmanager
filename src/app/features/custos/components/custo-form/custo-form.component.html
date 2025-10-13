@@ -80,20 +80,17 @@
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
-
                 <!-- Dia da Viagem -->
                 <mat-form-field appearance="outline" class="half-width">
                     <mat-label>Dia da Viagem (opcional)</mat-label>
                     <mat-select formControlName="diaViagemId">
                         <mat-option value="">Não associar a um dia específico</mat-option>
                         <mat-option *ngFor="let dia of diasViagem$ | async" [value]="dia.id">
-                            Dia {{ dia.ordem }} - {{ dia.cidadeOrigem }} → {{ dia.cidadeDestino }}
+                            Dia {{ dia.numeroDia }} - {{ dia.origem }} → {{ dia.destino }}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
             </div>
-
-            <!-- Tipo de Custo -->
             <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Tipo de Custo</mat-label>
                 <mat-select formControlName="tipo" required>

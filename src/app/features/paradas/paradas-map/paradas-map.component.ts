@@ -27,7 +27,7 @@ import { MatBottomSheetModule, MatBottomSheet } from '@angular/material/bottom-s
 import { Parada, TipoParada } from '../../../models';
 
 // Leaflet (será carregado dinamicamente)
-declare var L: any;
+declare let L: any;
 
 /**
  * Interface para marcador no mapa

@@ -15,7 +15,7 @@ import {
     serverTimestamp
 } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
-import { Observable, from, map, switchMap, combineLatest, of } from 'rxjs';
+import { Observable, from, map, switchMap, of } from 'rxjs';
 import { DiarioBordo, DiarioBordoForm, DiarioBordoFiltros } from '../models/diario-bordo.interface';
 import { AuthService } from '../core/services/auth.service';
 
@@ -61,7 +61,7 @@ export class DiarioBordoService {
         const entrada: Omit<DiarioBordo, 'id'> = {
             viagemId,
             diaViagemId,
-            usuarioId: usuario.uid,
+            usuarioId: usuario.id!,
             data: new Date().toISOString().split('T')[0], // Data atual no formato YYYY-MM-DD
             titulo: dados.titulo,
             conteudo: dados.conteudo,
@@ -70,8 +70,8 @@ export class DiarioBordoService {
             tags: dados.tags || [],
             criadoEm: serverTimestamp() as Timestamp,
             atualizadoEm: serverTimestamp() as Timestamp,
-            criadoPor: usuario.uid,
-            atualizadoPor: usuario.uid
+            criadoPor: usuario.id!,
+            atualizadoPor: usuario.id!
         };
 
         const docRef = await addDoc(collection(this.firestore, this.collectionName), entrada);
@@ -93,15 +93,15 @@ export class DiarioBordoService {
         const docRef = doc(this.firestore, this.collectionName, id);
 
         // Preparar dados para atualização
-        const dadosAtualizacao: any = {
+        const dadosAtualizacao: Record<string, unknown> = {
             atualizadoEm: serverTimestamp(),
-            atualizadoPor: usuario.uid
+            atualizadoPor: usuario.id!
         };
 
-        if (dados.titulo !== undefined) dadosAtualizacao.titulo = dados.titulo;
-        if (dados.conteudo !== undefined) dadosAtualizacao.conteudo = dados.conteudo;
-        if (dados.publico !== undefined) dadosAtualizacao.publico = dados.publico;
-        if (dados.tags !== undefined) dadosAtualizacao.tags = dados.tags;
+        if (dados.titulo !== undefined) dadosAtualizacao['titulo'] = dados.titulo;
+        if (dados.conteudo !== undefined) dadosAtualizacao['conteudo'] = dados.conteudo;
+        if (dados.publico !== undefined) dadosAtualizacao['publico'] = dados.publico;
+        if (dados.tags !== undefined) dadosAtualizacao['tags'] = dados.tags;
 
         // Upload de novas fotos se houver
         if (dados.fotos && dados.fotos.length > 0) {
@@ -109,11 +109,11 @@ export class DiarioBordoService {
             const entradaAtual = await this.obterPorId(id);
             if (entradaAtual) {
                 const novasFotos = await this.uploadFotos(dados.fotos, entradaAtual.viagemId);
-                dadosAtualizacao.fotos = [...(entradaAtual.fotos || []), ...novasFotos];
+                dadosAtualizacao['fotos'] = [...(entradaAtual.fotos || []), ...novasFotos];
             }
         }
 
-        await updateDoc(docRef, dadosAtualizacao);
+        await updateDoc(docRef, dadosAtualizacao as any);
     }
 
     /**
@@ -159,15 +159,15 @@ export class DiarioBordoService {
      * @returns Observable com a lista de entradas
      */
     listarEntradas(filtros: DiarioBordoFiltros = {}): Observable<DiarioBordo[]> {
-        return from(this.authService.getCurrentUser()).pipe(
+        return from(Promise.resolve(this.authService.getCurrentUser())).pipe(
             switchMap(usuario => {
-                if (!usuario) {
+                if (!usuario || !usuario.id) {
                     return of([]);
                 }
 
                 let q = query(
                     collection(this.firestore, this.collectionName),
-                    where('usuarioId', '==', usuario.uid),
+                    where('usuarioId', '==', usuario.id),
                     orderBy('data', 'desc')
                 );
 

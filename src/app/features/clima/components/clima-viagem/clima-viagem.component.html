@@ -1,0 +1,97 @@
+<div class="clima-viagem-container">
+    <!-- Loading -->
+    <div *ngIf="isLoading()" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Carregando informações climáticas...</p>
+    </div>
+
+    <!-- Erro -->
+    <div *ngIf="erro() && !isLoading()" class="error-container">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <h3>{{ erro() }}</h3>
+        <p>Configure a API key do OpenWeatherMap no arquivo de environment para usar esta funcionalidade.</p>
+        <button mat-raised-button color="primary" (click)="carregarDados()">
+            <mat-icon>refresh</mat-icon>
+            Tentar Novamente
+        </button>
+    </div>
+
+    <!-- Sem dias -->
+    <div *ngIf="!isLoading() && !erro() && diasViagem().length === 0" class="empty-state">
+        <mat-icon class="empty-icon">wb_sunny</mat-icon>
+        <h3>Nenhum dia planejado</h3>
+        <p>Adicione dias à viagem para visualizar informações climáticas.</p>
+    </div>
+
+    <!-- Lista de clima por dia -->
+    <div *ngIf="!isLoading() && !erro() && diasViagem().length > 0" class="clima-list">
+        <div class="header-actions">
+            <h2>Previsão do Tempo</h2>
+            <button mat-raised-button color="primary" (click)="onAtualizarTodasPrevisoes()" [disabled]="isLoading()">
+                <mat-icon>refresh</mat-icon>
+                Atualizar Todas
+            </button>
+        </div>
+
+        <div class="dias-clima">
+            <mat-card *ngFor="let dia of diasViagem()" class="dia-clima-card">
+                <mat-card-header>
+                    <div mat-card-avatar class="dia-avatar">
+                        <mat-icon>calendar_today</mat-icon>
+                    </div>
+                    <mat-card-title>
+                        Dia {{ dia.numeroDia }} - {{ dia.destino }}
+                    </mat-card-title>
+                    <mat-card-subtitle>
+                        {{ formatarData(dia.data) }}
+                    </mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <!-- Clima registrado -->
+                    <div *ngIf="getClimaDia(dia.id!)" class="clima-info">
+                        <app-clima-card
+                            [clima]="getClimaDia(dia.id!)"
+                            [previsao]="getClimaDia(dia.id!)?.previsao"
+                            [observado]="getClimaDia(dia.id!)?.observado"
+                            [alertas]="getClimaDia(dia.id!)?.alertas || []"
+                            [compact]="true"
+                            [showActions]="false">
+                        </app-clima-card>
+                    </div>
+
+                    <!-- Sem clima -->
+                    <div *ngIf="!getClimaDia(dia.id!)" class="sem-clima">
+                        <mat-icon>cloud_off</mat-icon>
+                        <p>Nenhuma previsão disponível</p>
+                    </div>
+                </mat-card-content>
+
+                <mat-card-actions align="end">
+                    <button mat-button color="primary" (click)="onAtualizarPrevisao(dia)" [disabled]="isLoading()">
+                        <mat-icon>refresh</mat-icon>
+                        {{ getClimaDia(dia.id!) ? 'Atualizar' : 'Buscar Previsão' }}
+                    </button>
+                </mat-card-actions>
+            </mat-card>
+        </div>
+
+        <!-- Informações adicionais -->
+        <mat-card class="info-card">
+            <mat-card-content>
+                <div class="info-content">
+                    <mat-icon>info</mat-icon>
+                    <div class="info-text">
+                        <p><strong>Sobre as previsões:</strong></p>
+                        <ul>
+                            <li>As previsões são fornecidas pela OpenWeatherMap</li>
+                            <li>Dados atualizados a cada 30 minutos</li>
+                            <li>Configure sua API key no arquivo de environment para usar esta funcionalidade</li>
+                            <li>As coordenadas são estimadas com base no destino informado</li>
+                        </ul>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>

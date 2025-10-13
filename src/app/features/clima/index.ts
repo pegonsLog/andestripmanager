@@ -4,3 +4,4 @@ export * from './components/clima-observado-form/clima-observado-form.component'
 export * from './components/alertas-clima/alertas-clima.component';
 export * from './components/historico-clima/historico-clima.component';
 export * from './components/clima-dashboard/clima-dashboard.component';
+export * from './components/clima-viagem/clima-viagem.component';

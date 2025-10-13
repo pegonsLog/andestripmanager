@@ -7,11 +7,11 @@
             </mat-icon>
         </div>
         <mat-card-title>
-            <span *ngIf="clima?.cidade">{{ clima.cidade }}</span>
+            <span *ngIf="clima?.cidade">{{ clima?.cidade }}</span>
             <span *ngIf="!clima?.cidade">Clima</span>
         </mat-card-title>
         <mat-card-subtitle *ngIf="clima?.data">
-            {{ clima.data | date:'dd/MM/yyyy':'pt-BR' }}
+            {{ clima?.data | date:'dd/MM/yyyy':'pt-BR' }}
         </mat-card-subtitle>
     </mat-card-header>
 

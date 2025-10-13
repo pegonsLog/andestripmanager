@@ -137,12 +137,13 @@ export class CacheService {
      * Recupera dados do cache
      */
     get<T>(key: string): T | null {
-        let item = this.memoryCache.get(key);
+        let item: CacheItem<any> | undefined = this.memoryCache.get(key);
 
         // Se não estiver na memória, tentar carregar do localStorage
         if (!item) {
-            item = this.loadFromStorageKey(key);
-            if (item) {
+            const loadedItem = this.loadFromStorageKey(key);
+            if (loadedItem) {
+                item = loadedItem;
                 this.memoryCache.set(key, item);
             }
         }

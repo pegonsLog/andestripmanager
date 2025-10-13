@@ -1,0 +1,104 @@
+<mat-card class="diario-entrada-card">
+    <mat-card-header>
+        <div mat-card-avatar class="entrada-avatar">
+            <mat-icon>{{ entrada.publico ? 'public' : 'lock' }}</mat-icon>
+        </div>
+        
+        <mat-card-title>
+            <div class="titulo-container">
+                <span class="titulo">{{ entrada.titulo || 'Sem título' }}</span>
+                <mat-chip *ngIf="entrada.publico" color="accent">Público</mat-chip>
+            </div>
+        </mat-card-title>
+        
+        <mat-card-subtitle>
+            <div class="subtitle-info">
+                <span class="data">
+                    <mat-icon inline>event</mat-icon>
+                    {{ formatarData(entrada.data) }}
+                </span>
+            </div>
+        </mat-card-subtitle>
+
+        <!-- Menu de ações -->
+        <button mat-icon-button [matMenuTriggerFor]="menuEntrada" class="menu-button">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menuEntrada="matMenu">
+            <button mat-menu-item (click)="onVisualizar()">
+                <mat-icon>visibility</mat-icon>
+                <span>Visualizar</span>
+            </button>
+            <button mat-menu-item (click)="onEditar()" [disabled]="!podeEditar">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="onExcluir()" class="delete-action" [disabled]="!podeEditar">
+                <mat-icon>delete</mat-icon>
+                <span>Excluir</span>
+            </button>
+        </mat-menu>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Preview do conteúdo -->
+        <div class="conteudo-preview">
+            <p>{{ getPreviewConteudo(stripHtml(entrada.conteudo)) }}</p>
+        </div>
+
+        <!-- Tags -->
+        <div class="tags-container" *ngIf="entrada.tags && entrada.tags.length > 0">
+            <mat-chip-listbox>
+                <mat-chip *ngFor="let tag of entrada.tags">
+                    <mat-icon>label</mat-icon>
+                    {{ tag }}
+                </mat-chip>
+            </mat-chip-listbox>
+        </div>
+
+        <!-- Fotos -->
+        <div class="fotos-info" *ngIf="entrada.fotos && entrada.fotos.length > 0">
+            <div class="fotos-preview">
+                <mat-icon>photo_library</mat-icon>
+                <span>{{ entrada.fotos.length }} foto(s)</span>
+            </div>
+            <div class="fotos-grid">
+                <img 
+                    *ngFor="let foto of entrada.fotos.slice(0, 4)" 
+                    [src]="foto" 
+                    [alt]="entrada.titulo || 'Foto do diário'"
+                    class="foto-thumbnail">
+                <div *ngIf="entrada.fotos.length > 4" class="mais-fotos">
+                    +{{ entrada.fotos.length - 4 }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Localização -->
+        <div class="localizacao-info" *ngIf="entrada.localizacao">
+            <mat-icon>place</mat-icon>
+            <span>{{ entrada.localizacao.endereco || 'Localização registrada' }}</span>
+        </div>
+
+        <!-- Clima -->
+        <div class="clima-info" *ngIf="entrada.clima">
+            <mat-icon>wb_sunny</mat-icon>
+            <span>
+                {{ entrada.clima.condicao || 'Clima registrado' }}
+                <span *ngIf="entrada.clima.temperatura"> • {{ entrada.clima.temperatura }}°C</span>
+            </span>
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+        <button mat-button (click)="onVisualizar()">
+            <mat-icon>visibility</mat-icon>
+            Ler mais
+        </button>
+        <button mat-button color="primary" (click)="onEditar()" [disabled]="!podeEditar">
+            <mat-icon>edit</mat-icon>
+            Editar
+        </button>
+    </mat-card-actions>
+</mat-card>

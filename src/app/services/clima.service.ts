@@ -55,7 +55,7 @@ export class ClimaService extends BaseFirestoreService<Clima> {
         return this.http.get<OpenWeatherResponse>(`${this.API_BASE_URL}/weather`, { params })
             .pipe(
                 map(response => this.mapearPrevisaoTempo(response)),
-                tap(previsao => this.cacheService.set(cacheKey, previsao, this.CACHE_TTL)),
+                tap(previsao => this.cacheService.set(cacheKey, previsao, this.cacheService.strategies.LONG)),
                 catchError(error => {
                     console.error('Erro ao buscar previsão do tempo:', error);
                     return throwError(() => new Error('Não foi possível obter a previsão do tempo'));
@@ -84,7 +84,7 @@ export class ClimaService extends BaseFirestoreService<Clima> {
         return this.http.get<OpenWeatherForecastResponse>(`${this.API_BASE_URL}/forecast`, { params })
             .pipe(
                 map(response => this.mapearPrevisaoEstendida(response)),
-                tap(previsoes => this.cacheService.set(cacheKey, previsoes, this.CACHE_TTL)),
+                tap(previsoes => this.cacheService.set(cacheKey, previsoes, this.cacheService.strategies.LONG)),
                 catchError(error => {
                     console.error('Erro ao buscar previsão estendida:', error);
                     return throwError(() => new Error('Não foi possível obter a previsão estendida'));

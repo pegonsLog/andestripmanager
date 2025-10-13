@@ -145,7 +145,7 @@ export class UploadService {
 
             img.onload = () => {
                 // Calcular novas dimensões mantendo proporção
-                let { width, height } = this.calculateDimensions(
+                const { width, height } = this.calculateDimensions(
                     img.width,
                     img.height,
                     maxWidth,

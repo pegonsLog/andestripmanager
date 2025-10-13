@@ -37,7 +37,6 @@ export class ClimaCardComponent {
 
     // Expor enum para o template
     CondicaoClimatica = CondicaoClimatica;
-    @Output() atualizarPrevisao = new EventEmitter<void>();
 
     /**
      * Obtém o ícone correspondente à condição climática
