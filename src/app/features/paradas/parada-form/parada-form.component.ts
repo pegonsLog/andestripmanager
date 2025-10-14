@@ -25,9 +25,11 @@ import {
     TipoCombustivel,
     DadosAbastecimento,
     DadosRefeicao,
-    DadosPontoInteresse
+    DadosPontoInteresse,
+    DiaViagem
 } from '../../../models';
 import { ParadasService } from '../../../services/paradas.service';
+import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { PhotoUploadComponent, Photo } from '../../../shared/components/photo-upload/photo-upload.component';
 
 @Component({
@@ -57,15 +59,20 @@ import { PhotoUploadComponent, Photo } from '../../../shared/components/photo-up
 export class ParadaFormComponent implements OnInit, OnDestroy {
     @Input() paradaId?: string;
     @Input() parada?: Parada;
-    @Input() diaViagemId!: string;
+    @Input() diaViagemId?: string;
     @Input() viagemId!: string;
     @Output() paradaSalva = new EventEmitter<Parada>();
     @Output() cancelar = new EventEmitter<void>();
 
     private fb = inject(FormBuilder);
     private paradasService = inject(ParadasService);
+    private diasViagemService = inject(DiasViagemService);
     private snackBar = inject(MatSnackBar);
     private destroy$ = new Subject<void>();
+
+    // Lista de dias disponíveis
+    diasDisponiveis: DiaViagem[] = [];
+    carregandoDias = false;
 
     paradaForm!: FormGroup;
     isEditMode = false;
@@ -123,6 +130,7 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.initializeForm();
         this.setupFormValidation();
+        this.carregarDiasViagem();
 
         if (this.paradaId || this.parada) {
             this.isEditMode = true;
@@ -135,11 +143,32 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
+    private async carregarDiasViagem(): Promise<void> {
+        if (!this.viagemId) return;
+        
+        this.carregandoDias = true;
+        try {
+            this.diasDisponiveis = await this.diasViagemService.listarDiasViagem(this.viagemId).toPromise() || [];
+            
+            // Se diaViagemId foi fornecido, pré-selecionar
+            if (this.diaViagemId) {
+                this.paradaForm.patchValue({ diaViagemId: this.diaViagemId });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar dias da viagem:', error);
+            this.snackBar.open('Erro ao carregar dias da viagem', 'Fechar', { duration: 3000 });
+        } finally {
+            this.carregandoDias = false;
+        }
+    }
+
     /**
      * Inicializa o formulário reativo
      */
     private initializeForm(): void {
         this.paradaForm = this.fb.group({
+            // Seleção do dia
+            diaViagemId: ['', [Validators.required]],
             // Campos básicos
             tipo: ['', [Validators.required]],
             nome: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -411,16 +440,20 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
 
                 // Emitir evento com dados atualizados
                 const paradaAtualizada: Parada = {
-                    ...this.parada!,
                     ...formData,
-                    id
+                    id,
+                    diaViagemId: this.parada!.diaViagemId,
+                    viagemId: this.parada!.viagemId,
+                    criadoEm: this.parada!.criadoEm,
+                    atualizadoEm: new Date() as any
                 };
                 this.paradaSalva.emit(paradaAtualizada);
             } else {
                 // Criação
+                const formValue = this.paradaForm.value;
                 const novaParadaId = await this.paradasService.criarParada({
                     ...formData,
-                    diaViagemId: this.diaViagemId,
+                    diaViagemId: formValue.diaViagemId,
                     viagemId: this.viagemId
                 });
                 this.showSuccess('Parada criada com sucesso!');
@@ -429,7 +462,7 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
                 const novaParada: Parada = {
                     ...formData,
                     id: novaParadaId,
-                    diaViagemId: this.diaViagemId,
+                    diaViagemId: formValue.diaViagemId,
                     viagemId: this.viagemId
                 };
                 this.paradaSalva.emit(novaParada);

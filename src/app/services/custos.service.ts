@@ -21,9 +21,16 @@ export class CustosService extends BaseFirestoreService<Custo> {
 
     /**
      * Lista custos de uma viagem
+     * Filtra automaticamente pelo usuário autenticado
      */
     listarCustosViagem(viagemId: string): Observable<Custo[]> {
+        const currentUser = this.authService.getCurrentUser();
+        if (!currentUser?.id) {
+            throw new Error('Usuário não autenticado');
+        }
+
         const constraints: QueryConstraint[] = [
+            where('usuarioId', '==', currentUser.id),
             where('viagemId', '==', viagemId),
             orderBy('data', 'desc')
         ];
@@ -33,9 +40,16 @@ export class CustosService extends BaseFirestoreService<Custo> {
 
     /**
      * Lista custos por categoria
+     * Filtra automaticamente pelo usuário autenticado
      */
     listarPorCategoria(viagemId: string, categoria: CategoriaCusto): Observable<Custo[]> {
+        const currentUser = this.authService.getCurrentUser();
+        if (!currentUser?.id) {
+            throw new Error('Usuário não autenticado');
+        }
+
         const constraints: QueryConstraint[] = [
+            where('usuarioId', '==', currentUser.id),
             where('viagemId', '==', viagemId),
             where('categoria', '==', categoria),
             orderBy('data', 'desc')
@@ -46,9 +60,16 @@ export class CustosService extends BaseFirestoreService<Custo> {
 
     /**
      * Lista custos por tipo (planejado/real)
+     * Filtra automaticamente pelo usuário autenticado
      */
     listarPorTipo(viagemId: string, tipo: 'planejado' | 'real'): Observable<Custo[]> {
+        const currentUser = this.authService.getCurrentUser();
+        if (!currentUser?.id) {
+            throw new Error('Usuário não autenticado');
+        }
+
         const constraints: QueryConstraint[] = [
+            where('usuarioId', '==', currentUser.id),
             where('viagemId', '==', viagemId),
             where('tipo', '==', tipo),
             orderBy('data', 'desc')

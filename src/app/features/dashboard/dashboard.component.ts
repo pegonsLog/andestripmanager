@@ -329,6 +329,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     /**
+     * Faz logout do usuário
+     */
+    async fazerLogout(): Promise<void> {
+        try {
+            await this.authService.logout();
+            this.snackBar.open('Logout realizado com sucesso!', 'Fechar', { duration: 3000 });
+            this.router.navigate(['/auth/login']);
+        } catch (error) {
+            console.error('Erro ao fazer logout:', error);
+            this.snackBar.open('Erro ao fazer logout. Tente novamente.', 'Fechar', { duration: 5000 });
+        }
+    }
+
+    /**
      * Retorna a cor do chip baseada no status
      */
     getCorStatus(status: StatusViagem): string {

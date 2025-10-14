@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { Firestore, where, orderBy, QueryConstraint } from '@angular/fire/firestore';
 import { BaseFirestoreService } from '../core/services/base.service';
 import { Parada, TipoParada } from '../models';
+import { AuthService } from '../core/services/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -10,7 +11,10 @@ import { Parada, TipoParada } from '../models';
 export class ParadasService extends BaseFirestoreService<Parada> {
     protected collectionName = 'paradas';
 
-    constructor(firestore: Firestore) {
+    constructor(
+        firestore: Firestore,
+        private authService: AuthService
+    ) {
         super(firestore);
     }
 
@@ -67,7 +71,9 @@ export class ParadasService extends BaseFirestoreService<Parada> {
             });
         }
 
-        return this.novo(dadosParada);
+        return this.novo({
+            ...dadosParada
+        });
     }
 
     /**

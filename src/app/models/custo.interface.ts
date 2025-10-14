@@ -5,6 +5,9 @@ import { CategoriaCusto } from './enums';
  * Interface para controle de custos da viagem
  */
 export interface Custo extends BaseEntity {
+    /** ID do usuário proprietário do custo */
+    usuarioId: string;
+
     /** ID da viagem */
     viagemId: string;
 

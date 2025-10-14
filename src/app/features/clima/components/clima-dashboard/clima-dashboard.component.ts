@@ -145,9 +145,9 @@ export class ClimaDashboardComponent implements OnInit, OnDestroy {
                 this.diaViagem.data,
                 this.diaViagem.cidadeDestino,
                 this.diaViagem.coordenadas?.destino || { lat: 0, lng: 0 },
-                this.usuarioId,
                 previsao
             );
+            previsao;
         } catch (error) {
             console.error('Erro ao salvar previsão:', error);
         }

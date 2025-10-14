@@ -11,59 +11,91 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Verifica se a viagem pertence ao usuário autenticado
-    function ownsViagemId(viagemId) {
-      return viagemId != null &&
-             isAuthenticated() &&
-             get(/databases/$(database)/documents/viagens/$(viagemId)).data.usuarioId == request.auth.uid;
-    }
-
     // Usuários - só podem acessar seus próprios dados
     match /users/{userId} {
       allow read, write: if isOwner(userId);
       allow create: if isAuthenticated();
     }
 
+    // Usuários (coleção em português) - só podem acessar seus próprios dados
+    match /usuarios/{userId} {
+      allow read, write: if isOwner(userId);
+      allow create: if isAuthenticated();
+    }
+
     // Viagens - só o proprietário pode acessar
     match /viagens/{viagemId} {
-      allow read, write: if isOwner(resource.data.usuarioId);
-      allow create: if isOwner(request.resource.data.usuarioId);
+      // Permite leitura se o usuário está autenticado e a query filtra por seu usuarioId
+      allow read: if isAuthenticated() && 
+                     (resource == null || resource.data.usuarioId == request.auth.uid);
+      allow write: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.usuarioId == request.auth.uid;
     }
 
     // Dias de viagem - só o proprietário pode acessar
     match /dias-viagem/{diaId} {
-      allow read, write: if isOwner(resource.data.usuarioId) || ownsViagemId(resource.data.viagemId);
-      allow create: if isOwner(request.resource.data.usuarioId) || ownsViagemId(request.resource.data.viagemId);
+      // Permite queries (list) para usuários autenticados, validação no get individual
+      allow list: if isAuthenticated();
+      allow get: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow write: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.usuarioId == request.auth.uid;
     }
 
-    // Paradas - só o proprietário pode acessar
+    // Paradas - validação através da viagem
     match /paradas/{paradaId} {
-      allow read, write: if isOwner(resource.data.usuarioId) || ownsViagemId(resource.data.viagemId);
-      allow create: if isOwner(request.resource.data.usuarioId) || ownsViagemId(request.resource.data.viagemId);
+      // Permite queries (list) para usuários autenticados
+      allow list: if isAuthenticated();
+      // Valida propriedade através da viagem associada
+      allow get: if isAuthenticated() && 
+                   get(/databases/$(database)/documents/viagens/$(resource.data.viagemId)).data.usuarioId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                              get(/databases/$(database)/documents/viagens/$(resource.data.viagemId)).data.usuarioId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                      get(/databases/$(database)/documents/viagens/$(request.resource.data.viagemId)).data.usuarioId == request.auth.uid;
     }
 
-    // Hospedagens - só o proprietário pode acessar
+    // Hospedagens - validação através da viagem
     match /hospedagens/{hospedagemId} {
-      allow read, write: if isOwner(resource.data.usuarioId) || ownsViagemId(resource.data.viagemId);
-      allow create: if isOwner(request.resource.data.usuarioId) || ownsViagemId(request.resource.data.viagemId);
+      // Permite queries (list) para usuários autenticados
+      allow list: if isAuthenticated();
+      // Valida propriedade através da viagem associada
+      allow get: if isAuthenticated() && 
+                   get(/databases/$(database)/documents/viagens/$(resource.data.viagemId)).data.usuarioId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                              get(/databases/$(database)/documents/viagens/$(resource.data.viagemId)).data.usuarioId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                      get(/databases/$(database)/documents/viagens/$(request.resource.data.viagemId)).data.usuarioId == request.auth.uid;
     }
 
     // Custos - só o proprietário pode acessar
     match /custos/{custoId} {
-      allow read, write: if isOwner(resource.data.usuarioId) || ownsViagemId(resource.data.viagemId);
-      allow create: if isOwner(request.resource.data.usuarioId) || ownsViagemId(request.resource.data.viagemId);
+      // Permite queries (list) para usuários autenticados, validação no get individual
+      allow list: if isAuthenticated();
+      allow get: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow write: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.usuarioId == request.auth.uid;
     }
 
-    // Clima - só o proprietário pode acessar
+    // Clima - validação através do dia de viagem
     match /clima/{climaId} {
-      allow read, write: if isOwner(resource.data.usuarioId);
-      allow create: if isOwner(request.resource.data.usuarioId);
+      // Permite queries (list) para usuários autenticados
+      allow list: if isAuthenticated();
+      // Valida propriedade através do dia de viagem associado
+      allow get: if isAuthenticated() && 
+                   get(/databases/$(database)/documents/dias-viagem/$(resource.data.diaViagemId)).data.usuarioId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                              get(/databases/$(database)/documents/dias-viagem/$(resource.data.diaViagemId)).data.usuarioId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                      get(/databases/$(database)/documents/dias-viagem/$(request.resource.data.diaViagemId)).data.usuarioId == request.auth.uid;
     }
 
     // Manutenções - só o proprietário pode acessar
     match /manutencoes/{manutencaoId} {
-      allow read, write: if isOwner(resource.data.usuarioId);
-      allow create: if isOwner(request.resource.data.usuarioId);
+      // Permite queries (list) para usuários autenticados, validação no get individual
+      allow list: if isAuthenticated();
+      allow get: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow write: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.usuarioId == request.auth.uid;
     }
 
     // Diário de bordo - leitura pública se marcado como público

@@ -107,12 +107,17 @@ export class AuthService {
         } catch (error: any) {
             throw this.handleAuthError(error);
         }
-    }  /**
-
-   * Realiza logout
-   */
+    }
+    
+    /**
+     * Realiza logout
+     */
     async logout(): Promise<void> {
         try {
+            // Limpar estado imediatamente antes do signOut
+            this.currentUserSubject.next(null);
+            this.isAuthenticatedSubject.next(false);
+            
             await signOut(this.auth);
         } catch (error: any) {
             throw this.handleAuthError(error);
@@ -195,12 +200,21 @@ export class AuthService {
     private handleAuthError(error: any): Error {
         let message = 'Erro de autenticação';
 
+        // Log do erro completo para debug
+        console.error('Erro de autenticação completo:', error);
+
         switch (error.code) {
             case 'auth/user-not-found':
                 message = 'Usuário não encontrado';
                 break;
             case 'auth/wrong-password':
                 message = 'Senha incorreta';
+                break;
+            case 'auth/invalid-credential':
+                message = 'Email ou senha incorretos';
+                break;
+            case 'auth/invalid-login-credentials':
+                message = 'Credenciais de login inválidas';
                 break;
             case 'auth/email-already-in-use':
                 message = 'Email já está em uso';
@@ -211,8 +225,20 @@ export class AuthService {
             case 'auth/invalid-email':
                 message = 'Email inválido';
                 break;
+            case 'auth/user-disabled':
+                message = 'Usuário desabilitado';
+                break;
             case 'auth/too-many-requests':
                 message = 'Muitas tentativas. Tente novamente mais tarde';
+                break;
+            case 'auth/network-request-failed':
+                message = 'Erro de conexão. Verifique sua internet';
+                break;
+            case 'auth/operation-not-allowed':
+                message = 'Operação não permitida';
+                break;
+            case 'auth/missing-password':
+                message = 'Senha não fornecida';
                 break;
             default:
                 message = error.message || 'Erro desconhecido';

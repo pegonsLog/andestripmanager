@@ -14,8 +14,12 @@
                 Nova Viagem
             </button>
 
-            <button mat-icon-button (click)="recarregarDados()" [disabled]="isLoading$ | async">
+            <button mat-icon-button (click)="recarregarDados()" [disabled]="isLoading$ | async" matTooltip="Atualizar">
                 <mat-icon>refresh</mat-icon>
+            </button>
+
+            <button mat-icon-button color="warn" (click)="fazerLogout()" matTooltip="Sair">
+                <mat-icon>logout</mat-icon>
             </button>
         </div>
     </div>

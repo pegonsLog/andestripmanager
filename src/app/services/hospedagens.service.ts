@@ -4,6 +4,7 @@ import { Firestore, where, orderBy, QueryConstraint } from '@angular/fire/firest
 import { BaseFirestoreService } from '../core/services/base.service';
 import { Hospedagem } from '../models';
 import { TipoHospedagem } from '../models/hospedagem.interface';
+import { AuthService } from '../core/services/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,10 @@ import { TipoHospedagem } from '../models/hospedagem.interface';
 export class HospedagensService extends BaseFirestoreService<Hospedagem> {
     protected collectionName = 'hospedagens';
 
-    constructor(firestore: Firestore) {
+    constructor(
+        firestore: Firestore,
+        private authService: AuthService
+    ) {
         super(firestore);
     }
 

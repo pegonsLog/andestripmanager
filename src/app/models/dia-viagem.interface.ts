@@ -5,6 +5,9 @@ import { CondicaoClimatica } from './enums';
  * Interface para um dia específico da viagem
  */
 export interface DiaViagem extends BaseEntity {
+    /** ID do usuário proprietário do dia de viagem */
+    usuarioId: string;
+
     /** ID da viagem à qual este dia pertence */
     viagemId: string;
 

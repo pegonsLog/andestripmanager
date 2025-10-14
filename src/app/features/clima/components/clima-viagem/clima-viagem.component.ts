@@ -5,8 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, firstValueFrom } from 'rxjs';
+import { takeUntil, switchMap, map } from 'rxjs/operators';
 
 import { ClimaCardComponent } from '../clima-card/clima-card.component';
 import { Clima, PrevisaoTempo } from '../../../../models/clima.interface';
@@ -116,43 +116,38 @@ export class ClimaViagemComponent implements OnInit, OnDestroy {
         this.erro.set(null);
 
         try {
-            // Usar coordenadas padrão se não tiver (exemplo: São Paulo)
-            const lat = -23.5505;
-            const lng = -46.6333;
+            // Buscar coordenadas e previsão usando firstValueFrom para converter Observable em Promise
+            const { coords, previsao } = await firstValueFrom(
+                this.climaService.buscarCoordenadasCidade(dia.destino).pipe(
+                    switchMap(coords => 
+                        this.climaService.buscarPrevisaoTempo(coords.lat, coords.lng, dia.destino).pipe(
+                            map(previsao => ({ coords, previsao }))
+                        )
+                    )
+                )
+            );
 
-            this.climaService.buscarPrevisaoTempo(lat, lng, dia.destino)
-                .pipe(takeUntil(this.destroy$))
-                .subscribe({
-                    next: async (previsao) => {
-                        // Salvar previsão no Firestore
-                        const usuarioId = 'temp'; // TODO: Obter do AuthService
-                        await this.climaService.salvarClimaDia(
-                            dia.id!,
-                            dia.data,
-                            dia.destino!,
-                            { lat, lng },
-                            usuarioId,
-                            previsao
-                        );
+            // Salvar previsão no Firestore com as coordenadas corretas
+            await this.climaService.salvarClimaDia(
+                dia.id!,
+                dia.data,
+                dia.destino!,
+                coords,
+                previsao
+            );
 
-                        // Atualizar mapa local
-                        const previsoes = this.previsoesPorDia();
-                        previsoes.set(dia.id!, previsao);
-                        this.previsoesPorDia.set(new Map(previsoes));
+            // Atualizar mapa local
+            const previsoes = this.previsoesPorDia();
+            previsoes.set(dia.id!, previsao);
+            this.previsoesPorDia.set(new Map(previsoes));
 
-                        this.snackBar.open('Previsão atualizada com sucesso!', 'Fechar', { duration: 3000 });
-                        this.carregarDados(); // Recarregar dados
-                    },
-                    error: (error) => {
-                        console.error('Erro ao buscar previsão:', error);
-                        this.erro.set('Erro ao buscar previsão do tempo. Verifique se a API key está configurada.');
-                        this.snackBar.open('Erro ao buscar previsão do tempo', 'Fechar', { duration: 5000 });
-                        this.isLoading.set(false);
-                    }
-                });
+            this.snackBar.open('Previsão atualizada com sucesso!', 'Fechar', { duration: 3000 });
+            this.carregarDados(); // Recarregar dados
+            this.isLoading.set(false);
         } catch (error) {
-            console.error('Erro ao atualizar previsão:', error);
-            this.erro.set('Erro ao atualizar previsão');
+            console.error('Erro ao buscar previsão:', error);
+            this.erro.set('Erro ao buscar previsão do tempo. Verifique se a API key está configurada.');
+            this.snackBar.open('Erro ao buscar previsão do tempo', 'Fechar', { duration: 5000 });
             this.isLoading.set(false);
         }
     }
@@ -162,16 +157,39 @@ export class ClimaViagemComponent implements OnInit, OnDestroy {
      */
     async onAtualizarTodasPrevisoes(): Promise<void> {
         const dias = this.diasViagem();
-        if (dias.length === 0) return;
+        if (dias.length === 0) {
+            this.snackBar.open('Nenhum dia de viagem encontrado', 'Fechar', { duration: 3000 });
+            return;
+        }
 
         this.isLoading.set(true);
-        this.snackBar.open('Atualizando previsões...', '', { duration: 2000 });
+        this.erro.set(null);
+        
+        let sucessos = 0;
+        let erros = 0;
+
+        this.snackBar.open(`Atualizando ${dias.length} previsões...`, '', { duration: 2000 });
 
         for (const dia of dias) {
-            await this.onAtualizarPrevisao(dia);
+            try {
+                await this.onAtualizarPrevisao(dia);
+                sucessos++;
+            } catch (error) {
+                console.error(`Erro ao atualizar previsão do dia ${dia.numeroDia}:`, error);
+                erros++;
+            }
         }
 
         this.isLoading.set(false);
+        
+        // Mensagem de resumo
+        if (erros === 0) {
+            this.snackBar.open(`✅ Todas as ${sucessos} previsões foram atualizadas!`, 'Fechar', { duration: 5000 });
+        } else if (sucessos > 0) {
+            this.snackBar.open(`⚠️ ${sucessos} atualizadas, ${erros} com erro`, 'Fechar', { duration: 5000 });
+        } else {
+            this.snackBar.open(`❌ Erro ao atualizar todas as previsões`, 'Fechar', { duration: 5000 });
+        }
     }
 
     /**

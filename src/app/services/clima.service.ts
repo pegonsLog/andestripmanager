@@ -35,6 +35,42 @@ export class ClimaService extends BaseFirestoreService<Clima> {
     }
 
     /**
+     * Busca coordenadas de uma cidade usando Geocoding API
+     */
+    buscarCoordenadasCidade(cidade: string): Observable<{ lat: number; lng: number }> {
+        const cacheKey = `geocode_${cidade}`;
+        const cached = this.cacheService.get<{ lat: number; lng: number }>(cacheKey);
+
+        if (cached) {
+            return of(cached);
+        }
+
+        const params = new HttpParams()
+            .set('q', cidade)
+            .set('limit', '1')
+            .set('appid', this.API_KEY);
+
+        // API de Geocoding usa URL diferente (sem /data/2.5)
+        return this.http.get<Array<{ lat: number; lon: number }>>('https://api.openweathermap.org/geo/1.0/direct', { params })
+            .pipe(
+                map(results => {
+                    if (results && results.length > 0) {
+                        const coords = { lat: results[0].lat, lng: results[0].lon };
+                        this.cacheService.set(cacheKey, coords, this.cacheService.strategies.LONG);
+                        return coords;
+                    }
+                    // Fallback para São Paulo se não encontrar
+                    return { lat: -23.5505, lng: -46.6333 };
+                }),
+                catchError(error => {
+                    console.error('Erro ao buscar coordenadas:', error);
+                    // Fallback para São Paulo em caso de erro
+                    return of({ lat: -23.5505, lng: -46.6333 });
+                })
+            );
+    }
+
+    /**
      * Busca previsão do tempo para uma localização
      */
     buscarPrevisaoTempo(lat: number, lng: number, cidade: string): Observable<PrevisaoTempo> {
@@ -100,7 +136,6 @@ export class ClimaService extends BaseFirestoreService<Clima> {
         data: string,
         cidade: string,
         coordenadas: { lat: number; lng: number },
-        usuarioId: string,
         previsao?: PrevisaoTempo,
         observado?: ClimaObservado
     ): Promise<void> {
@@ -110,8 +145,7 @@ export class ClimaService extends BaseFirestoreService<Clima> {
             cidade,
             coordenadas,
             previsao,
-            observado,
-            usuarioId
+            observado
         };
 
         // Verificar se já existe registro para este dia

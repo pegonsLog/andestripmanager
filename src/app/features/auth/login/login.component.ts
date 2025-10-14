@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -41,7 +41,8 @@ export class LoginComponent implements OnInit {
         private fb: FormBuilder,
         private authService: AuthService,
         private router: Router,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -76,6 +77,7 @@ export class LoginComponent implements OnInit {
         }
 
         this.isLoading = true;
+        this.cdr.markForCheck();
 
         try {
             const { email, senha } = this.loginForm.value;
@@ -86,6 +88,9 @@ export class LoginComponent implements OnInit {
                 panelClass: ['success-snackbar']
             });
 
+            // Aguardar um pouco para garantir que o estado foi atualizado
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             this.router.navigate(['/dashboard']);
         } catch (error: any) {
             this.snackBar.open(error.message || 'Erro ao fazer login', 'Fechar', {
@@ -94,6 +99,7 @@ export class LoginComponent implements OnInit {
             });
         } finally {
             this.isLoading = false;
+            this.cdr.markForCheck();
         }
     }
 

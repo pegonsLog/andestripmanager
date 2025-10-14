@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 import { Firestore, where, orderBy, QueryConstraint } from '@angular/fire/firestore';
 import { BaseFirestoreService } from '../core/services/base.service';
 import { DiaViagem } from '../models';
+import { AuthService } from '../core/services/auth.service';
+import { CondicaoClimatica } from '../models/enums';
 
 @Injectable({
     providedIn: 'root'
@@ -10,15 +12,25 @@ import { DiaViagem } from '../models';
 export class DiasViagemService extends BaseFirestoreService<DiaViagem> {
     protected collectionName = 'dias-viagem';
 
-    constructor(firestore: Firestore) {
+    constructor(
+        firestore: Firestore,
+        private authService: AuthService
+    ) {
         super(firestore);
     }
 
     /**
      * Lista dias de uma viagem específica
+     * Filtra automaticamente pelo usuário autenticado
      */
     listarDiasViagem(viagemId: string): Observable<DiaViagem[]> {
+        const usuario = this.authService.getCurrentUser();
+        if (!usuario?.id) {
+            throw new Error('Usuário não autenticado');
+        }
+
         const constraints: QueryConstraint[] = [
+            where('usuarioId', '==', usuario.id),
             where('viagemId', '==', viagemId),
             orderBy('numeroDia', 'asc')
         ];
@@ -29,15 +41,32 @@ export class DiasViagemService extends BaseFirestoreService<DiaViagem> {
     /**
      * Cria novo dia de viagem
      */
-    async criarDiaViagem(dadosDia: Omit<DiaViagem, 'id' | 'criadoEm' | 'atualizadoEm'>): Promise<string> {
-        return this.novo(dadosDia);
+    async criarDiaViagem(dadosDia: Omit<DiaViagem, 'id' | 'usuarioId' | 'criadoEm' | 'atualizadoEm'>): Promise<string> {
+        const usuario = this.authService.getCurrentUser();
+        if (!usuario?.id) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        const diaCompleto = {
+            ...dadosDia,
+            usuarioId: usuario.id
+        };
+
+        return this.novo(diaCompleto);
     }
 
     /**
      * Obtém dia específico por número
+     * Filtra automaticamente pelo usuário autenticado
      */
     obterDiaPorNumero(viagemId: string, numeroDia: number): Observable<DiaViagem[]> {
+        const usuario = this.authService.getCurrentUser();
+        if (!usuario?.id) {
+            throw new Error('Usuário não autenticado');
+        }
+
         const constraints: QueryConstraint[] = [
+            where('usuarioId', '==', usuario.id),
             where('viagemId', '==', viagemId),
             where('numeroDia', '==', numeroDia)
         ];
@@ -94,7 +123,7 @@ export class DiasViagemService extends BaseFirestoreService<DiaViagem> {
     /**
      * Atualiza condições climáticas
      */
-    async atualizarClima(id: string, condicao: any, tempMin?: number, tempMax?: number): Promise<void> {
+    async atualizarClima(id: string, condicao: CondicaoClimatica, tempMin?: number, tempMax?: number): Promise<void> {
         const updates: Partial<DiaViagem> = {
             condicaoClimatica: condicao
         };

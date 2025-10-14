@@ -16,8 +16,9 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject } from 'rxjs';
 
-import { Hospedagem, TipoHospedagem } from '../../../../models';
+import { Hospedagem, TipoHospedagem, DiaViagem } from '../../../../models';
 import { HospedagensService } from '../../../../services/hospedagens.service';
+import { DiasViagemService } from '../../../../services/dias-viagem.service';
 import { CustomValidators } from '../../../../models/validators';
 
 @Component({
@@ -46,15 +47,20 @@ import { CustomValidators } from '../../../../models/validators';
 })
 export class HospedagemFormComponent implements OnInit, OnDestroy {
     @Input() hospedagem?: Hospedagem;
-    @Input() diaViagemId!: string;
+    @Input() diaViagemId?: string;
     @Input() viagemId!: string;
     @Output() hospedagemSalva = new EventEmitter<Hospedagem>();
     @Output() cancelar = new EventEmitter<void>();
 
     private fb = inject(FormBuilder);
     private hospedagensService = inject(HospedagensService);
+    private diasViagemService = inject(DiasViagemService);
     private snackBar = inject(MatSnackBar);
     private destroy$ = new Subject<void>();
+
+    // Lista de dias disponíveis
+    diasDisponiveis: DiaViagem[] = [];
+    carregandoDias = false;
 
     hospedagemForm!: FormGroup;
     isEditMode = false;
@@ -100,9 +106,29 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.isEditMode = !!this.hospedagem;
         this.criarFormulario();
+        this.carregarDiasViagem();
 
         if (this.hospedagem) {
             this.preencherFormulario();
+        }
+    }
+
+    private async carregarDiasViagem(): Promise<void> {
+        if (!this.viagemId) return;
+        
+        this.carregandoDias = true;
+        try {
+            this.diasDisponiveis = await this.diasViagemService.listarDiasViagem(this.viagemId).toPromise() || [];
+            
+            // Se diaViagemId foi fornecido, pré-selecionar
+            if (this.diaViagemId) {
+                this.hospedagemForm.patchValue({ diaViagemId: this.diaViagemId });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar dias da viagem:', error);
+            this.snackBar.open('Erro ao carregar dias da viagem', 'Fechar', { duration: 3000 });
+        } finally {
+            this.carregandoDias = false;
         }
     }
 
@@ -113,6 +139,7 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
 
     private criarFormulario(): void {
         this.hospedagemForm = this.fb.group({
+            diaViagemId: ['', Validators.required],
             nome: ['', [Validators.required, Validators.minLength(2)]],
             tipo: [TipoHospedagem.HOTEL, Validators.required],
             endereco: ['', [Validators.required, Validators.minLength(10)]],
@@ -135,6 +162,7 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
     private preencherFormulario(): void {
         if (this.hospedagem) {
             this.hospedagemForm.patchValue({
+                diaViagemId: this.hospedagem.diaViagemId,
                 nome: this.hospedagem.nome,
                 tipo: this.hospedagem.tipo,
                 endereco: this.hospedagem.endereco,
@@ -182,7 +210,7 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
                 const formValue = this.hospedagemForm.value;
 
                 const dadosHospedagem: Omit<Hospedagem, 'id' | 'criadoEm' | 'atualizadoEm'> = {
-                    diaViagemId: this.diaViagemId,
+                    diaViagemId: formValue.diaViagemId,
                     viagemId: this.viagemId,
                     nome: formValue.nome,
                     tipo: formValue.tipo,

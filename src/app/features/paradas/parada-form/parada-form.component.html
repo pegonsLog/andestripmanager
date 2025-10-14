@@ -23,6 +23,24 @@
                     Informações Básicas
                 </h3>
 
+                <!-- Seleção do Dia da Viagem -->
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Dia da Viagem</mat-label>
+                        <mat-select formControlName="diaViagemId" [disabled]="carregandoDias" required>
+                            <mat-option *ngFor="let dia of diasDisponiveis" [value]="dia.id">
+                                Dia {{ dia.numeroDia }} - {{ dia.data | date:'dd/MM/yyyy' }} - {{ dia.origem }} → {{ dia.destino }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matSuffix>event</mat-icon>
+                        <mat-hint *ngIf="carregandoDias">Carregando dias...</mat-hint>
+                        <mat-hint *ngIf="!carregandoDias && diasDisponiveis.length === 0">Nenhum dia cadastrado. Crie um dia primeiro.</mat-hint>
+                        <mat-error *ngIf="hasError('diaViagemId')">
+                            Selecione o dia da viagem
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
                 <div class="form-row">
                     <!-- Tipo de Parada -->
                     <mat-form-field appearance="outline" class="full-width">

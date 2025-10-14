@@ -18,6 +18,7 @@ import { takeUntil } from 'rxjs/operators';
 import { DiaViagem, Viagem } from '../../../models';
 import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { ViagensService } from '../../../services/viagens.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 /**
  * Componente para formulário de criação/edição de dia de viagem
@@ -54,6 +55,7 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
     private snackBar = inject(MatSnackBar);
     private diasViagemService = inject(DiasViagemService);
     private viagensService = inject(ViagensService);
+    private authService = inject(AuthService);
 
     // Controle de ciclo de vida
     private destroy$ = new Subject<void>();
@@ -374,6 +376,13 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
             this.showError('ID da viagem é obrigatório');
             return;
         }
+
+        const usuarioAtual = this.authService.getCurrentUser();
+        if (!usuarioAtual?.id) {
+            this.showError('Usuário não autenticado');
+            return;
+        }
+
         this.isSaving$.next(true);
 
         try {
@@ -384,6 +393,7 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
             const coordenadasDestino = await this.buscarCoordenadas(formData.destino);
 
             const dadosDia: Omit<DiaViagem, 'id' | 'criadoEm' | 'atualizadoEm'> = {
+                usuarioId: usuarioAtual.id,
                 viagemId: this.viagemId,
                 data: formData.data.toISOString().split('T')[0],
                 numeroDia: formData.numeroDia,
