@@ -1,0 +1,73 @@
+// Estilos específicos do diálogo de detalhes do dia
+:host {
+    display: block;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 500;
+        color: white;
+
+        mat-icon {
+            color: white;
+        }
+    }
+
+    .viagem-nome {
+        font-size: 14px;
+        opacity: 0.9;
+        font-weight: 400;
+    }
+
+    .close-button {
+        margin-right: -8px;
+        color: white;
+    }
+}
+
+.dialog-content {
+    padding: 0;
+    margin: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+}
+
+.dialog-actions {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    background-color: white;
+}
+
+// Ajustes para o componente interno
+::ng-deep {
+    .dia-detail-dialog {
+        .mat-mdc-dialog-container {
+            padding: 0 !important;
+            
+            .mdc-dialog__surface {
+                padding: 0 !important;
+            }
+        }
+    }
+
+    // Ajustes para o componente dia-viagem-detail dentro do diálogo
+    app-dia-viagem-detail {
+        .dia-detail-container {
+            padding: 16px;
+        }
+    }
+}

@@ -1,0 +1,21 @@
+<div class="dialog-header">
+    <h2 mat-dialog-title>
+        <mat-icon>calendar_today</mat-icon>
+        Dia {{ data.dia.numeroDia }}
+        <span class="viagem-nome" *ngIf="data.viagemNome"> - {{ data.viagemNome }}</span>
+    </h2>
+    <button mat-icon-button mat-dialog-close class="close-button" matTooltip="Fechar">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+    <app-dia-viagem-detail [diaId]="data.dia.id!"></app-dia-viagem-detail>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button mat-dialog-close>
+        <mat-icon>close</mat-icon>
+        Fechar
+    </button>
+</mat-dialog-actions>

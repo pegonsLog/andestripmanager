@@ -46,6 +46,7 @@ import { ManutencaoCardComponent } from '../../manutencoes/components/manutencao
 import { DiarioEntradaFormDialogComponent, DiarioEntradaFormDialogData } from '../../diario/components/diario-entrada-form-dialog/diario-entrada-form-dialog.component';
 import { DiarioEntradaCardComponent } from '../../diario/components/diario-entrada-card/diario-entrada-card.component';
 import { ClimaViagemComponent } from '../../clima/components/clima-viagem/clima-viagem.component';
+import { DiaViagemDetailDialogComponent, DiaViagemDetailDialogData } from '../../dias-viagem/dia-viagem-detail-dialog/dia-viagem-detail-dialog.component';
 
 @Component({
     selector: 'app-viagem-detail',
@@ -711,11 +712,24 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Visualiza detalhes de um dia (placeholder)
+     * Visualiza detalhes de um dia em um diálogo
      */
     onVisualizarDia(dia: DiaViagem): void {
-        // Poderemos abrir um diálogo com DiaViagemDetailComponent futuramente
-        this.showSuccess(`Visualização do Dia ${dia.numeroDia} estará disponível em breve`);
+        const viagem = this.viagem();
+        
+        const dialogData: DiaViagemDetailDialogData = {
+            dia: dia,
+            viagemNome: viagem?.nome
+        };
+
+        this.dialog.open(DiaViagemDetailDialogComponent, {
+            width: '90vw',
+            maxWidth: '1200px',
+            height: '85vh',
+            maxHeight: '900px',
+            data: dialogData,
+            panelClass: 'dia-detail-dialog'
+        });
     }
 
     /**

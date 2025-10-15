@@ -16,6 +16,11 @@ export const environment = {
         units: "metric", // Celsius
         lang: "pt_br"
     },
+    googleMaps: {
+        apiKey: "YOUR_GOOGLE_MAPS_API_KEY" // IMPORTANTE: Substitua pela sua chave do Google Maps
+        // Obtenha em: https://console.cloud.google.com/google/maps-apis
+        // Esta chave NÃO será commitada (arquivo está no .gitignore)
+    },
     debug: false,
     logLevel: 'error'
 };

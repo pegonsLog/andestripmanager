@@ -6,7 +6,7 @@
     </div>
 
     <!-- Conteúdo principal -->
-    <div class="content" *ngIf="!(isLoading$ | async) && dados.dia">
+    <div class="content" *ngIf="(isLoading$ | async) === false && dados.dia">
         <!-- Cabeçalho do dia -->
         <mat-card class="header-card">
             <mat-card-header>
@@ -58,9 +58,9 @@
                         <mat-icon>schedule</mat-icon>
                         <div class="stat-info">
                             <span class="stat-label">Tempo Estimado</span>
-                            <span class="stat-value">{{ formatarTempo(dados.dia.rota.tempoEstimado) }}</span>
-                            <span *ngIf="dados.dia.rota.tempoReal" class="stat-real">
-                                ({{ formatarTempo(dados.dia.rota.tempoReal) }} real)
+                            <span class="stat-value">{{ formatarTempo(dados.dia.rota!.tempoEstimado!) }}</span>
+                            <span *ngIf="dados.dia.rota?.tempoReal" class="stat-real">
+                                ({{ formatarTempo(dados.dia.rota!.tempoReal!) }} real)
                             </span>
                         </div>
                     </div>
@@ -73,7 +73,7 @@
                         </div>
                     </div>
 
-                    <div class="stat-item" *ngIf="dados.estatisticas?.progresso > 0">
+                    <div class="stat-item" *ngIf="dados.estatisticas && dados.estatisticas.progresso && dados.estatisticas.progresso > 0">
                         <mat-icon>trending_up</mat-icon>
                         <div class="stat-info">
                             <span class="stat-label">Progresso</span>
@@ -83,7 +83,7 @@
                 </div>
 
                 <!-- Barra de progresso -->
-                <div class="progresso-container" *ngIf="dados.estatisticas?.progresso > 0">
+                <div class="progresso-container" *ngIf="dados.estatisticas && dados.estatisticas.progresso && dados.estatisticas.progresso > 0">
                     <div class="progresso-bar">
                         <div class="progresso-fill" [style.width.%]="dados.estatisticas.progresso"></div>
                     </div>
@@ -92,11 +92,10 @@
         </mat-card>
 
         <!-- Abas de conteúdo -->
-        <mat-tab-group class="content-tabs" animationDuration="300ms">
+        <mat-tab-group class="content-tabs" animationDuration="300ms" (selectedTabChange)="onTabChange($event)">
             <!-- Aba do Mapa -->
             <mat-tab label="Mapa e Rota">
-                <ng-template matTabContent>
-                    <div class="tab-content">
+                <div class="tab-content">
                         <mat-card class="map-card">
                             <mat-card-header>
                                 <mat-card-title>
@@ -105,7 +104,14 @@
                                 </mat-card-title>
                             </mat-card-header>
                             <mat-card-content>
-                                <div class="map-container" #mapContainer></div>
+                                <div class="map-container" #mapContainer>
+                                    <!-- Mensagem de carregamento -->
+                                    <div class="map-placeholder" *ngIf="!mapInitialized">
+                                        <mat-icon>map</mat-icon>
+                                        <p>Carregando mapa...</p>
+                                        <small>Se o mapa não carregar, verifique se a API do Google Maps está configurada</small>
+                                    </div>
+                                </div>
 
                                 <!-- Informações da rota -->
                                 <div class="rota-info" *ngIf="dados.dia.rota">
@@ -124,8 +130,7 @@
                                 </div>
                             </mat-card-content>
                         </mat-card>
-                    </div>
-                </ng-template>
+                </div>
             </mat-tab>
 
             <!-- Aba das Paradas -->
@@ -164,9 +169,9 @@
                                             <div class="info-item">
                                                 <mat-icon>local_gas_station</mat-icon>
                                                 <span>
-                                                    {{ (parada.dadosEspecificos as any).quantidade }}L
-                                                    <span *ngIf="(parada.dadosEspecificos as any).tipoCombustivel">
-                                                        - {{ (parada.dadosEspecificos as any).tipoCombustivel }}
+                                                    {{ $any(parada.dadosEspecificos).quantidade }}L
+                                                    <span *ngIf="$any(parada.dadosEspecificos).tipoCombustivel">
+                                                        - {{ $any(parada.dadosEspecificos).tipoCombustivel }}
                                                     </span>
                                                 </span>
                                             </div>
@@ -179,7 +184,7 @@
                                         <div class="tipo-info" *ngIf="parada.tipo === 'refeicao' && parada.dadosEspecificos">
                                             <div class="info-item">
                                                 <mat-icon>restaurant</mat-icon>
-                                                <span>{{ (parada.dadosEspecificos as any).tipoRefeicao }}</span>
+                                                <span>{{ $any(parada.dadosEspecificos).tipoRefeicao }}</span>
                                             </div>
                                             <div class="info-item" *ngIf="parada.custo">
                                                 <mat-icon>attach_money</mat-icon>
@@ -188,13 +193,13 @@
                                         </div>
 
                                         <div class="tipo-info" *ngIf="parada.tipo === 'ponto-interesse' && parada.dadosEspecificos">
-                                            <div class="info-item" *ngIf="(parada.dadosEspecificos as any).categoria">
+                                            <div class="info-item" *ngIf="$any(parada.dadosEspecificos).categoria">
                                                 <mat-icon>place</mat-icon>
-                                                <span>{{ (parada.dadosEspecificos as any).categoria }}</span>
+                                                <span>{{ $any(parada.dadosEspecificos).categoria }}</span>
                                             </div>
-                                            <div class="info-item" *ngIf="(parada.dadosEspecificos as any).valorEntrada">
+                                            <div class="info-item" *ngIf="$any(parada.dadosEspecificos).valorEntrada">
                                                 <mat-icon>attach_money</mat-icon>
-                                                <span>R$ {{ (parada.dadosEspecificos as any).valorEntrada.toFixed(2) }}</span>
+                                                <span>R$ {{ $any(parada.dadosEspecificos).valorEntrada.toFixed(2) }}</span>
                                             </div>
                                         </div>
 
@@ -347,7 +352,7 @@
     </div>
 
     <!-- Estado de erro -->
-    <div class="error-state" *ngIf="!(isLoading$ | async) && !dados.dia">
+    <div class="error-state" *ngIf="(isLoading$ | async) === false && !dados.dia">
         <mat-card>
             <mat-card-content>
                 <div class="empty-content">
