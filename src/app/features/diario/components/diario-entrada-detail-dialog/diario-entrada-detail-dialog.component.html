@@ -1,0 +1,104 @@
+<div class="diario-entrada-detail-dialog">
+    <div class="dialog-header">
+        <h5 mat-dialog-title>
+            <mat-icon>{{ data.entrada.publico ? 'public' : 'lock' }}</mat-icon>
+            {{ data.entrada.titulo || 'Entrada sem título' }}
+        </h5>
+        <button mat-icon-button (click)="fechar()" class="close-button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content>
+        <div class="entrada-meta">
+            <div class="meta-item">
+                <mat-icon>calendar_today</mat-icon>
+                <span>{{ data.entrada.data | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="meta-item">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ formatarTimestamp(data.entrada.criadoEm) }}</span>
+            </div>
+            <div class="meta-item" *ngIf="data.nomeDiaViagem">
+                <mat-icon>map</mat-icon>
+                <span>{{ data.nomeDiaViagem }}</span>
+            </div>
+            <div class="meta-item" *ngIf="data.entrada.publico">
+                <mat-icon>public</mat-icon>
+                <span>Entrada pública</span>
+            </div>
+        </div>
+
+        <mat-card class="conteudo-card">
+            <mat-card-content>
+                <div class="entrada-conteudo" [innerHTML]="data.entrada.conteudo"></div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Tags -->
+        <div class="tags-section" *ngIf="data.entrada.tags && data.entrada.tags.length > 0">
+            <h3>
+                <mat-icon>label</mat-icon>
+                Tags
+            </h3>
+            <mat-chip-listbox>
+                <mat-chip-option *ngFor="let tag of data.entrada.tags" disabled>
+                    {{ tag }}
+                </mat-chip-option>
+            </mat-chip-listbox>
+        </div>
+
+        <!-- Galeria de fotos -->
+        <div class="fotos-section" *ngIf="data.entrada.fotos && data.entrada.fotos.length > 0">
+            <h3>
+                <mat-icon>photo_library</mat-icon>
+                Fotos ({{ data.entrada.fotos.length }})
+            </h3>
+            <app-galeria-fotos 
+                [fotos]="converterFotosParaGaleria(data.entrada.fotos)"
+                [permitirRemocao]="false">
+            </app-galeria-fotos>
+        </div>
+
+        <!-- Informações adicionais -->
+        <div class="info-adicional" *ngIf="data.entrada.clima || data.entrada.localizacao">
+            <h3>
+                <mat-icon>info</mat-icon>
+                Informações Adicionais
+            </h3>
+            
+            <div class="clima-info" *ngIf="data.entrada.clima">
+                <mat-icon>wb_sunny</mat-icon>
+                <div>
+                    <strong>Clima:</strong>
+                    <span *ngIf="data.entrada.clima.temperatura">
+                        {{ data.entrada.clima.temperatura }}°C
+                    </span>
+                    <span *ngIf="data.entrada.clima.condicao">
+                        - {{ data.entrada.clima.condicao }}
+                    </span>
+                    <p *ngIf="data.entrada.clima.descricao">{{ data.entrada.clima.descricao }}</p>
+                </div>
+            </div>
+
+            <div class="localizacao-info" *ngIf="data.entrada.localizacao">
+                <mat-icon>location_on</mat-icon>
+                <div>
+                    <strong>Localização:</strong>
+                    <p *ngIf="data.entrada.localizacao.endereco">{{ data.entrada.localizacao.endereco }}</p>
+                    <small>
+                        Lat: {{ data.entrada.localizacao.latitude }}, 
+                        Lng: {{ data.entrada.localizacao.longitude }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="fechar()">
+            <mat-icon>close</mat-icon>
+            Fechar
+        </button>
+    </mat-dialog-actions>
+</div>

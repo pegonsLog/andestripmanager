@@ -1,9 +1,91 @@
 .login-container {
   display: flex;
   justify-content: center;
-  min-height: 80vh;
-  padding: 20px;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 60px 20px 40px;
+  position: relative;
+  overflow: hidden;
+  
+  // Imagem de fundo
   background: linear-gradient(135deg, #1976d2 0%, #333 100%);
+  background-image: url('/assets/images/login-background.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  
+  // Suavizar renderização da imagem
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  
+  // Camada da foto em tela cheia (aparece primeiro)
+  &::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/assets/images/login-background.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 1000;
+    pointer-events: none;
+    
+    // Animação: foto em nitidez máxima que esmaecer
+    animation: fadeToBackground 3s ease-in-out forwards;
+  }
+  
+  // Overlay escuro (aparece após a animação)
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 0;
+    opacity: 0;
+    animation: fadeInOverlay 1s ease-in 2.5s forwards;
+  }
+  
+  // Garantir que o conteúdo fique acima do overlay
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Animação: foto esmaecer para o fundo
+@keyframes fadeToBackground {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+    visibility: hidden;
+  }
+}
+
+// Animação: overlay aparecer gradualmente
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .login-card {
@@ -11,12 +93,35 @@
   max-width: 400px;
   padding: 0;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  
+  // Efeito glassmorphism (vidro fosco)
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  
+  // Animação de entrada do card
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInCard 0.8s ease-out 2.2s forwards;
 
   // Centralizar cabeçalho do card (MatCardHeader)
   .mat-mdc-card-header {
     display: flex;
     justify-content: center;
+  }
+}
+
+// Animação: card aparecer suavemente
+@keyframes fadeInCard {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

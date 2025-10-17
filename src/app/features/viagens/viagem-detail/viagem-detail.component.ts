@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, BehaviorSubject, of } from 'rxjs';
@@ -17,6 +18,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 // Models e Services
 import { Viagem, StatusViagem, DiaViagem, Parada, Hospedagem, Custo } from '../../../models';
@@ -45,6 +48,7 @@ import { ManutencaoFormDialogComponent, ManutencaoFormDialogData } from '../../m
 import { ManutencaoCardComponent } from '../../manutencoes/components/manutencao-card/manutencao-card.component';
 import { DiarioEntradaFormDialogComponent, DiarioEntradaFormDialogData } from '../../diario/components/diario-entrada-form-dialog/diario-entrada-form-dialog.component';
 import { DiarioEntradaCardComponent } from '../../diario/components/diario-entrada-card/diario-entrada-card.component';
+import { DiarioEntradaDetailDialogComponent } from '../../diario/components/diario-entrada-detail-dialog/diario-entrada-detail-dialog.component';
 import { ClimaViagemComponent } from '../../clima/components/clima-viagem/clima-viagem.component';
 import { DiaViagemDetailDialogComponent, DiaViagemDetailDialogData } from '../../dias-viagem/dia-viagem-detail-dialog/dia-viagem-detail-dialog.component';
 
@@ -53,6 +57,7 @@ import { DiaViagemDetailDialogComponent, DiaViagemDetailDialogData } from '../..
     standalone: true,
     imports: [
         CommonModule,
+        FormsModule,
         MatTabsModule,
         MatCardModule,
         MatButtonModule,
@@ -64,6 +69,8 @@ import { DiaViagemDetailDialogComponent, DiaViagemDetailDialogData } from '../..
         MatChipsModule,
         MatTooltipModule,
         MatDividerModule,
+        MatFormFieldModule,
+        MatInputModule,
         DatePipe,
         ViagemFormComponent,
         DiaViagemCardComponent,
@@ -107,6 +114,10 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
     custos = signal<Custo[]>([]);
     manutencoes = signal<Manutencao[]>([]);
     entradasDiario = signal<DiarioBordo[]>([]);
+    entradasDiarioFiltradas = signal<DiarioBordo[]>([]);
+    
+    // Filtro de diário
+    filtroDiarioTexto = '';
 
     // Estatísticas calculadas
     estatisticas = signal<{
@@ -313,6 +324,7 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (entradas) => {
                     this.entradasDiario.set(entradas);
+                    this.filtrarEntradasDiario();
                     this.updateEstatisticas();
                 },
                 error: (error) => {
@@ -681,7 +693,10 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                 if (this.entradasDiario().length === 0) {
                     this.diarioBordoService.obterEntradasDaViagem(viagemId)
                         .pipe(takeUntil(this.destroy$))
-                        .subscribe(entradas => this.entradasDiario.set(entradas));
+                        .subscribe(entradas => {
+                            this.entradasDiario.set(entradas);
+                            this.filtrarEntradasDiario();
+                        });
                 }
                 break;
         }
@@ -1235,15 +1250,32 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                 // Recarregar entradas
                 const atualizadas = await this.diarioBordoService.obterEntradasDaViagem(viagem.id!).toPromise();
                 this.entradasDiario.set(atualizadas || []);
+                this.filtrarEntradasDiario();
                 this.updateEstatisticas();
             }
         });
     }
 
     onVisualizarEntradaDiario(entrada: DiarioBordo): void {
-        // TODO: Implementar dialog de visualização detalhada
-        console.log('Visualizar entrada:', entrada.id);
-        this.showSuccess('Visualização detalhada será implementada em breve');
+        // Obter nome do dia da viagem se houver
+        let nomeDiaViagem: string | undefined;
+        if (entrada.diaViagemId) {
+            const dia = this.diasViagem().find(d => d.id === entrada.diaViagemId);
+            if (dia) {
+                nomeDiaViagem = `Dia ${dia.numeroDia} - ${dia.origem} → ${dia.destino}`;
+            }
+        }
+
+        // Abrir dialog de visualização detalhada
+        this.dialog.open(DiarioEntradaDetailDialogComponent, {
+            width: '90vw',
+            maxWidth: '900px',
+            maxHeight: '90vh',
+            data: {
+                entrada,
+                nomeDiaViagem
+            }
+        });
     }
 
     onEditarEntradaDiario(entrada: DiarioBordo): void {
@@ -1272,6 +1304,7 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                 this.showSuccess('Entrada atualizada com sucesso!');
                 const atualizadas = await this.diarioBordoService.obterEntradasDaViagem(viagem.id!).toPromise();
                 this.entradasDiario.set(atualizadas || []);
+                this.filtrarEntradasDiario();
                 this.updateEstatisticas();
             }
         });
@@ -1307,6 +1340,7 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                     await this.diarioBordoService.removerEntrada(entrada.id!);
                     const atualizadas = await this.diarioBordoService.obterEntradasDaViagem(viagem.id!).toPromise();
                     this.entradasDiario.set(atualizadas || []);
+                    this.filtrarEntradasDiario();
                     this.updateEstatisticas();
                     this.showSuccess('Entrada excluída com sucesso!');
                 } catch (error) {
@@ -1315,6 +1349,35 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
                 }
             }
         });
+    }
+
+    /**
+     * Filtra entradas do diário por texto
+     */
+    filtrarEntradasDiario(): void {
+        const entradas = this.entradasDiario();
+        
+        if (!this.filtroDiarioTexto || this.filtroDiarioTexto.trim() === '') {
+            this.entradasDiarioFiltradas.set(entradas);
+            return;
+        }
+
+        const termo = this.filtroDiarioTexto.toLowerCase().trim();
+        const filtradas = entradas.filter(entrada =>
+            entrada.titulo?.toLowerCase().includes(termo) ||
+            entrada.conteudo.toLowerCase().includes(termo) ||
+            entrada.tags?.some(tag => tag.toLowerCase().includes(termo))
+        );
+
+        this.entradasDiarioFiltradas.set(filtradas);
+    }
+
+    /**
+     * Limpa o filtro de diário
+     */
+    limparFiltroDiario(): void {
+        this.filtroDiarioTexto = '';
+        this.filtrarEntradasDiario();
     }
 
     /**

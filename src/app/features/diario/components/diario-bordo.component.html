@@ -101,8 +101,8 @@
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Tags</mat-label>
                         <input matInput formControlName="tags"
-                            placeholder="aventura, paisagem, comida (separadas por vírgula)">
-                        <mat-hint>Separe as tags com vírgulas</mat-hint>
+                            placeholder="Ex: aventura, trilha, paisagem, comida-local, memorável, natureza">
+                        <mat-hint>Palavras-chave para categorizar: atividades, sentimentos, temas, locais (separadas por vírgula)</mat-hint>
                     </mat-form-field>
 
                     <!-- Entrada pública -->
@@ -213,6 +213,10 @@
 
                     <!-- Ações -->
                     <mat-card-actions align="end">
+                        <button mat-button (click)="expandirEntrada(entrada.id!)" matTooltip="Ler mais">
+                            <mat-icon>visibility</mat-icon>
+                            Ler mais
+                        </button>
                         <button mat-icon-button (click)="editarEntrada(entrada)" matTooltip="Editar entrada">
                             <mat-icon>edit</mat-icon>
                         </button>

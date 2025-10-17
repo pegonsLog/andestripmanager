@@ -293,7 +293,8 @@ export class ViagemFormComponent implements OnInit, OnDestroy {
 
         this.cancelar.emit();
 
-        if (!this.isEditMode) {
+        // Navega de volta para a lista de viagens
+        if (this.navegarAoSalvar) {
             this.router.navigate(['/viagens']);
         }
     }

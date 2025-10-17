@@ -181,8 +181,17 @@ export class AuthService {
 
         try {
             const userRef = doc(this.firestore, 'usuarios', currentUser.id);
+            
+            // Remover campos undefined para evitar erro do Firestore
+            const dadosLimpos = Object.entries(dadosAtualizados).reduce((acc, [key, value]) => {
+                if (value !== undefined) {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {} as any);
+            
             await updateDoc(userRef, {
-                ...dadosAtualizados,
+                ...dadosLimpos,
                 atualizadoEm: new Date()
             });
 
@@ -190,7 +199,8 @@ export class AuthService {
             const updatedUser = { ...currentUser, ...dadosAtualizados };
             this.currentUserSubject.next(updatedUser);
         } catch (error: any) {
-            throw new Error('Erro ao atualizar dados do usuário');
+            console.error('Erro ao atualizar dados do usuário:', error);
+            throw new Error(`Erro ao atualizar dados do usuário: ${error.message || error}`);
         }
     }
 

@@ -46,6 +46,7 @@
     "@angular/router": "18.2.14",
     "@angular/service-worker": "18.2.14",
     "firebase": "^10.14.1",
+    "firebase-functions": "^6.5.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"

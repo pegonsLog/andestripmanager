@@ -14,9 +14,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable, Subject, BehaviorSubject, combineLatest } from 'rxjs';
-import { takeUntil, switchMap, map, startWith } from 'rxjs/operators';
+import { takeUntil, map, startWith } from 'rxjs/operators';
 
 import { DiarioBordo, DiarioBordoForm } from '../../../models/diario-bordo.interface';
 import { DiarioBordoService } from '../../../services/diario-bordo.service';
@@ -26,6 +26,7 @@ import { Viagem } from '../../../models/viagem.interface';
 import { DiaViagem } from '../../../models/dia-viagem.interface';
 import { FotoUploadComponent } from './foto-upload.component';
 import { GaleriaFotosComponent } from './galeria-fotos.component';
+import { DiarioEntradaDetailDialogComponent } from './diario-entrada-detail-dialog/diario-entrada-detail-dialog.component';
 
 /**
  * Componente principal do diário de bordo
@@ -49,6 +50,7 @@ import { GaleriaFotosComponent } from './galeria-fotos.component';
         MatDatepickerModule,
         MatNativeDateModule,
         MatSelectModule,
+        MatDialogModule,
         FotoUploadComponent,
         GaleriaFotosComponent
     ],
@@ -163,13 +165,13 @@ export class DiarioBordoComponent implements OnInit, OnDestroy {
             });
 
         // Carregar dias da viagem
-        this.diasViagemService.recuperarPorViagem(this.viagemId)
+        this.diasViagemService.listarDiasViagem(this.viagemId)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-                next: (dias) => {
+                next: (dias: DiaViagem[]) => {
                     this.diasViagem$.next(dias);
                 },
-                error: (error) => {
+                error: (error: unknown) => {
                     console.error('Erro ao carregar dias da viagem:', error);
                 }
             });
@@ -373,10 +375,12 @@ export class DiarioBordoComponent implements OnInit, OnDestroy {
     /**
      * Formata o timestamp para exibição
      */
-    formatarTimestamp(timestamp: any): string {
+    formatarTimestamp(timestamp: unknown): string {
         if (!timestamp) return '';
 
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const date = (timestamp as { toDate?: () => Date }).toDate 
+            ? (timestamp as { toDate: () => Date }).toDate() 
+            : new Date(timestamp as string | number | Date);
         return date.toLocaleString('pt-BR');
     }
 
@@ -386,7 +390,7 @@ export class DiarioBordoComponent implements OnInit, OnDestroy {
     obterNomeDiaViagem(diaViagemId: string): string {
         const dias = this.diasViagem$.value;
         const dia = dias.find(d => d.id === diaViagemId);
-        return dia ? `Dia ${dia.ordem} - ${dia.cidadeOrigem} → ${dia.cidadeDestino}` : 'Entrada geral';
+        return dia ? `Dia ${dia.numeroDia} - ${dia.origem} → ${dia.destino}` : 'Entrada geral';
     }
 
     /**
@@ -416,8 +420,44 @@ export class DiarioBordoComponent implements OnInit, OnDestroy {
      * Expande uma entrada para mostrar o conteúdo completo
      */
     expandirEntrada(entradaId: string): void {
-        // Por enquanto, apenas um placeholder - será implementado na próxima versão
-        console.log('Expandir entrada:', entradaId);
+        console.log('1. Visualizar entrada:', entradaId);
+        
+        // Obter entradas do BehaviorSubject
+        const entradas = this.entradas$.getValue();
+        console.log('2. Total de entradas:', entradas.length);
+        
+        const entrada = entradas.find(e => e.id === entradaId);
+        console.log('3. Entrada encontrada:', entrada);
+        
+        if (!entrada) {
+            console.log('4. Entrada não encontrada!');
+            this.snackBar.open('Entrada não encontrada', 'Fechar', { duration: 3000 });
+            return;
+        }
+
+        console.log('5. Obtendo nome do dia da viagem...');
+        const nomeDiaViagem = entrada.diaViagemId 
+            ? this.obterNomeDiaViagem(entrada.diaViagemId)
+            : undefined;
+        console.log('6. Nome do dia:', nomeDiaViagem);
+
+        console.log('7. Abrindo dialog com dados:', { entrada, nomeDiaViagem });
+        
+        try {
+            const dialogRef = this.dialog.open(DiarioEntradaDetailDialogComponent, {
+                width: '90vw',
+                maxWidth: '900px',
+                maxHeight: '90vh',
+                data: {
+                    entrada,
+                    nomeDiaViagem
+                }
+            });
+            console.log('8. Dialog aberto com sucesso:', dialogRef);
+        } catch (error) {
+            console.error('9. Erro ao abrir dialog:', error);
+            this.snackBar.open('Erro ao abrir visualização detalhada', 'Fechar', { duration: 3000 });
+        }
     }
 
     /**
@@ -474,7 +514,7 @@ export class DiarioBordoComponent implements OnInit, OnDestroy {
     /**
      * Converte fotos para o formato esperado pela galeria
      */
-    converterFotosParaGaleria(fotos: string[]): any[] {
+    converterFotosParaGaleria(fotos: string[]): Array<{ url: string; nome: string; data: string }> {
         return fotos.map(url => ({
             url,
             nome: 'Foto do diário',

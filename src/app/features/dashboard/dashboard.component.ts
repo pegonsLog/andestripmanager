@@ -315,6 +315,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     /**
+     * Navega para página de configurações/perfil
+     */
+    abrirConfiguracoes(): void {
+        this.router.navigate(['/perfil']);
+    }
+
+    /**
      * Navega para detalhes de uma viagem
      */
     verDetalhesViagem(viagemId: string): void {

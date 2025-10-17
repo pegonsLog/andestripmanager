@@ -551,23 +551,54 @@
                     </div>
 
                     <div *ngIf="entradasDiario().length > 0" class="content-list">
-                        <div class="list-header">
-                            <h3>Entradas do Diário ({{ entradasDiario().length }})</h3>
-                            <button mat-raised-button color="primary" (click)="onNovaEntradaDiario()">
-                                <mat-icon>add</mat-icon>
-                                Nova Entrada
-                            </button>
+                        <!-- Cabeçalho com busca integrada -->
+                        <div class="diario-header">
+                            <div class="header-top">
+                                <div class="header-info">
+                                    <h3>Entradas do Diário</h3>
+                                    <span class="badge-count">{{ entradasDiarioFiltradas().length }}</span>
+                                </div>
+                                <button mat-raised-button color="primary" (click)="onNovaEntradaDiario()">
+                                    <mat-icon>add</mat-icon>
+                                    Nova Entrada
+                                </button>
+                            </div>
+
+                            <!-- Campo de busca -->
+                            <div class="search-container">
+                                <mat-form-field appearance="outline" class="search-field">
+                                    <mat-icon matIconPrefix>search</mat-icon>
+                                    <input matInput 
+                                        placeholder="Buscar no diário"
+                                        [(ngModel)]="filtroDiarioTexto"
+                                        (input)="filtrarEntradasDiario()">
+                                    <button mat-icon-button 
+                                        matIconSuffix
+                                        *ngIf="filtroDiarioTexto"
+                                        (click)="limparFiltroDiario()"
+                                        matTooltip="Limpar busca">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                    <mat-hint>Busque por título, conteúdo ou tags</mat-hint>
+                                </mat-form-field>
+                            </div>
                         </div>
 
                         <div class="diario-list">
                             <app-diario-entrada-card
-                                *ngFor="let entrada of entradasDiario(); trackBy: trackByFn"
+                                *ngFor="let entrada of entradasDiarioFiltradas(); trackBy: trackByFn"
                                 [entrada]="entrada"
                                 [podeEditar]="podeEditar()"
                                 (visualizar)="onVisualizarEntradaDiario($event)"
                                 (editar)="onEditarEntradaDiario($event)"
                                 (excluir)="onRemoverEntradaDiario($event)">
                             </app-diario-entrada-card>
+                        </div>
+
+                        <div *ngIf="entradasDiarioFiltradas().length === 0 && filtroDiarioTexto" class="no-results">
+                            <mat-icon>search_off</mat-icon>
+                            <p>Nenhuma entrada encontrada com o termo "{{ filtroDiarioTexto }}"</p>
+                            <button mat-button (click)="limparFiltroDiario()">Limpar busca</button>
                         </div>
                     </div>
                 </div>

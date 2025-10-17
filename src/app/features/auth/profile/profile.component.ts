@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -9,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject, takeUntil } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth.service';
@@ -32,7 +34,8 @@ import { Usuario, DadosMotocicleta, cpfValidator, telefoneValidator } from '../.
         MatIconModule,
         MatSnackBarModule,
         MatProgressSpinnerModule,
-        MatDividerModule
+        MatDividerModule,
+        MatTooltipModule
     ],
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.scss'],
@@ -43,6 +46,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private readonly storageService = inject(StorageService);
     private readonly fb = inject(FormBuilder);
     private readonly snackBar = inject(MatSnackBar);
+    private readonly router = inject(Router);
+    private readonly cdr = inject(ChangeDetectorRef);
     private readonly destroy$ = new Subject<void>();
 
     // Formulários
@@ -146,6 +151,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             const reader = new FileReader();
             reader.onload = (e) => {
                 this.fotoPreview = e.target?.result as string;
+                this.cdr.markForCheck(); // Forçar detecção de mudanças
             };
             reader.readAsDataURL(file);
         }
@@ -158,6 +164,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         if (!this.usuario?.id) return;
 
         this.isUploadingPhoto = true;
+        this.cdr.markForCheck();
 
         try {
             // Remover foto do Storage se existir
@@ -170,6 +177,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
             this.fotoPreview = null;
             this.selectedFile = null;
+            this.cdr.markForCheck(); // Forçar detecção de mudanças
 
             this.snackBar.open('Foto removida com sucesso!', 'Fechar', {
                 duration: 3000
@@ -181,6 +189,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             });
         } finally {
             this.isUploadingPhoto = false;
+            this.cdr.markForCheck();
         }
     }
 
@@ -193,6 +202,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
 
         this.isUploadingPhoto = true;
+        this.cdr.markForCheck();
 
         try {
             // Comprimir imagem antes do upload
@@ -209,6 +219,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
                 compressedFile
             ).toPromise();
 
+            this.cdr.markForCheck(); // Forçar detecção de mudanças
+            
             this.snackBar.open('Foto atualizada com sucesso!', 'Fechar', {
                 duration: 3000
             });
@@ -222,6 +234,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             return null;
         } finally {
             this.isUploadingPhoto = false;
+            this.cdr.markForCheck();
         }
     }
 
@@ -245,11 +258,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
                 fotoUrl = uploadedUrl || undefined;
             }
 
-            // Preparar dados para atualização
-            const dadosAtualizados: Partial<Usuario> = {
-                ...this.perfilForm.value,
-                fotoUrl: fotoUrl || undefined
-            };
+            // Preparar dados para atualização - apenas campos não vazios
+            const formValue = this.perfilForm.value;
+            const dadosAtualizados: Partial<Usuario> = {};
+            
+            // Adicionar apenas campos com valor
+            if (formValue.nome) dadosAtualizados.nome = formValue.nome;
+            if (formValue.cpf) dadosAtualizados.cpf = formValue.cpf;
+            if (formValue.telefone) dadosAtualizados.telefone = formValue.telefone;
+            
+            // Adicionar foto apenas se houver
+            if (fotoUrl) {
+                dadosAtualizados.fotoUrl = fotoUrl;
+            }
 
             // Atualizar dados no Firebase
             await this.authService.updateUserData(dadosAtualizados);
@@ -261,8 +282,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.selectedFile = null;
         } catch (error) {
             console.error('Erro ao salvar perfil:', error);
-            this.snackBar.open('Erro ao salvar perfil', 'Fechar', {
-                duration: 3000
+            
+            let mensagemErro = 'Erro ao salvar perfil';
+            if (error instanceof Error) {
+                mensagemErro = error.message;
+            }
+            
+            this.snackBar.open(mensagemErro, 'Fechar', {
+                duration: 5000
             });
         } finally {
             this.isSaving = false;
@@ -344,5 +371,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
 
         return '';
+    }
+
+    /**
+     * Volta para a página anterior (dashboard)
+     */
+    voltar(): void {
+        this.router.navigate(['/dashboard']);
     }
 }

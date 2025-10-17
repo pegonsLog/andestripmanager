@@ -60,12 +60,12 @@ export class DiarioBordoService {
 
         const entrada: Omit<DiarioBordo, 'id'> = {
             viagemId,
-            diaViagemId,
+            ...(diaViagemId && { diaViagemId }), // Só inclui se tiver valor
             usuarioId: usuario.id!,
             data: new Date().toISOString().split('T')[0], // Data atual no formato YYYY-MM-DD
-            titulo: dados.titulo,
+            ...(dados.titulo && { titulo: dados.titulo }), // Só inclui se tiver valor
             conteudo: dados.conteudo,
-            fotos: fotosUrls,
+            ...(fotosUrls.length > 0 && { fotos: fotosUrls }), // Só inclui se tiver fotos
             publico: dados.publico,
             tags: dados.tags || [],
             criadoEm: serverTimestamp() as Timestamp,
@@ -93,15 +93,15 @@ export class DiarioBordoService {
         const docRef = doc(this.firestore, this.collectionName, id);
 
         // Preparar dados para atualização
-        const dadosAtualizacao: Record<string, unknown> = {
-            atualizadoEm: serverTimestamp(),
+        const dadosAtualizacao: Partial<DiarioBordo> = {
+            atualizadoEm: serverTimestamp() as Timestamp,
             atualizadoPor: usuario.id!
         };
 
-        if (dados.titulo !== undefined) dadosAtualizacao['titulo'] = dados.titulo;
-        if (dados.conteudo !== undefined) dadosAtualizacao['conteudo'] = dados.conteudo;
-        if (dados.publico !== undefined) dadosAtualizacao['publico'] = dados.publico;
-        if (dados.tags !== undefined) dadosAtualizacao['tags'] = dados.tags;
+        if (dados.titulo !== undefined) dadosAtualizacao.titulo = dados.titulo;
+        if (dados.conteudo !== undefined) dadosAtualizacao.conteudo = dados.conteudo;
+        if (dados.publico !== undefined) dadosAtualizacao.publico = dados.publico;
+        if (dados.tags !== undefined) dadosAtualizacao.tags = dados.tags;
 
         // Upload de novas fotos se houver
         if (dados.fotos && dados.fotos.length > 0) {
@@ -109,11 +109,11 @@ export class DiarioBordoService {
             const entradaAtual = await this.obterPorId(id);
             if (entradaAtual) {
                 const novasFotos = await this.uploadFotos(dados.fotos, entradaAtual.viagemId);
-                dadosAtualizacao['fotos'] = [...(entradaAtual.fotos || []), ...novasFotos];
+                dadosAtualizacao.fotos = [...(entradaAtual.fotos || []), ...novasFotos];
             }
         }
 
-        await updateDoc(docRef, dadosAtualizacao as any);
+        await updateDoc(docRef, dadosAtualizacao);
     }
 
     /**
