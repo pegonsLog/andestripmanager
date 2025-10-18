@@ -51,8 +51,8 @@
         <div class="tags-container" *ngIf="entrada.tags && entrada.tags.length > 0">
             <mat-chip-listbox>
                 <mat-chip *ngFor="let tag of entrada.tags">
-                    <mat-icon>label</mat-icon>
-                    {{ tag }}
+                    <mat-icon>{{ getIconeTag(tag) }}</mat-icon>
+                    {{ getTextoTag(tag) }}
                 </mat-chip>
             </mat-chip-listbox>
         </div>

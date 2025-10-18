@@ -1,0 +1,62 @@
+<mat-card class="custo-card">
+    <mat-card-header>
+        <div mat-card-avatar class="categoria-avatar">
+            <mat-icon>{{ getIconeCategoria(custo.categoria) }}</mat-icon>
+        </div>
+
+        <mat-card-title class="custo-descricao">
+            {{ custo.descricao }}
+        </mat-card-title>
+
+        <mat-card-subtitle class="custo-info">
+            {{ getCategoriaTexto(custo.categoria) }} • {{ custo.data | date:'dd/MM/yyyy' }}
+        </mat-card-subtitle>
+
+        <!-- Menu de Ações -->
+        <div class="card-actions" *ngIf="showActions">
+            <button mat-icon-button [matMenuTriggerFor]="menuAcoes">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-menu #menuAcoes="matMenu">
+                <button mat-menu-item (click)="onEditar()">
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="onExcluir()" class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    <span>Excluir</span>
+                </button>
+            </mat-menu>
+        </div>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Valor -->
+        <div class="valor-section">
+            <div class="valor-principal">
+                <mat-icon class="valor-icon">attach_money</mat-icon>
+                <span class="valor-texto">{{ formatarMoeda(custo.valor) }}</span>
+            </div>
+            <mat-chip [color]="getTipoColor(custo.tipo)">
+                {{ getTipoTexto(custo.tipo) }}
+            </mat-chip>
+        </div>
+
+        <!-- Observações -->
+        <div class="observacoes" *ngIf="custo.observacoes">
+            <mat-icon class="obs-icon">notes</mat-icon>
+            <p class="obs-texto">{{ custo.observacoes }}</p>
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions class="card-footer" *ngIf="showActions">
+        <div class="acoes-principais">
+            <button mat-button color="primary" (click)="onEditar()">
+                <mat-icon>edit</mat-icon>
+                Editar
+            </button>
+        </div>
+    </mat-card-actions>
+</mat-card>

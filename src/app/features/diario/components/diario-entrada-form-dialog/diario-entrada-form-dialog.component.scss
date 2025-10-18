@@ -96,17 +96,83 @@ mat-dialog-actions {
     }
 }
 
+// Tags section
+.tags-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .tags-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+
+        .tags-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.87);
+        }
+
+        .tag-select {
+            flex: 1;
+            max-width: 300px;
+
+            ::ng-deep .mat-mdc-select-value {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+    }
+}
+
 // Chips customization
 mat-chip-grid {
     mat-chip-row {
         background-color: #e3f2fd;
         color: #1976d2;
 
+        mat-icon[matChipAvatar] {
+            background-color: #1976d2;
+            color: white;
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+
         button[matChipRemove] {
             mat-icon {
                 font-size: 18px;
                 width: 18px;
                 height: 18px;
+            }
+        }
+    }
+}
+
+// Select options com ícones
+::ng-deep .mat-mdc-option {
+    .mat-icon {
+        margin-right: 12px;
+        vertical-align: middle;
+        color: #1976d2;
+    }
+
+    span {
+        vertical-align: middle;
+    }
+}
+
+// Responsividade
+@media (max-width: 600px) {
+    .tags-section {
+        .tags-header {
+            flex-direction: column;
+            align-items: stretch;
+
+            .tag-select {
+                max-width: none;
             }
         }
     }

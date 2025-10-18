@@ -63,10 +63,32 @@ export interface ParadaDetailDialogData {
           <div class="obs">{{ data.parada.observacoes }}</div>
         </div>
 
-        <div class="grid-item" *ngIf="data.parada.fotos?.length">
-          <div class="section-title"><mat-icon>photo_camera</mat-icon> Fotos</div>
-          <div class="fotos">
-            <img *ngFor="let f of data.parada.fotos" [src]="f" alt="Foto da parada" />
+        <div class="grid-item fotos-section" *ngIf="data.parada.fotos?.length">
+          <div class="section-title"><mat-icon>photo_camera</mat-icon> Fotos ({{ data.parada.fotos?.length }})</div>
+          <div class="fotos-galeria">
+            <div *ngFor="let f of data.parada.fotos; let i = index" class="foto-wrapper" (click)="visualizarFoto(i)">
+              <img [src]="f" [alt]="'Foto ' + (i + 1)" />
+              <div class="foto-overlay">
+                <mat-icon>zoom_in</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Modal de visualização de foto em tela cheia -->
+        <div class="foto-modal" *ngIf="fotoSelecionada !== null" (click)="fecharFoto()">
+          <div class="modal-content">
+            <button mat-icon-button class="btn-fechar" (click)="fecharFoto()">
+              <mat-icon>close</mat-icon>
+            </button>
+            <button mat-icon-button class="btn-anterior" (click)="fotoAnterior(); $event.stopPropagation()" *ngIf="data.parada.fotos && data.parada.fotos.length > 1">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <img [src]="data.parada.fotos![fotoSelecionada]" [alt]="'Foto ' + (fotoSelecionada + 1)" (click)="$event.stopPropagation()" />
+            <button mat-icon-button class="btn-proximo" (click)="fotoProxima(); $event.stopPropagation()" *ngIf="data.parada.fotos && data.parada.fotos.length > 1">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+            <div class="foto-contador">{{ fotoSelecionada + 1 }} / {{ data.parada.fotos?.length }}</div>
           </div>
         </div>
       </div>
@@ -91,13 +113,34 @@ export interface ParadaDetailDialogData {
     .section-title { display: flex; align-items: center; gap: 6px; font-weight: 600; margin-bottom: 6px; }
     .row { display: flex; gap: 16px; }
     .obs { white-space: pre-wrap; }
-    .fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
-    .fotos img { width: 100%; height: 90px; object-fit: cover; border-radius: 4px; }
+    .fotos-section { grid-column: 1 / -1; }
+    .fotos-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 8px; }
+    .foto-wrapper { position: relative; cursor: pointer; overflow: hidden; border-radius: 8px; aspect-ratio: 4/3; }
+    .foto-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+    .foto-wrapper:hover img { transform: scale(1.05); }
+    .foto-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+    .foto-wrapper:hover .foto-overlay { opacity: 1; }
+    .foto-overlay mat-icon { color: white; font-size: 48px; width: 48px; height: 48px; }
+    .foto-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+    .modal-content { position: relative; max-width: 90vw; max-height: 90vh; display: flex; align-items: center; justify-content: center; }
+    .modal-content img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+    .btn-fechar { position: absolute; top: -50px; right: 0; color: white; }
+    .btn-anterior, .btn-proximo { position: absolute; color: white; background: rgba(0,0,0,0.5); }
+    .btn-anterior { left: -60px; }
+    .btn-proximo { right: -60px; }
+    .foto-contador { position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); color: white; font-size: 14px; }
+    @media (max-width: 768px) {
+      .fotos-galeria { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+      .btn-anterior { left: 10px; }
+      .btn-proximo { right: 10px; }
+    }
     @media (min-width: 720px) { .grid { grid-template-columns: repeat(2, 1fr); } }
     `
   ]
 })
 export class ParadaDetailDialogComponent {
+  fotoSelecionada: number | null = null;
+
   constructor(
     private dialogRef: MatDialogRef<ParadaDetailDialogComponent, void>,
     @Inject(MAT_DIALOG_DATA) public data: ParadaDetailDialogData
@@ -129,5 +172,29 @@ export class ParadaDetailDialogComponent {
       'hospedagem': 'Hospedagem'
     };
     return textos[tipo] || tipo;
+  }
+
+  visualizarFoto(index: number): void {
+    this.fotoSelecionada = index;
+  }
+
+  fecharFoto(): void {
+    this.fotoSelecionada = null;
+  }
+
+  fotoAnterior(): void {
+    if (this.fotoSelecionada !== null && this.data.parada.fotos) {
+      this.fotoSelecionada = this.fotoSelecionada > 0 
+        ? this.fotoSelecionada - 1 
+        : this.data.parada.fotos.length - 1;
+    }
+  }
+
+  fotoProxima(): void {
+    if (this.fotoSelecionada !== null && this.data.parada.fotos) {
+      this.fotoSelecionada = this.fotoSelecionada < this.data.parada.fotos.length - 1 
+        ? this.fotoSelecionada + 1 
+        : 0;
+    }
   }
 }

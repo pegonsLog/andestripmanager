@@ -271,6 +271,12 @@ $success: #4caf50;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 50%;
+
+    mat-icon {
+      font-size: 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
   }
 
   mat-card-header {
@@ -410,12 +416,52 @@ $success: #4caf50;
 
 .viagem-detail-container {
   .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
     h3 {
-      margin: 0 0 1rem 0;
+      margin: 0;
       font-size: 22px;
       font-weight: 600;
       color: rgba(0, 0, 0, 0.87);
       font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .total-custo {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1976d2;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    button {
+      flex-shrink: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .list-header {
+      flex-direction: column;
+      align-items: stretch;
+
+      .header-left {
+        margin-bottom: 1rem;
+      }
+
+      button {
+        width: 100%;
+      }
     }
   }
 

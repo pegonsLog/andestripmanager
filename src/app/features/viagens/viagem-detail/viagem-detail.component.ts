@@ -43,7 +43,9 @@ import { SelectDiaDialogComponent, SelectDiaDialogData } from '../../paradas/sel
 import { HospedagemFormComponent } from '../../hospedagens/components/hospedagem-form/hospedagem-form.component';
 import { HospedagemDetailDialogComponent, HospedagemDetailDialogData } from '../../hospedagens/components/hospedagem-detail-dialog/hospedagem-detail-dialog.component';
 import { HospedagemCardComponent } from '../../hospedagens/components/hospedagem-card/hospedagem-card.component';
+import { ParadaCardComponent } from '../../paradas/parada-card/parada-card.component';
 import { CustoFormDialogComponent, CustoFormDialogData } from '../../custos/components/custo-form-dialog/custo-form-dialog.component';
+import { CustoCardComponent } from '../../custos/components/custo-card/custo-card.component';
 import { ManutencaoFormDialogComponent, ManutencaoFormDialogData } from '../../manutencoes/components/manutencao-form-dialog/manutencao-form-dialog.component';
 import { ManutencaoCardComponent } from '../../manutencoes/components/manutencao-card/manutencao-card.component';
 import { DiarioEntradaFormDialogComponent, DiarioEntradaFormDialogData } from '../../diario/components/diario-entrada-form-dialog/diario-entrada-form-dialog.component';
@@ -74,7 +76,9 @@ import { DiaViagemDetailDialogComponent, DiaViagemDetailDialogData } from '../..
         DatePipe,
         ViagemFormComponent,
         DiaViagemCardComponent,
+        ParadaCardComponent,
         HospedagemCardComponent,
+        CustoCardComponent,
         ManutencaoCardComponent,
         DiarioEntradaCardComponent,
         ClimaViagemComponent
@@ -1124,6 +1128,60 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
         });
     }
 
+    onEditarCusto(custo: Custo): void {
+        const viagem = this.viagem();
+        if (!viagem?.id || !custo.id) return;
+
+        const dialogData: CustoFormDialogData = {
+            viagemId: viagem.id,
+            custo: custo
+        };
+
+        const dialogRef = this.dialog.open(CustoFormDialogComponent, {
+            width: '720px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            autoFocus: false,
+            data: dialogData
+        });
+
+        dialogRef.afterClosed().subscribe(custoAtualizado => {
+            if (custoAtualizado) {
+                this.showSuccess('Custo atualizado com sucesso!');
+                this.carregarCustos();
+            }
+        });
+    }
+
+    async onRemoverCusto(custo: Custo): Promise<void> {
+        if (!custo.id) return;
+
+        const dialogData: ConfirmationDialogData = {
+            titulo: 'Confirmar Exclusão',
+            mensagem: `Deseja realmente excluir o custo "${custo.descricao}"?`,
+            textoConfirmar: 'Excluir',
+            textoCancelar: 'Cancelar'
+        };
+
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '400px',
+            data: dialogData
+        });
+
+        dialogRef.afterClosed().subscribe(async confirmed => {
+            if (confirmed) {
+                try {
+                    await this.custosService.remove(custo.id!);
+                    this.showSuccess('Custo excluído com sucesso!');
+                    this.carregarCustos();
+                } catch (error) {
+                    console.error('Erro ao excluir custo:', error);
+                    this.showError('Erro ao excluir custo');
+                }
+            }
+        });
+    }
+
     onRegistrarManutencao(): void {
         const viagem = this.viagem();
         if (!viagem?.id) return;
@@ -1431,7 +1489,7 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
             case StatusViagem.PLANEJADA:
                 return 'schedule';
             case StatusViagem.EM_ANDAMENTO:
-                return 'directions_bike';
+                return 'two_wheeler';
             case StatusViagem.FINALIZADA:
                 return 'check_circle';
             case StatusViagem.CANCELADA:

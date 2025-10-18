@@ -123,7 +123,7 @@ export class ViagemCardComponent {
             case StatusViagem.PLANEJADA:
                 return 'schedule';
             case StatusViagem.EM_ANDAMENTO:
-                return 'directions_bike';
+                return 'two_wheeler';
             case StatusViagem.FINALIZADA:
                 return 'check_circle';
             default:

@@ -1,0 +1,207 @@
+.custo-card {
+  max-width: 400px;
+  margin: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// Header do Card
+mat-card-header {
+  position: relative;
+  padding-bottom: 8px;
+
+  .categoria-avatar {
+    background-color: #1976d2;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  .custo-descricao {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+  }
+
+  .custo-info {
+    color: #666;
+    font-size: 0.875rem;
+  }
+
+  .card-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+// Conteúdo do Card
+mat-card-content {
+  padding-top: 8px;
+}
+
+// Seção de Valor
+.valor-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+
+  .valor-principal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .valor-icon {
+      color: #1976d2;
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .valor-texto {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1976d2;
+    }
+  }
+
+  mat-chip {
+    font-weight: 500;
+  }
+}
+
+// Observações
+.observacoes {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+  .obs-icon {
+    color: #666;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .obs-texto {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #555;
+    line-height: 1.4;
+  }
+}
+
+// Footer do Card
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 16px;
+  border-top: 1px solid #e0e0e0;
+
+  .acoes-principais {
+    display: flex;
+    gap: 8px;
+
+    button {
+      mat-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+// Menu de ações
+.delete-action {
+  color: #f44336;
+
+  mat-icon {
+    color: #f44336;
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .custo-card {
+    margin: 8px;
+    max-width: none;
+  }
+
+  .valor-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .valor-principal {
+      .valor-texto {
+        font-size: 1.3rem;
+      }
+    }
+  }
+
+  .card-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+
+    .acoes-principais {
+      justify-content: center;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+}
+
+// Animações
+.custo-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Estados especiais
+.custo-card {
+  &.selecionado {
+    border: 2px solid #1976d2;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+  }
+
+  &.desabilitado {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}

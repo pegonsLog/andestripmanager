@@ -75,12 +75,6 @@
                     <mat-icon class="info-icon">attach_money</mat-icon>
                     <span class="info-text font-regular">{{ formatarMoeda(viagem.custoTotal) }}</span>
                 </div>
-
-                <!-- Número de dias planejados -->
-                <div class="info-item" *ngIf="viagem.numeroDias" matTooltip="Dias planejados">
-                    <mat-icon class="info-icon">calendar_today</mat-icon>
-                    <span class="info-text font-regular">{{ viagem.numeroDias }} dias</span>
-                </div>
             </div>
         </div>
 
@@ -97,14 +91,6 @@
                     <mat-icon matChipAvatar>warning</mat-icon>
                     Atrasada
                 </mat-chip>
-
-                <!-- Contador de dias restantes -->
-                <div class="dias-restantes" *ngIf="viagem.status === StatusViagem.PLANEJADA && !isAtrasada()">
-                    <span class="font-regular contador-texto">
-                        <mat-icon class="contador-icon">schedule</mat-icon>
-                        {{ diasRestantes() }} dias restantes
-                    </span>
-                </div>
             </div>
         </div>
 

@@ -20,7 +20,7 @@
                 [multiple]="allowMultiple" [disabled]="!canAddMorePhotos()" (change)="onFileSelected($event)"
                 style="display: none;">
 
-            <button mat-raised-button color="primary" [disabled]="!canAddMorePhotos()" (click)="fileInput.click()">
+            <button mat-raised-button color="primary" type="button" [disabled]="!canAddMorePhotos()" (click)="fileInput.click()">
                 <mat-icon>add_photo_alternate</mat-icon>
                 {{ getUploadButtonText() }}
             </button>
@@ -49,11 +49,11 @@
 
                     <!-- Overlay com ações -->
                     <div class="photo-overlay">
-                        <button mat-icon-button color="primary" matTooltip="Visualizar" (click)="openPhoto(photo)">
+                        <button mat-icon-button color="primary" type="button" matTooltip="Visualizar" (click)="openPhoto(photo)">
                             <mat-icon>zoom_in</mat-icon>
                         </button>
 
-                        <button mat-icon-button color="warn" matTooltip="Remover" [disabled]="disabled"
+                        <button mat-icon-button color="warn" type="button" matTooltip="Remover" [disabled]="disabled"
                             (click)="removePhoto(photo)">
                             <mat-icon>delete</mat-icon>
                         </button>

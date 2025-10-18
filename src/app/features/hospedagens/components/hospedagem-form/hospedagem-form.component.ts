@@ -20,6 +20,7 @@ import { Hospedagem, TipoHospedagem, DiaViagem } from '../../../../models';
 import { HospedagensService } from '../../../../services/hospedagens.service';
 import { DiasViagemService } from '../../../../services/dias-viagem.service';
 import { CustomValidators } from '../../../../models/validators';
+import { UploadService } from '../../../../core/services/upload.service';
 
 @Component({
     selector: 'app-hospedagem-form',
@@ -56,6 +57,7 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
     private hospedagensService = inject(HospedagensService);
     private diasViagemService = inject(DiasViagemService);
     private snackBar = inject(MatSnackBar);
+    private uploadService = inject(UploadService);
     private destroy$ = new Subject<void>();
 
     // Lista de dias disponíveis
@@ -178,6 +180,19 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
                 siteOficial: this.hospedagem.siteOficial || '',
                 observacoes: this.hospedagem.observacoes || ''
             });
+            
+            // Carregar fotos existentes
+            if (this.hospedagem.fotos && this.hospedagem.fotos.length > 0) {
+                this.fotosHospedagem = [...this.hospedagem.fotos];
+            }
+            
+            // Carregar avaliações existentes
+            if (this.hospedagem.avaliacao) {
+                this.avaliacaoGeral = this.hospedagem.avaliacao;
+            }
+            if (this.hospedagem.avaliacaoDetalhada) {
+                this.avaliacaoDetalhada = { ...this.avaliacaoDetalhada, ...this.hospedagem.avaliacaoDetalhada };
+            }
         }
     }
 
@@ -229,7 +244,8 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
                     siteOficial: formValue.siteOficial || undefined,
                     observacoes: formValue.observacoes || undefined,
                     avaliacao: this.avaliacaoGeral || undefined,
-                    avaliacaoDetalhada: this.avaliacaoDetalhada.qualidadeQuarto > 0 ? this.avaliacaoDetalhada : undefined
+                    avaliacaoDetalhada: this.avaliacaoDetalhada.qualidadeQuarto > 0 ? this.avaliacaoDetalhada : undefined,
+                    fotos: this.fotosHospedagem.length > 0 ? this.fotosHospedagem : undefined
                 };
 
                 let hospedagemId: string;
@@ -260,9 +276,24 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
         this.cancelar.emit();
     }
 
-    private formatarData(data: Date): string {
+    private formatarData(data: Date | string | any): string {
         if (!data) return '';
-        return data.toISOString().split('T')[0];
+        
+        // Se já for uma string no formato correto, retornar
+        if (typeof data === 'string') {
+            return data.split('T')[0];
+        }
+        
+        // Se for um objeto Date ou timestamp
+        const dataObj = data instanceof Date ? data : new Date(data);
+        
+        // Verificar se é uma data válida
+        if (isNaN(dataObj.getTime())) {
+            console.error('Data inválida:', data);
+            return '';
+        }
+        
+        return dataObj.toISOString().split('T')[0];
     }
 
     private marcarCamposComoTocados(): void {
@@ -347,31 +378,41 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
     }
 
     private async uploadFoto(file: File): Promise<void> {
-        if (!file.type.startsWith('image/')) {
-            this.snackBar.open('Apenas arquivos de imagem são permitidos', 'Fechar', { duration: 3000 });
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) { // 5MB
-            this.snackBar.open('Arquivo muito grande. Máximo 5MB', 'Fechar', { duration: 3000 });
+        // Validar tipo e tamanho
+        if (!this.uploadService.isValidImage(file)) {
+            this.snackBar.open('Arquivo inválido. Use JPG, PNG ou WebP (máx. 10MB)', 'Fechar', { duration: 3000 });
             return;
         }
 
         this.uploadingFoto = true;
 
         try {
-            // Simular upload - em produção, usar Firebase Storage
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result as string;
-                this.fotosHospedagem.push(result);
-                this.snackBar.open('Foto adicionada com sucesso!', 'Fechar', { duration: 2000 });
-            };
-            reader.readAsDataURL(file);
+            // Gerar path único para o arquivo
+            const path = this.uploadService.generatePath(
+                `hospedagens/${this.viagemId}`,
+                file.name
+            );
+
+            // Fazer upload com progresso
+            this.uploadService.uploadFileWithProgress(file, path).subscribe({
+                next: (result) => {
+                    if ('url' in result) {
+                        // Upload concluído
+                        this.fotosHospedagem.push(result.url);
+                        this.snackBar.open('Foto adicionada com sucesso!', 'Fechar', { duration: 2000 });
+                        this.uploadingFoto = false;
+                    }
+                    // Progresso pode ser exibido aqui se necessário
+                },
+                error: (error) => {
+                    console.error('Erro ao fazer upload da foto:', error);
+                    this.snackBar.open('Erro ao fazer upload da foto', 'Fechar', { duration: 3000 });
+                    this.uploadingFoto = false;
+                }
+            });
         } catch (error) {
             console.error('Erro ao fazer upload da foto:', error);
             this.snackBar.open('Erro ao fazer upload da foto', 'Fechar', { duration: 3000 });
-        } finally {
             this.uploadingFoto = false;
         }
     }

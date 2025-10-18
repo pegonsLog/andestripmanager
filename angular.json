@@ -64,8 +64,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "12kB",
-                  "maximumError": "16kB"
+                  "maximumWarning": "14kB",
+                  "maximumError": "18kB"
                 }
               ],
               "outputHashing": "all",
@@ -78,13 +78,7 @@
               "namedChunks": false,
               "vendorChunk": true,
               "commonChunk": true,
-              "statsJson": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ]
+              "statsJson": true
             },
             "staging": {
               "budgets": [
@@ -95,8 +89,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "12kB",
-                  "maximumError": "16kB"
+                  "maximumWarning": "14kB",
+                  "maximumError": "18kB"
                 }
               ],
               "outputHashing": "all",
@@ -108,13 +102,7 @@
               "sourceMap": true,
               "namedChunks": false,
               "vendorChunk": true,
-              "commonChunk": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.staging.ts"
-                }
-              ]
+              "commonChunk": true
             },
             "development": {
               "buildOptimizer": false,

@@ -1,0 +1,113 @@
+<mat-card class="parada-card" [class.com-foto]="temFotos()">
+    <!-- Foto da Parada -->
+    <div class="foto-container" *ngIf="temFotos()">
+        <img [src]="getPrimeiraFoto()" [alt]="parada.nome" class="foto-parada">
+        <div class="foto-overlay" *ngIf="getQuantidadeFotos() > 1">
+            <mat-icon>photo_library</mat-icon>
+            <span>+{{ getQuantidadeFotos() - 1 }}</span>
+        </div>
+    </div>
+
+    <mat-card-header>
+        <div mat-card-avatar class="tipo-avatar">
+            <mat-icon>{{ getTipoIcon(parada.tipo) }}</mat-icon>
+        </div>
+
+        <mat-card-title class="parada-nome">
+            {{ parada.nome }}
+        </mat-card-title>
+
+        <mat-card-subtitle class="parada-tipo">
+            {{ diaLabel }} • {{ getTipoParadaLabel(parada.tipo) }}
+        </mat-card-subtitle>
+
+        <!-- Menu de Ações -->
+        <div class="card-actions" *ngIf="showActions">
+            <button mat-icon-button [matMenuTriggerFor]="menuAcoes">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-menu #menuAcoes="matMenu">
+                <button mat-menu-item (click)="onVisualizar()">
+                    <mat-icon>visibility</mat-icon>
+                    <span>Visualizar</span>
+                </button>
+                <button mat-menu-item (click)="onEditar()">
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="onExcluir()" class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    <span>Excluir</span>
+                </button>
+            </mat-menu>
+        </div>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Horários -->
+        <div class="info-item" *ngIf="parada.horaChegada || parada.horaSaida">
+            <mat-icon class="info-icon">schedule</mat-icon>
+            <div class="info-content">
+                <span class="info-label">Horários:</span>
+                <div class="horarios-flex">
+                    <span *ngIf="parada.horaChegada" class="horario-item">
+                        <mat-icon inline>login</mat-icon> {{ parada.horaChegada }}
+                    </span>
+                    <span *ngIf="parada.horaSaida" class="horario-item">
+                        <mat-icon inline>logout</mat-icon> {{ parada.horaSaida }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custo -->
+        <div class="info-item" *ngIf="parada.custo">
+            <mat-icon class="info-icon">attach_money</mat-icon>
+            <div class="info-content">
+                <span class="info-label">Custo:</span>
+                <span class="info-value custo-valor">{{ formatarMoeda(parada.custo) }}</span>
+            </div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="info-item" *ngIf="parada.endereco">
+            <mat-icon class="info-icon">location_on</mat-icon>
+            <div class="info-content">
+                <span class="info-value">{{ parada.endereco }}</span>
+            </div>
+        </div>
+
+        <!-- Avaliação -->
+        <div class="avaliacao-section" *ngIf="parada.avaliacao && parada.avaliacao > 0">
+            <div class="estrelas">
+                <mat-icon *ngFor="let estrela of getEstrelas(parada.avaliacao)"
+                    [class.estrela-preenchida]="estrela === 1">
+                    star
+                </mat-icon>
+                <span class="avaliacao-numero">{{ parada.avaliacao }}/5</span>
+            </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="observacoes" *ngIf="parada.observacoes">
+            <mat-icon class="obs-icon">notes</mat-icon>
+            <p class="obs-texto">{{ parada.observacoes }}</p>
+        </div>
+    </mat-card-content>
+
+    <mat-card-actions class="card-footer" *ngIf="showActions">
+        <div class="acoes-principais">
+            <button mat-button color="primary" (click)="onVisualizar()">
+                <mat-icon>visibility</mat-icon>
+                Detalhes
+            </button>
+
+            <button mat-button (click)="onEditar()">
+                <mat-icon>edit</mat-icon>
+                Editar
+            </button>
+        </div>
+    </mat-card-actions>
+</mat-card>

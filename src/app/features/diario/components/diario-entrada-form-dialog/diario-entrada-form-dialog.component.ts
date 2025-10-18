@@ -10,6 +10,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatMenuModule } from '@angular/material/menu';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 
@@ -38,7 +40,9 @@ export interface DiarioEntradaFormDialogData {
         MatFormFieldModule,
         MatSlideToggleModule,
         MatChipsModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatSelectModule,
+        MatMenuModule
     ],
     templateUrl: './diario-entrada-form-dialog.component.html',
     styleUrls: ['./diario-entrada-form-dialog.component.scss']
@@ -53,6 +57,26 @@ export class DiarioEntradaFormDialogComponent implements OnInit {
     isEditMode = false;
     tags: string[] = [];
     readonly separatorKeysCodes = [ENTER, COMMA] as const;
+
+    // Tags predefinidas com ícones
+    tagsPredefinidas = [
+        { valor: 'aventura', texto: 'Aventura', icone: 'explore' },
+        { valor: 'trilha', texto: 'Trilha', icone: 'hiking' },
+        { valor: 'paisagem', texto: 'Paisagem', icone: 'landscape' },
+        { valor: 'comida-local', texto: 'Comida Local', icone: 'restaurant' },
+        { valor: 'memoravel', texto: 'Memorável', icone: 'star' },
+        { valor: 'natureza', texto: 'Natureza', icone: 'park' },
+        { valor: 'fotografia', texto: 'Fotografia', icone: 'photo_camera' },
+        { valor: 'amigos', texto: 'Amigos', icone: 'group' },
+        { valor: 'familia', texto: 'Família', icone: 'family_restroom' },
+        { valor: 'cultura', texto: 'Cultura', icone: 'museum' },
+        { valor: 'historia', texto: 'História', icone: 'history_edu' },
+        { valor: 'praia', texto: 'Praia', icone: 'beach_access' },
+        { valor: 'montanha', texto: 'Montanha', icone: 'terrain' },
+        { valor: 'cidade', texto: 'Cidade', icone: 'location_city' },
+        { valor: 'desafio', texto: 'Desafio', icone: 'emoji_events' },
+        { valor: 'relaxamento', texto: 'Relaxamento', icone: 'spa' }
+    ];
 
     constructor(
         public dialogRef: MatDialogRef<DiarioEntradaFormDialogComponent>,
@@ -98,6 +122,22 @@ export class DiarioEntradaFormDialogComponent implements OnInit {
         if (index >= 0) {
             this.tags.splice(index, 1);
         }
+    }
+
+    adicionarTagPredefinida(valor: string): void {
+        if (!this.tags.includes(valor)) {
+            this.tags.push(valor);
+        }
+    }
+
+    getIconeTag(tag: string): string {
+        const tagPredefinida = this.tagsPredefinidas.find(t => t.valor === tag);
+        return tagPredefinida?.icone || 'label';
+    }
+
+    getTextoTag(tag: string): string {
+        const tagPredefinida = this.tagsPredefinidas.find(t => t.valor === tag);
+        return tagPredefinida?.texto || tag;
     }
 
     async onSubmit(): Promise<void> {

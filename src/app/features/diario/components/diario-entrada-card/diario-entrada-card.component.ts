@@ -86,4 +86,54 @@ export class DiarioEntradaCardComponent {
     onExcluir(): void {
         this.excluir.emit(this.entrada);
     }
+
+    /**
+     * Retorna o ícone correto para cada tag
+     */
+    getIconeTag(tag: string): string {
+        const tagsPredefinidas: { [key: string]: string } = {
+            'aventura': 'explore',
+            'trilha': 'hiking',
+            'paisagem': 'landscape',
+            'comida-local': 'restaurant',
+            'memoravel': 'star',
+            'natureza': 'park',
+            'fotografia': 'photo_camera',
+            'amigos': 'group',
+            'familia': 'family_restroom',
+            'cultura': 'museum',
+            'historia': 'history_edu',
+            'praia': 'beach_access',
+            'montanha': 'terrain',
+            'cidade': 'location_city',
+            'desafio': 'emoji_events',
+            'relaxamento': 'spa'
+        };
+        return tagsPredefinidas[tag] || 'label';
+    }
+
+    /**
+     * Retorna o texto formatado para cada tag
+     */
+    getTextoTag(tag: string): string {
+        const tagsFormatadas: { [key: string]: string } = {
+            'aventura': 'Aventura',
+            'trilha': 'Trilha',
+            'paisagem': 'Paisagem',
+            'comida-local': 'Comida Local',
+            'memoravel': 'Memorável',
+            'natureza': 'Natureza',
+            'fotografia': 'Fotografia',
+            'amigos': 'Amigos',
+            'familia': 'Família',
+            'cultura': 'Cultura',
+            'historia': 'História',
+            'praia': 'Praia',
+            'montanha': 'Montanha',
+            'cidade': 'Cidade',
+            'desafio': 'Desafio',
+            'relaxamento': 'Relaxamento'
+        };
+        return tagsFormatadas[tag] || tag;
+    }
 }
