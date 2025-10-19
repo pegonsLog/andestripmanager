@@ -463,3 +463,62 @@ button[disabled] {
     height: 120px;
   }
 }
+
+// Estilos para seção de coordenadas
+.coordenadas-section {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+
+  .coordenada-field {
+    flex: 1;
+    min-width: 150px;
+    max-width: 250px;
+  }
+
+  .buscar-coordenadas-btn {
+    height: 56px;
+    min-width: 200px;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.coordenadas-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #666;
+  background-color: #e3f2fd;
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+
+  mat-icon {
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: #1976d2;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .coordenadas-section {
+    flex-direction: column;
+    align-items: stretch;
+
+    .coordenada-field {
+      max-width: none;
+      width: 100%;
+    }
+
+    .buscar-coordenadas-btn {
+      width: 100%;
+    }
+  }
+}

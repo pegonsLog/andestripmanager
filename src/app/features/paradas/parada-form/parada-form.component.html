@@ -80,6 +80,54 @@
                     </mat-form-field>
                 </div>
 
+                <!-- Seção de Coordenadas -->
+                <div class="coordenadas-section">
+                    <div class="coordenadas-header">
+                        <h4>
+                            <mat-icon>my_location</mat-icon>
+                            Coordenadas GPS
+                        </h4>
+                        <button 
+                            mat-raised-button 
+                            color="primary" 
+                            type="button" 
+                            (click)="buscarCoordenadas()"
+                            [disabled]="!paradaForm.get('endereco')?.value"
+                            matTooltip="Buscar coordenadas automaticamente baseado no endereço">
+                            <mat-icon>search</mat-icon>
+                            Buscar Coordenadas
+                        </button>
+                    </div>
+
+                    <div class="form-row two-columns">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Latitude</mat-label>
+                            <input matInput type="number" formControlName="latitude" 
+                                step="0.000001" placeholder="-23.550520">
+                            <mat-icon matSuffix>south</mat-icon>
+                            <mat-hint>Coordenada de latitude</mat-hint>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Longitude</mat-label>
+                            <input matInput type="number" formControlName="longitude" 
+                                step="0.000001" placeholder="-46.633308">
+                            <mat-icon matSuffix>east</mat-icon>
+                            <mat-hint>Coordenada de longitude</mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="coordenadas-info" *ngIf="paradaForm.get('latitude')?.value && paradaForm.get('longitude')?.value">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Coordenadas definidas: {{ paradaForm.get('latitude')?.value | number:'1.6-6' }}, {{ paradaForm.get('longitude')?.value | number:'1.6-6' }}</span>
+                    </div>
+
+                    <div class="coordenadas-info info" *ngIf="!paradaForm.get('latitude')?.value || !paradaForm.get('longitude')?.value">
+                        <mat-icon>info</mat-icon>
+                        <span>As coordenadas permitem visualizar a parada no mapa. Digite o endereço e clique em "Buscar Coordenadas" ou insira manualmente.</span>
+                    </div>
+                </div>
+
                 <div class="form-row two-columns">
                     <!-- Hora de Chegada -->
                     <mat-form-field appearance="outline">

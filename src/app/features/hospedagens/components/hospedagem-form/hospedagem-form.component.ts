@@ -21,6 +21,10 @@ import { HospedagensService } from '../../../../services/hospedagens.service';
 import { DiasViagemService } from '../../../../services/dias-viagem.service';
 import { CustomValidators } from '../../../../models/validators';
 import { UploadService } from '../../../../core/services/upload.service';
+import { GoogleMapsLoaderService } from '../../../../services/google-maps-loader.service';
+
+// Declaração global do Google Maps
+declare var google: any;
 
 @Component({
     selector: 'app-hospedagem-form',
@@ -58,6 +62,7 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
     private diasViagemService = inject(DiasViagemService);
     private snackBar = inject(MatSnackBar);
     private uploadService = inject(UploadService);
+    private googleMapsLoader = inject(GoogleMapsLoaderService);
     private destroy$ = new Subject<void>();
 
     // Lista de dias disponíveis
@@ -145,6 +150,8 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
             nome: ['', [Validators.required, Validators.minLength(2)]],
             tipo: [TipoHospedagem.HOTEL, Validators.required],
             endereco: ['', [Validators.required, Validators.minLength(10)]],
+            latitude: [null],
+            longitude: [null],
             dataCheckIn: ['', Validators.required],
             dataCheckOut: ['', Validators.required],
             horaCheckIn: ['14:00'],
@@ -168,6 +175,8 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
                 nome: this.hospedagem.nome,
                 tipo: this.hospedagem.tipo,
                 endereco: this.hospedagem.endereco,
+                latitude: this.hospedagem.coordenadas ? this.hospedagem.coordenadas[0] : null,
+                longitude: this.hospedagem.coordenadas ? this.hospedagem.coordenadas[1] : null,
                 dataCheckIn: this.hospedagem.dataCheckIn,
                 dataCheckOut: this.hospedagem.dataCheckOut,
                 horaCheckIn: this.hospedagem.horaCheckIn || '14:00',
@@ -230,6 +239,9 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
                     nome: formValue.nome,
                     tipo: formValue.tipo,
                     endereco: formValue.endereco,
+                    coordenadas: (formValue.latitude && formValue.longitude) 
+                        ? [formValue.latitude, formValue.longitude] as [number, number]
+                        : undefined,
                     dataCheckIn: this.formatarData(formValue.dataCheckIn),
                     dataCheckOut: this.formatarData(formValue.dataCheckOut),
                     horaCheckIn: formValue.horaCheckIn,
@@ -444,5 +456,76 @@ export class HospedagemFormComponent implements OnInit, OnDestroy {
 
     getAvaliacaoDetalhadaValue(campo: keyof typeof this.avaliacaoDetalhada): number {
         return this.avaliacaoDetalhada[campo] || 0;
+    }
+
+    /**
+     * Busca coordenadas baseado no endereço
+     */
+    async buscarCoordenadas(): Promise<void> {
+        const endereco = this.hospedagemForm.get('endereco')?.value;
+
+        if (!endereco || endereco.trim().length < 10) {
+            this.snackBar.open('Digite um endereço válido para buscar as coordenadas', 'Fechar', { duration: 3000 });
+            return;
+        }
+
+        // Mostrar feedback de carregamento
+        this.snackBar.open('Buscando coordenadas...', '', {
+            duration: 2000
+        });
+
+        try {
+            const coords = await this.buscarCoordenadasEndereco(endereco);
+            if (coords) {
+                this.hospedagemForm.patchValue({
+                    latitude: coords[0],
+                    longitude: coords[1]
+                });
+                this.snackBar.open(`Coordenadas encontradas: ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`, 'Fechar', { duration: 3000 });
+            } else {
+                this.snackBar.open('Não foi possível encontrar as coordenadas. Verifique o endereço ou digite manualmente.', 'Fechar', { duration: 5000 });
+            }
+        } catch (error) {
+            console.error('Erro ao buscar coordenadas:', error);
+            this.snackBar.open('Erro ao buscar coordenadas. Tente novamente ou digite manualmente.', 'Fechar', { duration: 5000 });
+        }
+    }
+
+    /**
+     * Integração com serviço de geocodificação usando Google Maps API
+     */
+    private async buscarCoordenadasEndereco(endereco: string): Promise<[number, number] | undefined> {
+        if (!endereco || endereco.trim().length < 10) {
+            return undefined;
+        }
+
+        try {
+            // Verificar se o Google Maps está carregado
+            if (typeof google === 'undefined' || !google.maps) {
+                console.warn('Google Maps não está carregado. Tentando carregar...');
+                await this.googleMapsLoader.load();
+            }
+
+            // Usar o Geocoder do Google Maps
+            const geocoder = new google.maps.Geocoder();
+            
+            return new Promise((resolve) => {
+                geocoder.geocode({ address: endereco }, (results: any, status: any) => {
+                    if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+                        const location = results[0].geometry.location;
+                        const lat = location.lat();
+                        const lng = location.lng();
+                        console.log(`Coordenadas encontradas para "${endereco}":`, lat, lng);
+                        resolve([lat, lng]);
+                    } else {
+                        console.warn(`Geocoding falhou para "${endereco}":`, status);
+                        resolve(undefined);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Erro ao buscar coordenadas:', error);
+            return undefined;
+        }
     }
 }

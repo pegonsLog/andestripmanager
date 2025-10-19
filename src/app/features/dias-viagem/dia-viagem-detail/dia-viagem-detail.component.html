@@ -91,264 +91,71 @@
             </mat-card-content>
         </mat-card>
 
-        <!-- Abas de conteúdo -->
-        <mat-tab-group class="content-tabs" animationDuration="300ms" (selectedTabChange)="onTabChange($event)">
-            <!-- Aba do Mapa -->
-            <mat-tab label="Mapa e Rota">
-                <div class="tab-content">
-                        <mat-card class="map-card">
-                            <mat-card-header>
-                                <mat-card-title>
-                                    <mat-icon>map</mat-icon>
-                                    Rota do Dia
-                                </mat-card-title>
-                            </mat-card-header>
-                            <mat-card-content>
-                                <div class="map-container" #mapContainer>
-                                    <!-- Mensagem de carregamento -->
-                                    <div class="map-placeholder" *ngIf="!mapInitialized">
-                                        <mat-icon>map</mat-icon>
-                                        <p>Carregando mapa...</p>
-                                        <small>Se o mapa não carregar, verifique se a API do Google Maps está configurada</small>
-                                    </div>
-                                </div>
-
-                                <!-- Informações da rota -->
-                                <div class="rota-info" *ngIf="dados.dia.rota">
-                                    <div class="rota-item">
-                                        <mat-icon>my_location</mat-icon>
-                                        <span><strong>Origem:</strong> {{ dados.dia.origem }}</span>
-                                    </div>
-                                    <div class="rota-item">
-                                        <mat-icon>flag</mat-icon>
-                                        <span><strong>Destino:</strong> {{ dados.dia.destino }}</span>
-                                    </div>
-                                    <div class="rota-item" *ngIf="dados.dia.rota.tipoEstrada">
-                                        <mat-icon>road</mat-icon>
-                                        <span><strong>Tipo:</strong> {{ dados.dia.rota.tipoEstrada }}</span>
-                                    </div>
-                                </div>
-                            </mat-card-content>
-                        </mat-card>
-                </div>
-            </mat-tab>
-
-            <!-- Aba das Paradas -->
-            <mat-tab label="Paradas">
-                <ng-template matTabContent>
-                    <div class="tab-content">
-                        <div class="paradas-container" *ngIf="dados.paradas.length > 0; else noParadas">
-                            <mat-card *ngFor="let parada of dados.paradas; let i = index" class="parada-card">
-                                <mat-card-header>
-                                    <div mat-card-avatar class="parada-avatar">
-                                        <mat-icon>{{ getTipoParadaIcon(parada.tipo) }}</mat-icon>
-                                    </div>
-                                    <mat-card-title>{{ parada.nome }}</mat-card-title>
-                                    <mat-card-subtitle>
-                                        <mat-chip>{{ getTipoParadaLabel(parada.tipo) }}</mat-chip>
-                                        <span *ngIf="parada.horaChegada || parada.horaSaida" class="horario">
-                                            {{ parada.horaChegada || '--:--' }}<span *ngIf="parada.horaSaida"> - {{ parada.horaSaida }}</span>
-                                        </span>
-                                    </mat-card-subtitle>
-                                </mat-card-header>
-
-                                <mat-card-content>
-                                    <div class="parada-info">
-                                        <div class="endereco" *ngIf="parada.endereco">
-                                            <mat-icon>place</mat-icon>
-                                            <span>{{ parada.endereco }}</span>
-                                        </div>
-
-                                        <div class="observacoes" *ngIf="parada.observacoes">
-                                            <mat-icon>note</mat-icon>
-                                            <span>{{ parada.observacoes }}</span>
-                                        </div>
-
-                                        <!-- Informações específicas por tipo -->
-                                        <div class="tipo-info" *ngIf="parada.tipo === 'abastecimento' && parada.dadosEspecificos">
-                                            <div class="info-item">
-                                                <mat-icon>local_gas_station</mat-icon>
-                                                <span>
-                                                    {{ $any(parada.dadosEspecificos).quantidade }}L
-                                                    <span *ngIf="$any(parada.dadosEspecificos).tipoCombustivel">
-                                                        - {{ $any(parada.dadosEspecificos).tipoCombustivel }}
-                                                    </span>
-                                                </span>
-                                            </div>
-                                            <div class="info-item" *ngIf="parada.custo">
-                                                <mat-icon>attach_money</mat-icon>
-                                                <span>R$ {{ parada.custo.toFixed(2) }}</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="tipo-info" *ngIf="parada.tipo === 'refeicao' && parada.dadosEspecificos">
-                                            <div class="info-item">
-                                                <mat-icon>restaurant</mat-icon>
-                                                <span>{{ $any(parada.dadosEspecificos).tipoRefeicao }}</span>
-                                            </div>
-                                            <div class="info-item" *ngIf="parada.custo">
-                                                <mat-icon>attach_money</mat-icon>
-                                                <span>R$ {{ parada.custo.toFixed(2) }}</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="tipo-info" *ngIf="parada.tipo === 'ponto-interesse' && parada.dadosEspecificos">
-                                            <div class="info-item" *ngIf="$any(parada.dadosEspecificos).categoria">
-                                                <mat-icon>place</mat-icon>
-                                                <span>{{ $any(parada.dadosEspecificos).categoria }}</span>
-                                            </div>
-                                            <div class="info-item" *ngIf="$any(parada.dadosEspecificos).valorEntrada">
-                                                <mat-icon>attach_money</mat-icon>
-                                                <span>R$ {{ $any(parada.dadosEspecificos).valorEntrada.toFixed(2) }}</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="fotos-preview" *ngIf="parada.fotos && parada.fotos.length > 0">
-                                            <mat-icon>photo_library</mat-icon>
-                                            <span>{{ parada.fotos.length }} foto(s)</span>
-                                        </div>
-                                    </div>
-                                </mat-card-content>
-
-                                <mat-card-actions align="end">
-                                    <button mat-button (click)="centralizarParada(parada)" matTooltip="Ver no mapa">
-                                        <mat-icon>map</mat-icon>
-                                        Ver no Mapa
-                                    </button>
-                                </mat-card-actions>
-                            </mat-card>
+        <!-- Conteúdo do Mapa -->
+        <div class="map-section">
+            <mat-card class="map-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>map</mat-icon>
+                        Rota do Dia
+                    </mat-card-title>
+                    <mat-card-subtitle>
+                        <div class="map-controls">
+                            <button mat-icon-button 
+                                    [class.active]="showTraffic"
+                                    (click)="toggleTraffic()"
+                                    matTooltip="Mostrar/Ocultar Trânsito">
+                                <mat-icon>traffic</mat-icon>
+                            </button>
+                            <button mat-icon-button 
+                                    [class.active]="showRestaurants"
+                                    (click)="toggleRestaurants()"
+                                    matTooltip="Mostrar/Ocultar Restaurantes">
+                                <mat-icon>restaurant</mat-icon>
+                            </button>
+                            <button mat-icon-button 
+                                    [class.active]="showHotels"
+                                    (click)="toggleHotels()"
+                                    matTooltip="Mostrar/Ocultar Hotéis">
+                                <mat-icon>hotel</mat-icon>
+                            </button>
+                            <button mat-icon-button 
+                                    [class.active]="showGasStations"
+                                    (click)="toggleGasStations()"
+                                    matTooltip="Mostrar/Ocultar Postos">
+                                <mat-icon>local_gas_station</mat-icon>
+                            </button>
                         </div>
-
-                        <!-- Estado vazio para paradas -->
-                        <ng-template #noParadas>
-                            <mat-card class="empty-state">
-                                <mat-card-content>
-                                    <div class="empty-content">
-                                        <mat-icon class="empty-icon">place</mat-icon>
-                                        <h3>Nenhuma parada registrada</h3>
-                                        <p>As paradas deste dia aparecerão aqui quando forem adicionadas</p>
-                                    </div>
-                                </mat-card-content>
-                            </mat-card>
-                        </ng-template>
+                    </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="map-container" #mapContainer>
+                        <!-- Mensagem de carregamento -->
+                        <div class="map-placeholder" *ngIf="!mapInitialized">
+                            <mat-icon>map</mat-icon>
+                            <p>Carregando mapa...</p>
+                            <small>Se o mapa não carregar, verifique se a API do Google Maps está configurada</small>
+                        </div>
                     </div>
-                </ng-template>
-            </mat-tab>
 
-            <!-- Aba do Clima -->
-            <mat-tab label="Clima">
-                <ng-template matTabContent>
-                    <div class="tab-content">
-                        <mat-card class="clima-card">
-                            <mat-card-header>
-                                <mat-card-title>
-                                    <mat-icon>wb_sunny</mat-icon>
-                                    Informações Climáticas
-                                </mat-card-title>
-                            </mat-card-header>
-                            <mat-card-content>
-                                <div class="clima-info"
-                                    *ngIf="dados.dia.condicaoClimatica || dados.dia.temperaturaMin || dados.dia.temperaturaMax; else noClima">
-                                    <div class="clima-principal">
-                                        <mat-chip-set>
-                                            <mat-chip *ngIf="dados.dia.condicaoClimatica"
-                                                [color]="getClimaColor(dados.dia.condicaoClimatica)">
-                                                <mat-icon matChipAvatar>{{ getClimaIcon(dados.dia.condicaoClimatica)
-                                                    }}</mat-icon>
-                                                {{ dados.dia.condicaoClimatica }}
-                                            </mat-chip>
-                                        </mat-chip-set>
-                                    </div>
-
-                                    <div class="temperatura-info"
-                                        *ngIf="dados.dia.temperaturaMin || dados.dia.temperaturaMax">
-                                        <div class="temp-item" *ngIf="dados.dia.temperaturaMin">
-                                            <mat-icon>thermostat</mat-icon>
-                                            <span class="temp-label">Mínima</span>
-                                            <span class="temp-value">{{ dados.dia.temperaturaMin }}°C</span>
-                                        </div>
-
-                                        <div class="temp-item" *ngIf="dados.dia.temperaturaMax">
-                                            <mat-icon>device_thermostat</mat-icon>
-                                            <span class="temp-label">Máxima</span>
-                                            <span class="temp-value">{{ dados.dia.temperaturaMax }}°C</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Estado vazio para clima -->
-                                <ng-template #noClima>
-                                    <div class="empty-content">
-                                        <mat-icon class="empty-icon">wb_sunny</mat-icon>
-                                        <h3>Informações climáticas não disponíveis</h3>
-                                        <p>Os dados do clima para este dia não foram registrados</p>
-                                    </div>
-                                </ng-template>
-                            </mat-card-content>
-                        </mat-card>
+                    <!-- Informações da rota -->
+                    <div class="rota-info" *ngIf="dados.dia.rota">
+                        <div class="rota-item">
+                            <mat-icon>my_location</mat-icon>
+                            <span><strong>Origem:</strong> {{ dados.dia.origem }}</span>
+                        </div>
+                        <div class="rota-item">
+                            <mat-icon>flag</mat-icon>
+                            <span><strong>Destino:</strong> {{ dados.dia.destino }}</span>
+                        </div>
+                        <div class="rota-item" *ngIf="dados.dia.rota.tipoEstrada">
+                            <mat-icon>road</mat-icon>
+                            <span><strong>Tipo:</strong> {{ dados.dia.rota.tipoEstrada }}</span>
+                        </div>
                     </div>
-                </ng-template>
-            </mat-tab>
-
-            <!-- Aba de Horários -->
-            <mat-tab label="Horários">
-                <ng-template matTabContent>
-                    <div class="tab-content">
-                        <mat-card class="horarios-card">
-                            <mat-card-header>
-                                <mat-card-title>
-                                    <mat-icon>schedule</mat-icon>
-                                    Horários do Dia
-                                </mat-card-title>
-                            </mat-card-header>
-                            <mat-card-content>
-                                <div class="horarios-grid">
-                                    <div class="horario-section">
-                                        <h4>Partida</h4>
-                                        <div class="horario-item">
-                                            <mat-icon>schedule</mat-icon>
-                                            <div class="horario-info">
-                                                <span class="horario-label">Planejado</span>
-                                                <span class="horario-valor">{{ dados.dia.horaPartidaPlanejada || 'Não
-                                                    definido' }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="horario-item" *ngIf="dados.dia.horaPartidaReal">
-                                            <mat-icon>done</mat-icon>
-                                            <div class="horario-info">
-                                                <span class="horario-label">Real</span>
-                                                <span class="horario-valor real">{{ dados.dia.horaPartidaReal }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <mat-divider vertical></mat-divider>
-
-                                    <div class="horario-section">
-                                        <h4>Chegada</h4>
-                                        <div class="horario-item">
-                                            <mat-icon>schedule</mat-icon>
-                                            <div class="horario-info">
-                                                <span class="horario-label">Planejado</span>
-                                                <span class="horario-valor">{{ dados.dia.horaChegadaPlanejada || 'Não
-                                                    definido' }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="horario-item" *ngIf="dados.dia.horaChegadaReal">
-                                            <mat-icon>done</mat-icon>
-                                            <div class="horario-info">
-                                                <span class="horario-label">Real</span>
-                                                <span class="horario-valor real">{{ dados.dia.horaChegadaReal }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </mat-card-content>
-                        </mat-card>
-                    </div>
-                </ng-template>
-            </mat-tab>
-        </mat-tab-group>
+                </mat-card-content>
+            </mat-card>
+        </div>
     </div>
 
     <!-- Estado de erro -->

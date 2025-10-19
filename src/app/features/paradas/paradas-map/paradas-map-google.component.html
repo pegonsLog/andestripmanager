@@ -1,0 +1,62 @@
+<div class="paradas-map-container">
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Carregando mapa...</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="map-controls" *ngIf="showFilters && !isLoading">
+        <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Filtrar por tipo</mat-label>
+            <mat-select [(ngModel)]="filtroTipo" (selectionChange)="onFiltroTipoChange()">
+                <mat-option value="todos">
+                    <mat-icon>map</mat-icon>
+                    Todos ({{ paradas.length }})
+                </mat-option>
+                <mat-option *ngFor="let tipo of getTiposDisponiveis()" [value]="tipo">
+                    <mat-icon [style.color]="getTipoConfig(tipo).color">
+                        {{ getTipoConfig(tipo).icon }}
+                    </mat-icon>
+                    {{ getTipoConfig(tipo).label }} ({{ getContagemPorTipo(tipo) }})
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+
+    <!-- Container do Mapa -->
+    <div 
+        #mapContainer 
+        class="map-container" 
+        [style.height]="height"
+        [class.hidden]="isLoading">
+    </div>
+
+    <!-- Legenda -->
+    <div class="map-legend" *ngIf="showLegend && !isLoading && paradas.length > 0">
+        <div class="legend-title">
+            <mat-icon>info</mat-icon>
+            Legenda
+        </div>
+        <div class="legend-items">
+            <div 
+                class="legend-item" 
+                *ngFor="let tipo of getTiposDisponiveis()"
+                [class.active]="filtroTipo === tipo || filtroTipo === 'todos'"
+                (click)="filtroTipo = tipo; onFiltroTipoChange()">
+                <div 
+                    class="legend-marker" 
+                    [style.background-color]="getTipoConfig(tipo).color">
+                </div>
+                <span class="legend-label">{{ getTipoConfig(tipo).label }}</span>
+                <span class="legend-count">{{ getContagemPorTipo(tipo) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensagem quando não há paradas -->
+    <div class="no-paradas" *ngIf="!isLoading && paradas.length === 0">
+        <mat-icon>location_off</mat-icon>
+        <p>Nenhuma parada com coordenadas para exibir no mapa</p>
+    </div>
+</div>

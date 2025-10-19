@@ -131,6 +131,109 @@
                     <mat-icon matSuffix>note</mat-icon>
                 </mat-form-field>
 
+                <!-- Seção de Pontos da Rota (Waypoints) -->
+                <div class="pontos-rota-section">
+                    <div class="section-header">
+                        <h3>
+                            <mat-icon>route</mat-icon>
+                            Pontos da Rota (Waypoints)
+                        </h3>
+                        <button mat-raised-button color="accent" type="button" (click)="adicionarPontoRota()">
+                            <mat-icon>add_location</mat-icon>
+                            Adicionar Ponto
+                        </button>
+                    </div>
+
+                    <div class="pontos-info" *ngIf="pontosRota.length === 0">
+                        <mat-icon>info</mat-icon>
+                        <p>Adicione pontos intermediários para que o Google Maps calcule a rota passando por esses locais. Isso é útil quando a viagem real desvia do trajeto padrão sugerido.</p>
+                    </div>
+
+                    <div class="pontos-lista" formArrayName="pontosRota">
+                        <div class="ponto-item" *ngFor="let ponto of pontosRota.controls; let i = index" [formGroupName]="i">
+                            <div class="ponto-header">
+                                <div class="ponto-numero">
+                                    <mat-icon>{{ getTipoPontoIcon(ponto.get('tipo')?.value) }}</mat-icon>
+                                    <span>Ponto {{ i + 1 }}</span>
+                                </div>
+                                <div class="ponto-acoes">
+                                    <button mat-icon-button type="button" 
+                                        [disabled]="i === 0"
+                                        (click)="moverPontoParaCima(i)"
+                                        matTooltip="Mover para cima">
+                                        <mat-icon>arrow_upward</mat-icon>
+                                    </button>
+                                    <button mat-icon-button type="button"
+                                        [disabled]="i === pontosRota.length - 1"
+                                        (click)="moverPontoParaBaixo(i)"
+                                        matTooltip="Mover para baixo">
+                                        <mat-icon>arrow_downward</mat-icon>
+                                    </button>
+                                    <button mat-icon-button type="button" color="warn"
+                                        (click)="removerPontoRota(i)"
+                                        matTooltip="Remover ponto">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="ponto-campos">
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field-large">
+                                        <mat-label>Nome/Localização</mat-label>
+                                        <input matInput formControlName="nome" 
+                                            placeholder="Ex: Posto BR km 120, Cidade X">
+                                        <mat-icon matSuffix>place</mat-icon>
+                                        <mat-error *ngIf="ponto.get('nome')?.hasError('required')">
+                                            Nome é obrigatório
+                                        </mat-error>
+                                        <mat-error *ngIf="ponto.get('nome')?.hasError('minlength')">
+                                            Mínimo 2 caracteres
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field-small">
+                                        <mat-label>Tipo</mat-label>
+                                        <mat-select formControlName="tipo">
+                                            <mat-option *ngFor="let tipo of tiposPontoRota" [value]="tipo.value">
+                                                <mat-icon>{{ tipo.icon }}</mat-icon>
+                                                {{ tipo.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Latitude</mat-label>
+                                        <input matInput type="number" formControlName="latitude" 
+                                            step="0.000001" placeholder="-23.550520">
+                                        <mat-error *ngIf="ponto.get('latitude')?.hasError('required')">
+                                            Latitude é obrigatória
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Longitude</mat-label>
+                                        <input matInput type="number" formControlName="longitude" 
+                                            step="0.000001" placeholder="-46.633308">
+                                        <mat-error *ngIf="ponto.get('longitude')?.hasError('required')">
+                                            Longitude é obrigatória
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <button mat-raised-button type="button" 
+                                        (click)="buscarCoordenadasPonto(i)"
+                                        class="btn-buscar-coords">
+                                        <mat-icon>search</mat-icon>
+                                        Buscar Coords
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Informações adicionais -->
                 <div class="info-container">
                     <mat-icon class="info-icon">info</mat-icon>
@@ -140,6 +243,7 @@
                             <li>O tempo estimado é calculado automaticamente baseado na distância e tipo de estrada</li>
                             <li>As datas devem seguir uma sequência lógica entre os dias</li>
                             <li>Você pode ajustar os horários depois durante a viagem</li>
+                            <li><strong>Waypoints:</strong> Use pontos de passagem para rotas que desviam do trajeto padrão</li>
                         </ul>
                     </div>
                 </div>

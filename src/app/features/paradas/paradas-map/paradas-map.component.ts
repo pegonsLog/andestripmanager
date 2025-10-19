@@ -9,7 +9,8 @@ import {
     ElementRef,
     ViewChild,
     ChangeDetectionStrategy,
-    inject
+    inject,
+    OnChanges
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -78,6 +79,16 @@ export class ParadasMapComponent implements OnInit, OnDestroy, OnChanges, AfterV
     markerClusterGroup: any;
     isMapReady = false;
     leafletLoaded = false;
+
+    // Camadas adicionais
+    poiLayers: { [key: string]: any } = {};
+    poiMarkers: any[] = [];
+    showPOI = {
+        restaurants: false,
+        hotels: false,
+        gasStations: false,
+        attractions: false
+    };
 
     // Filtros
     filtroTipo: TipoParada | 'todos' = 'todos';
@@ -314,23 +325,65 @@ export class ParadasMapComponent implements OnInit, OnDestroy, OnChanges, AfterV
                     <h4>${parada.nome}</h4>
                 </div>
                 <div class="popup-body">
-                    <p><strong>Tipo:</strong> ${tipoConfig.label}</p>
+                    <p style="display: flex; align-items: center; gap: 6px;">
+                        <i class="material-icons" style="font-size: 16px; color: ${tipoConfig.color};">label</i>
+                        <strong>Tipo:</strong> ${tipoConfig.label}
+                    </p>
         `;
 
         if (parada.endereco) {
-            content += `<p><strong>Endereço:</strong> ${parada.endereco}</p>`;
+            content += `
+                    <p style="display: flex; align-items: start; gap: 6px;">
+                        <i class="material-icons" style="font-size: 16px; color: #666;">place</i>
+                        <span><strong>Endereço:</strong> ${parada.endereco}</span>
+                    </p>`;
         }
 
-        if (parada.horaChegada) {
-            content += `<p><strong>Chegada:</strong> ${parada.horaChegada}</p>`;
+        if (parada.horaChegada || parada.horaSaida) {
+            const horario = parada.horaChegada && parada.horaSaida 
+                ? `${parada.horaChegada} - ${parada.horaSaida}`
+                : parada.horaChegada || parada.horaSaida || '';
+            content += `
+                    <p style="display: flex; align-items: center; gap: 6px;">
+                        <i class="material-icons" style="font-size: 16px; color: #666;">schedule</i>
+                        <span><strong>Horário:</strong> ${horario}</span>
+                    </p>`;
         }
 
-        if (parada.custo) {
-            content += `<p><strong>Custo:</strong> R$ ${parada.custo.toFixed(2)}</p>`;
+        if (parada.custo && parada.custo > 0) {
+            content += `
+                    <p style="display: flex; align-items: center; gap: 6px;">
+                        <i class="material-icons" style="font-size: 16px; color: #4caf50;">attach_money</i>
+                        <span><strong>Custo:</strong> <span style="color: #4caf50; font-weight: 600;">R$ ${parada.custo.toFixed(2)}</span></span>
+                    </p>`;
+        }
+
+        if (parada.duracao && parada.duracao > 0) {
+            const horas = Math.floor(parada.duracao / 60);
+            const minutos = parada.duracao % 60;
+            const duracaoTexto = horas > 0 ? `${horas}h ${minutos}min` : `${minutos}min`;
+            content += `
+                    <p style="display: flex; align-items: center; gap: 6px;">
+                        <i class="material-icons" style="font-size: 16px; color: #666;">timer</i>
+                        <span><strong>Duração:</strong> ${duracaoTexto}</span>
+                    </p>`;
+        }
+
+        if (parada.avaliacao && parada.avaliacao > 0) {
+            const estrelas = '⭐'.repeat(parada.avaliacao);
+            content += `
+                    <p style="display: flex; align-items: center; gap: 6px;">
+                        <i class="material-icons" style="font-size: 16px; color: #ffc107;">star</i>
+                        <span><strong>Avaliação:</strong> ${estrelas} (${parada.avaliacao}/5)</span>
+                    </p>`;
         }
 
         if (parada.observacoes) {
-            content += `<p><strong>Observações:</strong> ${parada.observacoes}</p>`;
+            content += `
+                    <p style="display: flex; align-items: start; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;">
+                        <i class="material-icons" style="font-size: 16px; color: #ff9800;">info</i>
+                        <span style="font-style: italic; color: #666;">${parada.observacoes}</span>
+                    </p>`;
         }
 
         content += `
@@ -338,6 +391,7 @@ export class ParadasMapComponent implements OnInit, OnDestroy, OnChanges, AfterV
                 <div class="popup-actions">
                     <button onclick="window.paradaMapComponent.openParadaDetails('${parada.id}')" 
                             class="popup-button">
+                        <i class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">visibility</i>
                         Ver Detalhes
                     </button>
                 </div>
@@ -448,6 +502,145 @@ export class ParadasMapComponent implements OnInit, OnDestroy, OnChanges, AfterV
         if (parada) {
             this.paradaSelected.emit(parada);
         }
+    }
+
+    /**
+     * Alterna exibição de POI (Points of Interest)
+     */
+    togglePOI(type: 'restaurants' | 'hotels' | 'gasStations' | 'attractions'): void {
+        this.showPOI[type] = !this.showPOI[type];
+        
+        if (this.showPOI[type]) {
+            // Limpar outros POIs primeiro
+            this.clearPOIMarkers();
+            
+            // Buscar POIs via Overpass API
+            this.fetchPOIs(type);
+        } else {
+            this.clearPOIMarkers();
+        }
+    }
+
+    /**
+     * Busca POIs usando Overpass API
+     */
+    private async fetchPOIs(type: string): Promise<void> {
+        if (!this.isMapReady) return;
+
+        const bounds = this.map.getBounds();
+        const south = bounds.getSouth();
+        const west = bounds.getWest();
+        const north = bounds.getNorth();
+        const east = bounds.getEast();
+
+        // Mapear tipos para tags OSM
+        const osmTags: { [key: string]: string } = {
+            restaurants: 'amenity=restaurant',
+            hotels: 'tourism=hotel',
+            gasStations: 'amenity=fuel',
+            attractions: 'tourism=attraction'
+        };
+
+        const tag = osmTags[type];
+        if (!tag) return;
+
+        // Query Overpass API
+        const query = `
+            [out:json][timeout:25];
+            (
+                node[${tag}](${south},${west},${north},${east});
+                way[${tag}](${south},${west},${north},${east});
+            );
+            out center 50;
+        `;
+
+        const overpassUrl = 'https://overpass-api.de/api/interpreter';
+
+        try {
+            const response = await fetch(overpassUrl, {
+                method: 'POST',
+                body: query
+            });
+
+            const data = await response.json();
+            
+            if (data.elements && data.elements.length > 0) {
+                this.addPOIMarkers(data.elements, type);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar POIs:', error);
+        }
+    }
+
+    /**
+     * Adiciona marcadores de POI ao mapa
+     */
+    private addPOIMarkers(elements: any[], type: string): void {
+        const iconConfig: { [key: string]: { color: string; icon: string } } = {
+            restaurants: { color: '#4caf50', icon: 'restaurant' },
+            hotels: { color: '#9c27b0', icon: 'hotel' },
+            gasStations: { color: '#ff5722', icon: 'local_gas_station' },
+            attractions: { color: '#2196f3', icon: 'place' }
+        };
+
+        const config = iconConfig[type];
+
+        elements.forEach((element: any) => {
+            const lat = element.lat || element.center?.lat;
+            const lon = element.lon || element.center?.lon;
+
+            if (!lat || !lon) return;
+
+            const name = element.tags?.name || 'Sem nome';
+            const address = element.tags?.['addr:street'] || '';
+
+            // Criar ícone customizado
+            const icon = L.divIcon({
+                html: `
+                    <div class="poi-marker" style="background-color: ${config.color}">
+                        <i class="material-icons">${config.icon}</i>
+                    </div>
+                `,
+                className: 'poi-marker-container',
+                iconSize: [28, 28],
+                iconAnchor: [14, 28],
+                popupAnchor: [0, -28]
+            });
+
+            // Criar marcador
+            const marker = L.marker([lat, lon], { 
+                icon,
+                opacity: 0.8
+            });
+
+            // Criar popup
+            const popupContent = `
+                <div class="poi-popup-content">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <i class="material-icons" style="color: ${config.color}; font-size: 20px;">${config.icon}</i>
+                        <h4 style="margin: 0; font-size: 14px; font-weight: 600;">${name}</h4>
+                    </div>
+                    ${address ? `<p style="margin: 0; font-size: 12px; color: #666;">${address}</p>` : ''}
+                    ${element.tags?.cuisine ? `<p style="margin: 4px 0 0 0; font-size: 12px;"><strong>Cozinha:</strong> ${element.tags.cuisine}</p>` : ''}
+                    ${element.tags?.phone ? `<p style="margin: 4px 0 0 0; font-size: 12px;"><strong>Tel:</strong> ${element.tags.phone}</p>` : ''}
+                </div>
+            `;
+
+            marker.bindPopup(popupContent);
+            marker.addTo(this.map);
+
+            this.poiMarkers.push(marker);
+        });
+    }
+
+    /**
+     * Limpa marcadores de POI
+     */
+    private clearPOIMarkers(): void {
+        this.poiMarkers.forEach(marker => {
+            this.map.removeLayer(marker);
+        });
+        this.poiMarkers = [];
     }
 }
 

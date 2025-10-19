@@ -25,6 +25,34 @@
                     <span>{{ markers.length }} parada(s) exibida(s)</span>
                 </div>
 
+                <!-- Controles de POI -->
+                <div class="poi-controls">
+                    <button mat-icon-button 
+                            [class.active]="showPOI.restaurants"
+                            (click)="togglePOI('restaurants')"
+                            matTooltip="Mostrar/Ocultar Restaurantes">
+                        <mat-icon>restaurant</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            [class.active]="showPOI.hotels"
+                            (click)="togglePOI('hotels')"
+                            matTooltip="Mostrar/Ocultar Hotéis">
+                        <mat-icon>hotel</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            [class.active]="showPOI.gasStations"
+                            (click)="togglePOI('gasStations')"
+                            matTooltip="Mostrar/Ocultar Postos">
+                        <mat-icon>local_gas_station</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            [class.active]="showPOI.attractions"
+                            (click)="togglePOI('attractions')"
+                            matTooltip="Mostrar/Ocultar Atrações">
+                        <mat-icon>attractions</mat-icon>
+                    </button>
+                </div>
+
             </div>
         </mat-card>
     </div>

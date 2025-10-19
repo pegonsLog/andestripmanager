@@ -1,11 +1,16 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild, AfterViewInit, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
 import { Parada } from '../../../models';
+import { GoogleMapsLoaderService } from '../../../services/google-maps-loader.service';
+
+// Declaração global do Google Maps
+declare var google: any;
 
 export interface ParadaDetailDialogData {
   parada: Parada;
@@ -15,7 +20,7 @@ export interface ParadaDetailDialogData {
 @Component({
   selector: 'app-parada-detail-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatChipsModule, MatDividerModule],
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatChipsModule, MatDividerModule, MatTabsModule],
   template: `
     <h5 mat-dialog-title class="title">
       <mat-icon class="tipo-icon">{{ getIconeParada(data.parada.tipo) }}</mat-icon>
@@ -29,7 +34,11 @@ export interface ParadaDetailDialogData {
         <span class="tipo">{{ getTipoParadaTexto(data.parada.tipo) }}</span>
       </div>
 
-      <div class="grid">
+      <mat-tab-group class="tabs-container" (selectedTabChange)="onTabChange($event)">
+        <!-- Aba de Informações -->
+        <mat-tab label="Informações">
+          <div class="tab-content">
+            <div class="grid">
         <div class="grid-item" *ngIf="data.parada.horaChegada || data.parada.horaSaida">
           <div class="section-title"><mat-icon>schedule</mat-icon> Horários</div>
           <div class="row">
@@ -75,21 +84,36 @@ export interface ParadaDetailDialogData {
           </div>
         </div>
         
-        <!-- Modal de visualização de foto em tela cheia -->
-        <div class="foto-modal" *ngIf="fotoSelecionada !== null" (click)="fecharFoto()">
-          <div class="modal-content">
-            <button mat-icon-button class="btn-fechar" (click)="fecharFoto()">
-              <mat-icon>close</mat-icon>
-            </button>
-            <button mat-icon-button class="btn-anterior" (click)="fotoAnterior(); $event.stopPropagation()" *ngIf="data.parada.fotos && data.parada.fotos.length > 1">
-              <mat-icon>chevron_left</mat-icon>
-            </button>
-            <img [src]="data.parada.fotos![fotoSelecionada]" [alt]="'Foto ' + (fotoSelecionada + 1)" (click)="$event.stopPropagation()" />
-            <button mat-icon-button class="btn-proximo" (click)="fotoProxima(); $event.stopPropagation()" *ngIf="data.parada.fotos && data.parada.fotos.length > 1">
-              <mat-icon>chevron_right</mat-icon>
-            </button>
-            <div class="foto-contador">{{ fotoSelecionada + 1 }} / {{ data.parada.fotos?.length }}</div>
+            </div>
           </div>
+        </mat-tab>
+
+        <!-- Aba do Mapa -->
+        <mat-tab label="Mapa" *ngIf="data.parada.coordenadas">
+          <div class="tab-content">
+            <div class="map-container" #mapContainer></div>
+            <div class="coordenadas-info" *ngIf="data.parada.coordenadas">
+              <mat-icon>my_location</mat-icon>
+              <span>{{ data.parada.coordenadas[0].toFixed(6) }}, {{ data.parada.coordenadas[1].toFixed(6) }}</span>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+
+      <!-- Modal de visualização de foto em tela cheia -->
+      <div class="foto-modal" *ngIf="fotoSelecionada !== null" (click)="fecharFoto()">
+        <div class="modal-content">
+          <button mat-icon-button class="btn-fechar" (click)="fecharFoto()">
+            <mat-icon>close</mat-icon>
+          </button>
+          <button mat-icon-button class="btn-anterior" (click)="fotoAnterior(); $event.stopPropagation()" *ngIf="data.parada.fotos && data.parada.fotos.length > 1">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <img [src]="data.parada.fotos![fotoSelecionada]" [alt]="'Foto ' + (fotoSelecionada + 1)" (click)="$event.stopPropagation()" />
+          <button mat-icon-button class="btn-proximo" (click)="fotoProxima(); $event.stopPropagation()" *ngIf="data.parada.fotos && data.parada.fotos.length > 1">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <div class="foto-contador">{{ fotoSelecionada + 1 }} / {{ data.parada.fotos?.length }}</div>
         </div>
       </div>
     </div>
@@ -129,22 +153,38 @@ export interface ParadaDetailDialogData {
     .btn-anterior { left: -60px; }
     .btn-proximo { right: -60px; }
     .foto-contador { position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); color: white; font-size: 14px; }
+    .tabs-container { margin-top: 16px; }
+    .tab-content { padding: 16px 0; }
+    .map-container { width: 100%; height: 400px; background-color: #f5f5f5; border-radius: 8px; overflow: hidden; }
+    .coordenadas-info { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 12px; background-color: #f5f5f5; border-radius: 6px; font-size: 14px; color: #666; }
+    .coordenadas-info mat-icon { font-size: 20px; width: 20px; height: 20px; }
     @media (max-width: 768px) {
       .fotos-galeria { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
       .btn-anterior { left: 10px; }
       .btn-proximo { right: 10px; }
+      .map-container { height: 300px; }
     }
     @media (min-width: 720px) { .grid { grid-template-columns: repeat(2, 1fr); } }
     `
   ]
 })
-export class ParadaDetailDialogComponent {
+export class ParadaDetailDialogComponent implements AfterViewInit {
+  @ViewChild('mapContainer') mapContainer!: ElementRef;
+  
   fotoSelecionada: number | null = null;
+  map: any;
+  mapInitialized = false;
+  
+  private googleMapsLoader = inject(GoogleMapsLoaderService);
 
   constructor(
     private dialogRef: MatDialogRef<ParadaDetailDialogComponent, void>,
     @Inject(MAT_DIALOG_DATA) public data: ParadaDetailDialogData
   ) {}
+
+  ngAfterViewInit(): void {
+    // O mapa será inicializado quando a aba for selecionada
+  }
 
   onClose(): void {
     this.dialogRef.close();
@@ -197,4 +237,100 @@ export class ParadaDetailDialogComponent {
         : 0;
     }
   }
+
+  /**
+   * Detecta mudança de aba
+   */
+  onTabChange(event: any): void {
+    // Índice 1 é a aba do mapa (0 = Informações, 1 = Mapa)
+    if (event.index === 1 && !this.mapInitialized) {
+      setTimeout(() => {
+        this.initializeMap();
+      }, 100);
+    }
+  }
+
+  /**
+   * Inicializa o mapa do Google
+   */
+  private async initializeMap(): Promise<void> {
+    if (this.mapInitialized || !this.data.parada.coordenadas) return;
+
+    try {
+      // Carregar Google Maps se necessário
+      await this.googleMapsLoader.load();
+
+      if (!this.mapContainer || !this.mapContainer.nativeElement) {
+        console.warn('mapContainer não disponível');
+        return;
+      }
+
+      const coords = this.data.parada.coordenadas;
+      const position = { lat: coords[0], lng: coords[1] };
+
+      // Criar mapa
+      this.map = new google.maps.Map(this.mapContainer.nativeElement, {
+        center: position,
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      });
+
+      // Adicionar marcador
+      const marker = new google.maps.Marker({
+        position,
+        map: this.map,
+        title: this.data.parada.nome,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 12,
+          fillColor: this.getMarkerColor(this.data.parada.tipo),
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 3
+        }
+      });
+
+      // Adicionar InfoWindow
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <div style="padding: 8px;">
+            <h4 style="margin: 0 0 8px 0;">${this.data.parada.nome}</h4>
+            <p style="margin: 0; color: #666;">${this.getTipoParadaTexto(this.data.parada.tipo)}</p>
+            ${this.data.parada.endereco ? `<p style="margin: 4px 0 0 0; font-size: 13px;">${this.data.parada.endereco}</p>` : ''}
+          </div>
+        `
+      });
+
+      marker.addListener('click', () => {
+        infoWindow.open(this.map, marker);
+      });
+
+      this.mapInitialized = true;
+    } catch (error) {
+      console.error('Erro ao inicializar mapa:', error);
+    }
+  }
+
+  /**
+   * Retorna a cor do marcador baseado no tipo
+   */
+  private getMarkerColor(tipo: string): string {
+    const cores: { [key: string]: string } = {
+      'abastecimento': '#ff5722',
+      'refeicao': '#4caf50',
+      'ponto-interesse': '#2196f3',
+      'descanso': '#9c27b0',
+      'manutencao': '#ff9800',
+      'hospedagem': '#795548'
+    };
+    return cores[tipo] || '#2196f3';
+  }
 }
+

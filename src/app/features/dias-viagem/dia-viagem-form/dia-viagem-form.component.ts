@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -11,14 +11,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { DiaViagem, Viagem } from '../../../models';
+import { DiaViagem, Viagem, PontoRota } from '../../../models';
 import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { ViagensService } from '../../../services/viagens.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { GoogleMapsLoaderService } from '../../../services/google-maps-loader.service';
+
+// Declaração global do Google Maps
+declare var google: any;
 
 /**
  * Componente para formulário de criação/edição de dia de viagem
@@ -38,7 +43,8 @@ import { AuthService } from '../../../core/services/auth.service';
         MatIconModule,
         MatSelectModule,
         MatSnackBarModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatTooltipModule
     ],
     templateUrl: './dia-viagem-form.component.html',
     styleUrls: ['./dia-viagem-form.component.scss'],
@@ -56,6 +62,7 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
     private diasViagemService = inject(DiasViagemService);
     private viagensService = inject(ViagensService);
     private authService = inject(AuthService);
+    private googleMapsLoader = inject(GoogleMapsLoaderService);
 
     // Controle de ciclo de vida
     private destroy$ = new Subject<void>();
@@ -81,6 +88,12 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
         { value: 'rodovia', label: 'Rodovia' },
         { value: 'estrada-rural', label: 'Estrada Rural' },
         { value: 'mista', label: 'Mista' }
+    ];
+
+    tiposPontoRota = [
+        { value: 'waypoint', label: 'Ponto de Passagem', icon: 'location_on' },
+        { value: 'parada', label: 'Parada Obrigatória', icon: 'pause_circle' },
+        { value: 'referencia', label: 'Referência', icon: 'flag' }
     ];
 
     ngOnInit(): void {
@@ -116,7 +129,8 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
             horaChegadaPlanejada: [''],
             tempoEstimado: [0, [Validators.min(0)]],
             tipoEstrada: ['rodovia'],
-            observacoes: ['']
+            observacoes: [''],
+            pontosRota: this.fb.array([])
         });
 
         // Quando selecionar um dia disponível, atualiza o campo data
@@ -264,6 +278,14 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
             tipoEstrada: dia.rota?.tipoEstrada || 'rodovia',
             observacoes: dia.observacoes || ''
         });
+
+        // Carregar pontos da rota se existirem
+        if (dia.rota?.pontosRota && dia.rota.pontosRota.length > 0) {
+            const pontosOrdenados = [...dia.rota.pontosRota].sort((a, b) => a.ordem - b.ordem);
+            pontosOrdenados.forEach(ponto => {
+                this.adicionarPontoRota(ponto);
+            });
+        }
     }
 
     /**
@@ -355,12 +377,41 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Integração com serviço de geocodificação (placeholder)
+     * Integração com serviço de geocodificação usando Google Maps API
      */
     async buscarCoordenadas(endereco: string): Promise<[number, number] | undefined> {
-        // TODO: Implementar integração com Google Maps Geocoding API
-        console.log('Buscar coordenadas para:', endereco);
-        return undefined;
+        if (!endereco || endereco.trim().length < 2) {
+            return undefined;
+        }
+
+        try {
+            // Verificar se o Google Maps está carregado
+            if (typeof google === 'undefined' || !google.maps) {
+                console.warn('Google Maps não está carregado. Tentando carregar...');
+                await this.googleMapsLoader.load();
+            }
+
+            // Usar o Geocoder do Google Maps
+            const geocoder = new google.maps.Geocoder();
+            
+            return new Promise((resolve) => {
+                geocoder.geocode({ address: endereco }, (results: any, status: any) => {
+                    if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+                        const location = results[0].geometry.location;
+                        const lat = location.lat();
+                        const lng = location.lng();
+                        console.log(`Coordenadas encontradas para "${endereco}":`, lat, lng);
+                        resolve([lat, lng]);
+                    } else {
+                        console.warn(`Geocoding falhou para "${endereco}":`, status);
+                        resolve(undefined);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Erro ao buscar coordenadas:', error);
+            return undefined;
+        }
     }
 
     /**
@@ -392,6 +443,16 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
             const coordenadasOrigemm = await this.buscarCoordenadas(formData.origem);
             const coordenadasDestino = await this.buscarCoordenadas(formData.destino);
 
+            // Converter pontos da rota para o formato correto
+            const pontosRota: PontoRota[] | undefined = formData.pontosRota && formData.pontosRota.length > 0
+                ? formData.pontosRota.map((ponto: any) => ({
+                    coordenadas: [ponto.latitude, ponto.longitude] as [number, number],
+                    nome: ponto.nome,
+                    tipo: ponto.tipo,
+                    ordem: ponto.ordem
+                }))
+                : undefined;
+
             const dadosDia: Omit<DiaViagem, 'id' | 'criadoEm' | 'atualizadoEm'> = {
                 usuarioId: usuarioAtual.id,
                 viagemId: this.viagemId,
@@ -407,7 +468,8 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
                     ...(coordenadasOrigemm ? { coordenadasOrigemm } : {}),
                     ...(coordenadasDestino ? { coordenadasDestino } : {}),
                     ...(formData.tempoEstimado ? { tempoEstimado: formData.tempoEstimado } : {}),
-                    tipoEstrada: formData.tipoEstrada
+                    tipoEstrada: formData.tipoEstrada,
+                    ...(pontosRota ? { pontosRota } : {})
                 }
             };
 
@@ -534,5 +596,121 @@ export class DiaViagemFormComponent implements OnInit, OnDestroy {
         const ano = data.getFullYear();
         
         return `${diaSemana}, ${dia} ${mes} ${ano}`;
+    }
+
+    /**
+     * Retorna o FormArray de pontos da rota
+     */
+    get pontosRota(): FormArray {
+        return this.diaForm.get('pontosRota') as FormArray;
+    }
+
+    /**
+     * Cria um FormGroup para um ponto da rota
+     */
+    private criarPontoRotaFormGroup(ponto?: PontoRota): FormGroup {
+        return this.fb.group({
+            nome: [ponto?.nome || '', [Validators.required, Validators.minLength(2)]],
+            latitude: [ponto?.coordenadas?.[0] || null, [Validators.required]],
+            longitude: [ponto?.coordenadas?.[1] || null, [Validators.required]],
+            tipo: [ponto?.tipo || 'waypoint', [Validators.required]],
+            ordem: [ponto?.ordem || this.pontosRota.length + 1]
+        });
+    }
+
+    /**
+     * Adiciona um novo ponto à rota
+     */
+    adicionarPontoRota(ponto?: PontoRota): void {
+        this.pontosRota.push(this.criarPontoRotaFormGroup(ponto));
+    }
+
+    /**
+     * Remove um ponto da rota
+     */
+    removerPontoRota(index: number): void {
+        this.pontosRota.removeAt(index);
+        // Reordenar os pontos restantes
+        this.pontosRota.controls.forEach((control, i) => {
+            control.patchValue({ ordem: i + 1 });
+        });
+    }
+
+    /**
+     * Move um ponto para cima na lista
+     */
+    moverPontoParaCima(index: number): void {
+        if (index === 0) return;
+        const ponto = this.pontosRota.at(index);
+        this.pontosRota.removeAt(index);
+        this.pontosRota.insert(index - 1, ponto);
+        // Reordenar
+        this.pontosRota.controls.forEach((control, i) => {
+            control.patchValue({ ordem: i + 1 });
+        });
+    }
+
+    /**
+     * Move um ponto para baixo na lista
+     */
+    moverPontoParaBaixo(index: number): void {
+        if (index === this.pontosRota.length - 1) return;
+        const ponto = this.pontosRota.at(index);
+        this.pontosRota.removeAt(index);
+        this.pontosRota.insert(index + 1, ponto);
+        // Reordenar
+        this.pontosRota.controls.forEach((control, i) => {
+            control.patchValue({ ordem: i + 1 });
+        });
+    }
+
+    /**
+     * Busca coordenadas para um ponto específico
+     */
+    async buscarCoordenadasPonto(index: number): Promise<void> {
+        const pontoControl = this.pontosRota.at(index);
+        const nome = pontoControl.get('nome')?.value;
+
+        if (!nome || nome.trim().length < 2) {
+            this.showError('Digite um nome válido para buscar as coordenadas');
+            return;
+        }
+
+        // Mostrar feedback de carregamento
+        this.snackBar.open('Buscando coordenadas...', '', {
+            duration: 2000
+        });
+
+        try {
+            const coords = await this.buscarCoordenadas(nome);
+            if (coords) {
+                pontoControl.patchValue({
+                    latitude: coords[0],
+                    longitude: coords[1]
+                });
+                this.showSuccess(`Coordenadas encontradas: ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`);
+            } else {
+                this.showError('Não foi possível encontrar as coordenadas. Verifique o nome do local ou digite manualmente.');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar coordenadas:', error);
+            this.showError('Erro ao buscar coordenadas. Tente novamente ou digite manualmente.');
+        }
+    }
+
+    /**
+     * Retorna o ícone do tipo de ponto
+     */
+    getTipoPontoIcon(tipo: string): string {
+        const tipoPonto = this.tiposPontoRota.find(t => t.value === tipo);
+        return tipoPonto?.icon || 'location_on';
+    }
+
+    /**
+     * Retorna o label do tipo de ponto
+     */
+    getTipoPontoLabel(tipo: string): string {
+        const tipoPonto = this.tiposPontoRota.find(t => t.value === tipo);
+        return tipoPonto?.label || tipo;
     }
 }

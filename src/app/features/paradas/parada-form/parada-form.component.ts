@@ -31,6 +31,11 @@ import {
 import { ParadasService } from '../../../services/paradas.service';
 import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { PhotoUploadComponent, Photo } from '../../../shared/components/photo-upload/photo-upload.component';
+import { GoogleMapsLoaderService } from '../../../services/google-maps-loader.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+// Declaração global do Google Maps
+declare var google: any;
 
 @Component({
     selector: 'app-parada-form',
@@ -50,6 +55,7 @@ import { PhotoUploadComponent, Photo } from '../../../shared/components/photo-up
         MatChipsModule,
         MatAutocompleteModule,
         MatSliderModule,
+        MatTooltipModule,
         PhotoUploadComponent
     ],
     templateUrl: './parada-form.component.html',
@@ -68,6 +74,7 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
     private paradasService = inject(ParadasService);
     private diasViagemService = inject(DiasViagemService);
     private snackBar = inject(MatSnackBar);
+    private googleMapsLoader = inject(GoogleMapsLoaderService);
     private destroy$ = new Subject<void>();
 
     // Lista de dias disponíveis
@@ -178,6 +185,10 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
             custo: [null, [Validators.min(0)]],
             observacoes: ['', [Validators.maxLength(500)]],
             avaliacao: [null, [Validators.min(1), Validators.max(5)]],
+
+            // Coordenadas
+            latitude: [null],
+            longitude: [null],
 
             // Campos específicos de abastecimento
             tipoCombustivel: [''],
@@ -359,7 +370,9 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
             horaSaida: parada.horaSaida || '',
             custo: parada.custo || null,
             observacoes: parada.observacoes || '',
-            avaliacao: parada.avaliacao || null
+            avaliacao: parada.avaliacao || null,
+            latitude: parada.coordenadas ? parada.coordenadas[0] : null,
+            longitude: parada.coordenadas ? parada.coordenadas[1] : null
         });
 
         // Carregar fotos
@@ -486,6 +499,9 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
             tipo,
             nome: formValue.nome,
             endereco: formValue.endereco || undefined,
+            coordenadas: (formValue.latitude && formValue.longitude) 
+                ? [formValue.latitude, formValue.longitude] as [number, number]
+                : undefined,
             horaChegada: formValue.horaChegada || undefined,
             horaSaida: formValue.horaSaida || undefined,
             custo: formValue.custo || undefined,
@@ -653,5 +669,76 @@ export class ParadaFormComponent implements OnInit, OnDestroy {
      */
     getUploadPath(): string {
         return `paradas/${this.viagemId}/${this.diaViagemId}`;
+    }
+
+    /**
+     * Busca coordenadas baseado no endereço
+     */
+    async buscarCoordenadas(): Promise<void> {
+        const endereco = this.paradaForm.get('endereco')?.value;
+
+        if (!endereco || endereco.trim().length < 2) {
+            this.showError('Digite um endereço válido para buscar as coordenadas');
+            return;
+        }
+
+        // Mostrar feedback de carregamento
+        this.snackBar.open('Buscando coordenadas...', '', {
+            duration: 2000
+        });
+
+        try {
+            const coords = await this.buscarCoordenadasEndereco(endereco);
+            if (coords) {
+                this.paradaForm.patchValue({
+                    latitude: coords[0],
+                    longitude: coords[1]
+                });
+                this.showSuccess(`Coordenadas encontradas: ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`);
+            } else {
+                this.showError('Não foi possível encontrar as coordenadas. Verifique o endereço ou digite manualmente.');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar coordenadas:', error);
+            this.showError('Erro ao buscar coordenadas. Tente novamente ou digite manualmente.');
+        }
+    }
+
+    /**
+     * Integração com serviço de geocodificação usando Google Maps API
+     */
+    private async buscarCoordenadasEndereco(endereco: string): Promise<[number, number] | undefined> {
+        if (!endereco || endereco.trim().length < 2) {
+            return undefined;
+        }
+
+        try {
+            // Verificar se o Google Maps está carregado
+            if (typeof google === 'undefined' || !google.maps) {
+                console.warn('Google Maps não está carregado. Tentando carregar...');
+                await this.googleMapsLoader.load();
+            }
+
+            // Usar o Geocoder do Google Maps
+            const geocoder = new google.maps.Geocoder();
+            
+            return new Promise((resolve) => {
+                geocoder.geocode({ address: endereco }, (results: any, status: any) => {
+                    if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+                        const location = results[0].geometry.location;
+                        const lat = location.lat();
+                        const lng = location.lng();
+                        console.log(`Coordenadas encontradas para "${endereco}":`, lat, lng);
+                        resolve([lat, lng]);
+                    } else {
+                        console.warn(`Geocoding falhou para "${endereco}":`, status);
+                        resolve(undefined);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Erro ao buscar coordenadas:', error);
+            return undefined;
+        }
     }
 }

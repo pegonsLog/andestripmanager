@@ -77,6 +77,15 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy, AfterViewIni
     directionsService: any = null;
     directionsRenderer: any = null;
     mapInitialized = false;
+    trafficLayer: any = null;
+    placesService: any = null;
+    placeMarkers: any[] = [];
+    
+    // Controles de camadas
+    showTraffic = true;
+    showRestaurants = false;
+    showHotels = false;
+    showGasStations = false;
 
     ngOnInit(): void {
         if (!this.diaId) {
@@ -174,42 +183,6 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy, AfterViewIni
             });
     }
 
-    /**
-     * Detecta mudança de aba
-     */
-    onTabChange(event: any): void {
-        // Índice 0 é a aba do mapa
-        if (event.index === 0) {
-            this.onMapTabSelected();
-        }
-    }
-
-    /**
-     * Inicializa Google Maps quando a aba do mapa é selecionada
-     */
-    onMapTabSelected(): void {
-        if (this.mapInitialized) {
-            return; // Já foi inicializado
-        }
-
-        // Aguardar para garantir que o DOM foi renderizado
-        // Aumentar o delay porque o ng-template precisa de mais tempo
-        setTimeout(() => {
-            if (this.mapContainer && this.mapContainer.nativeElement) {
-                this.initializeGoogleMaps();
-            } else {
-                console.warn('mapContainer ainda não está disponível, tentando novamente...');
-                // Tentar novamente após mais tempo
-                setTimeout(() => {
-                    if (this.mapContainer && this.mapContainer.nativeElement) {
-                        this.initializeGoogleMaps();
-                    } else {
-                        console.error('mapContainer não pôde ser inicializado');
-                    }
-                }, 500);
-            }
-        }, 300);
-    }
 
     /**
      * Inicializa Google Maps
@@ -241,14 +214,25 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy, AfterViewIni
                 zoom: 10,
                 center: { lat: -23.5505, lng: -46.6333 }, // São Paulo como padrão
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
-                styles: [
-                    {
-                        featureType: 'poi',
-                        elementType: 'labels',
-                        stylers: [{ visibility: 'off' }]
-                    }
-                ]
+                mapTypeControl: true,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                    position: google.maps.ControlPosition.TOP_RIGHT
+                },
+                zoomControl: true,
+                zoomControlOptions: {
+                    position: google.maps.ControlPosition.RIGHT_CENTER
+                },
+                streetViewControl: true,
+                fullscreenControl: true
             });
+
+            // Adicionar camada de trânsito
+            this.trafficLayer = new google.maps.TrafficLayer();
+            this.trafficLayer.setMap(this.map);
+
+            // Inicializar serviço de lugares
+            this.placesService = new google.maps.places.PlacesService(this.map);
 
             this.directionsService = new google.maps.DirectionsService();
             this.directionsRenderer = new google.maps.DirectionsRenderer({
@@ -300,12 +284,30 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy, AfterViewIni
     private showRoute(origem: [number, number], destino: [number, number]): void {
         if (!this.directionsService || !this.directionsRenderer) return;
 
+        const dia = this.dia$.value;
+        const waypoints: google.maps.DirectionsWaypoint[] = [];
+
+        // Adicionar waypoints se existirem na rota
+        if (dia?.rota?.pontosRota && dia.rota.pontosRota.length > 0) {
+            // Ordenar pontos pela ordem
+            const pontosOrdenados = [...dia.rota.pontosRota].sort((a, b) => a.ordem - b.ordem);
+            
+            pontosOrdenados.forEach(ponto => {
+                waypoints.push({
+                    location: { lat: ponto.coordenadas[0], lng: ponto.coordenadas[1] },
+                    stopover: ponto.tipo === 'parada' // Paradas são stopovers, waypoints não
+                });
+            });
+        }
+
         const request: google.maps.DirectionsRequest = {
             origin: { lat: origem[0], lng: origem[1] },
             destination: { lat: destino[0], lng: destino[1] },
+            waypoints: waypoints.length > 0 ? waypoints : undefined,
             travelMode: google.maps.TravelMode.DRIVING,
             avoidHighways: false,
-            avoidTolls: false
+            avoidTolls: false,
+            optimizeWaypoints: false // Manter a ordem definida pelo usuário
         };
 
         this.directionsService.route(request, (result, status) => {
@@ -333,10 +335,28 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy, AfterViewIni
                     if (status2 === google.maps.GeocoderStatus.OK && results2 && results2[0]) {
                         const destinoCoords = results2[0].geometry.location;
 
+                        const dia = this.dia$.value;
+                        const waypoints: google.maps.DirectionsWaypoint[] = [];
+
+                        // Adicionar waypoints se existirem na rota
+                        if (dia?.rota?.pontosRota && dia.rota.pontosRota.length > 0) {
+                            // Ordenar pontos pela ordem
+                            const pontosOrdenados = [...dia.rota.pontosRota].sort((a, b) => a.ordem - b.ordem);
+                            
+                            pontosOrdenados.forEach(ponto => {
+                                waypoints.push({
+                                    location: { lat: ponto.coordenadas[0], lng: ponto.coordenadas[1] },
+                                    stopover: ponto.tipo === 'parada'
+                                });
+                            });
+                        }
+
                         const request: google.maps.DirectionsRequest = {
                             origin: origemCoords,
                             destination: destinoCoords,
-                            travelMode: google.maps.TravelMode.DRIVING
+                            waypoints: waypoints.length > 0 ? waypoints : undefined,
+                            travelMode: google.maps.TravelMode.DRIVING,
+                            optimizeWaypoints: false
                         };
 
                         this.directionsService!.route(request, (result, status3) => {
@@ -392,54 +412,111 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy, AfterViewIni
      * Retorna ícone do marcador baseado no tipo de parada
      */
     private getMarkerIcon(tipo: string): google.maps.Icon {
-        const baseUrl = 'https://maps.google.com/mapfiles/ms/icons/';
+        // Usar ícones coloridos do Google Maps
+        const iconColors: { [key: string]: string } = {
+            'abastecimento': 'red',
+            'refeicao': 'green',
+            'ponto-interesse': 'blue',
+            'descanso': 'purple',
+            'manutencao': 'orange',
+            'hospedagem': 'brown'
+        };
 
-        switch (tipo) {
-            case 'abastecimento':
-                return {
-                    url: baseUrl + 'gas_stations.png',
-                    scaledSize: new google.maps.Size(32, 32)
-                };
-            case 'refeicao':
-                return {
-                    url: baseUrl + 'restaurant.png',
-                    scaledSize: new google.maps.Size(32, 32)
-                };
-            case 'ponto-interesse':
-                return {
-                    url: baseUrl + 'camera.png',
-                    scaledSize: new google.maps.Size(32, 32)
-                };
-            default:
-                return {
-                    url: baseUrl + 'red-dot.png',
-                    scaledSize: new google.maps.Size(32, 32)
-                };
-        }
+        const color = iconColors[tipo] || 'red';
+        
+        return {
+            url: `http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`,
+            scaledSize: new google.maps.Size(40, 40),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(20, 40)
+        };
     }
 
     /**
      * Cria conteúdo da info window
      */
     private createInfoWindowContent(parada: Parada): string {
+        const tipoIcon = this.getTipoParadaIcon(parada.tipo);
+        const tipoLabel = this.getTipoParadaLabel(parada.tipo);
+        
         let content = `
-      <div style="max-width: 200px;">
-        <h4 style="margin: 0 0 8px 0;">${parada.nome}</h4>
-        <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">
-          ${this.getTipoParadaLabel(parada.tipo)}
-        </p>
+      <div style="max-width: 280px; font-family: 'Roboto', sans-serif; padding: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #1976d2;">
+          <span class="material-icons" style="color: #1976d2; font-size: 24px;">${tipoIcon}</span>
+          <div>
+            <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #333;">${parada.nome}</h4>
+            <p style="margin: 2px 0 0 0; font-size: 12px; color: #666; font-weight: 500;">
+              ${tipoLabel}
+            </p>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
     `;
 
+        if (parada.endereco) {
+            content += `
+          <div style="display: flex; align-items: start; gap: 6px;">
+            <span class="material-icons" style="color: #666; font-size: 16px;">place</span>
+            <span style="font-size: 13px; color: #444; line-height: 1.4;">${parada.endereco}</span>
+          </div>
+        `;
+        }
+
         if (parada.horaChegada || parada.horaSaida) {
-            const horario = `${parada.horaChegada || '--:--'}${parada.horaSaida ? ' - ' + parada.horaSaida : ''}`;
-            content += `<p style="margin: 0 0 4px 0; font-size: 12px;"><strong>Horário:</strong> ${horario}</p>`;
+            const horario = parada.horaChegada && parada.horaSaida 
+                ? `${parada.horaChegada} - ${parada.horaSaida}`
+                : parada.horaChegada || parada.horaSaida || '';
+            content += `
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="material-icons" style="color: #666; font-size: 16px;">schedule</span>
+            <span style="font-size: 13px; color: #444; font-weight: 500;">${horario}</span>
+          </div>
+        `;
+        }
+
+        if (parada.custo && parada.custo > 0) {
+            content += `
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="material-icons" style="color: #4caf50; font-size: 16px;">attach_money</span>
+            <span style="font-size: 13px; color: #4caf50; font-weight: 600;">R$ ${parada.custo.toFixed(2)}</span>
+          </div>
+        `;
+        }
+
+        if (parada.duracao && parada.duracao > 0) {
+            const horas = Math.floor(parada.duracao / 60);
+            const minutos = parada.duracao % 60;
+            const duracaoTexto = horas > 0 ? `${horas}h ${minutos}min` : `${minutos}min`;
+            content += `
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="material-icons" style="color: #666; font-size: 16px;">timer</span>
+            <span style="font-size: 13px; color: #444;">${duracaoTexto}</span>
+          </div>
+        `;
+        }
+
+        if (parada.avaliacao && parada.avaliacao > 0) {
+            const estrelas = '⭐'.repeat(parada.avaliacao);
+            content += `
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="material-icons" style="color: #ffc107; font-size: 16px;">star</span>
+            <span style="font-size: 13px; color: #444;">${estrelas} (${parada.avaliacao}/5)</span>
+          </div>
+        `;
         }
 
         if (parada.observacoes) {
-            content += `<p style="margin: 0; font-size: 12px;">${parada.observacoes}</p>`;
+            content += `
+          <div style="display: flex; align-items: start; gap: 6px; margin-top: 4px; padding-top: 8px; border-top: 1px solid #eee;">
+            <span class="material-icons" style="color: #ff9800; font-size: 16px;">info</span>
+            <span style="font-size: 12px; color: #666; line-height: 1.4; font-style: italic;">${parada.observacoes}</span>
+          </div>
+        `;
         }
 
-        content += '</div>';
+        content += `
+        </div>
+      </div>`;
         return content;
     }
 
@@ -453,6 +530,66 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy, AfterViewIni
         if (this.directionsRenderer) {
             this.directionsRenderer.setMap(null);
         }
+
+        if (this.trafficLayer) {
+            this.trafficLayer.setMap(null);
+        }
+    }
+
+    /**
+     * Busca lugares próximos ao longo da rota
+     */
+    searchNearbyPlaces(location: google.maps.LatLng, types: string[]): void {
+        if (!this.placesService || !this.map) return;
+
+        const request = {
+            location: location,
+            radius: 5000, // 5km de raio
+            types: types
+        };
+
+        this.placesService.nearbySearch(request, (results: any[], status: any) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                // Limitar a 10 resultados para não poluir o mapa
+                results.slice(0, 10).forEach((place: any) => {
+                    this.createPlaceMarker(place);
+                });
+            }
+        });
+    }
+
+    /**
+     * Cria marcador para um lugar
+     */
+    private createPlaceMarker(place: any): void {
+        if (!place.geometry || !place.geometry.location) return;
+
+        const marker = new google.maps.Marker({
+            map: this.map,
+            position: place.geometry.location,
+            title: place.name,
+            icon: {
+                url: place.icon,
+                scaledSize: new google.maps.Size(25, 25)
+            },
+            opacity: 0.7
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+            content: `
+                <div style="padding: 8px; max-width: 200px;">
+                    <h4 style="margin: 0 0 4px 0; font-size: 14px;">${place.name}</h4>
+                    <p style="margin: 0; font-size: 12px; color: #666;">${place.vicinity || ''}</p>
+                    ${place.rating ? `<p style="margin: 4px 0 0 0; font-size: 12px;">⭐ ${place.rating}/5</p>` : ''}
+                </div>
+            `
+        });
+
+        marker.addListener('click', () => {
+            infoWindow.open(this.map!, marker);
+        });
+
+        this.placeMarkers.push(marker);
     }
 
     /**
@@ -597,5 +734,71 @@ export class DiaViagemDetailComponent implements OnInit, OnDestroy, AfterViewIni
             this.map.setCenter({ lat: parada.coordenadas[0], lng: parada.coordenadas[1] });
             this.map.setZoom(15);
         }
+    }
+
+    /**
+     * Alterna exibição da camada de trânsito
+     */
+    toggleTraffic(): void {
+        this.showTraffic = !this.showTraffic;
+        if (this.trafficLayer) {
+            this.trafficLayer.setMap(this.showTraffic ? this.map : null);
+        }
+    }
+
+    /**
+     * Alterna exibição de restaurantes
+     */
+    toggleRestaurants(): void {
+        this.showRestaurants = !this.showRestaurants;
+        if (this.showRestaurants) {
+            this.clearPlaceMarkers();
+            const center = this.map?.getCenter();
+            if (center) {
+                this.searchNearbyPlaces(center, ['restaurant']);
+            }
+        } else {
+            this.clearPlaceMarkers();
+        }
+    }
+
+    /**
+     * Alterna exibição de hotéis
+     */
+    toggleHotels(): void {
+        this.showHotels = !this.showHotels;
+        if (this.showHotels) {
+            this.clearPlaceMarkers();
+            const center = this.map?.getCenter();
+            if (center) {
+                this.searchNearbyPlaces(center, ['lodging']);
+            }
+        } else {
+            this.clearPlaceMarkers();
+        }
+    }
+
+    /**
+     * Alterna exibição de postos de gasolina
+     */
+    toggleGasStations(): void {
+        this.showGasStations = !this.showGasStations;
+        if (this.showGasStations) {
+            this.clearPlaceMarkers();
+            const center = this.map?.getCenter();
+            if (center) {
+                this.searchNearbyPlaces(center, ['gas_station']);
+            }
+        } else {
+            this.clearPlaceMarkers();
+        }
+    }
+
+    /**
+     * Limpa marcadores de lugares
+     */
+    private clearPlaceMarkers(): void {
+        this.placeMarkers.forEach(marker => marker.setMap(null));
+        this.placeMarkers = [];
     }
 }
