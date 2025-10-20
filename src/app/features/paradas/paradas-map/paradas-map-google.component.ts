@@ -30,9 +30,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Parada, TipoParada } from '../../../models';
 import { GoogleMapsLoaderService } from '../../../services/google-maps-loader.service';
 
-// Declaração global do Google Maps
-declare var google: any;
-
 /**
  * Interface para marcador no mapa
  */

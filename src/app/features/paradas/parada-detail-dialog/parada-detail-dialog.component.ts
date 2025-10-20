@@ -9,9 +9,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { Parada } from '../../../models';
 import { GoogleMapsLoaderService } from '../../../services/google-maps-loader.service';
 
-// Declaração global do Google Maps
-declare var google: any;
-
 export interface ParadaDetailDialogData {
   parada: Parada;
   diaLabel: string;

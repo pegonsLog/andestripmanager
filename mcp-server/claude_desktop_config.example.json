@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "andestripmanager": {
+      "command": "node",
+      "args": [
+        "/home/pegons/apps/andestripmanager/mcp-server/dist/index.js"
+      ],
+      "env": {
+        "FIREBASE_SERVICE_ACCOUNT_PATH": "/home/pegons/apps/andestripmanager/mcp-server/serviceAccountKey.json"
+      }
+    }
+  }
+}

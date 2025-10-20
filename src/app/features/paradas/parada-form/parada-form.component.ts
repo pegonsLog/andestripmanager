@@ -34,9 +34,6 @@ import { PhotoUploadComponent, Photo } from '../../../shared/components/photo-up
 import { GoogleMapsLoaderService } from '../../../services/google-maps-loader.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-// Declaração global do Google Maps
-declare var google: any;
-
 @Component({
     selector: 'app-parada-form',
     standalone: true,

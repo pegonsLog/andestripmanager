@@ -17,9 +17,6 @@ import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { ParadasService } from '../../../services/paradas.service';
 import { GoogleMapsLoaderService } from '../../../services/google-maps-loader.service';
 
-// Declaração global do Google Maps
-declare var google: any;
-
 /**
  * Componente para visualização detalhada de um dia de viagem
  * Inclui mapa, paradas, informações climáticas e progresso

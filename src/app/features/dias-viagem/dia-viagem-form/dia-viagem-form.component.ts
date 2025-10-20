@@ -22,9 +22,6 @@ import { ViagensService } from '../../../services/viagens.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { GoogleMapsLoaderService } from '../../../services/google-maps-loader.service';
 
-// Declaração global do Google Maps
-declare var google: any;
-
 /**
  * Componente para formulário de criação/edição de dia de viagem
  */

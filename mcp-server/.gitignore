@@ -1,0 +1,30 @@
+# Dependências
+node_modules/
+
+# Arquivos compilados
+dist/
+
+# Variáveis de ambiente
+.env
+
+# Credenciais Firebase
+serviceAccountKey.json
+*.json
+!package.json
+!tsconfig.json
+!claude_desktop_config.example.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

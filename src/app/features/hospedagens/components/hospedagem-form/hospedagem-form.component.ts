@@ -23,9 +23,6 @@ import { CustomValidators } from '../../../../models/validators';
 import { UploadService } from '../../../../core/services/upload.service';
 import { GoogleMapsLoaderService } from '../../../../services/google-maps-loader.service';
 
-// Declaração global do Google Maps
-declare var google: any;
-
 @Component({
     selector: 'app-hospedagem-form',
     standalone: true,

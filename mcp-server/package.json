@@ -1,0 +1,31 @@
+{
+  "name": "andestripmanager-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server para expor dados do AndesTripManager via Model Context Protocol",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch & node --watch dist/index.js",
+    "inspect": "node --inspect dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "firebase",
+    "firestore",
+    "viagens"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "firebase-admin": "^12.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 
-// Declaração global do Google Maps
-declare var google: any;
-
 /**
  * Serviço para carregar o Google Maps API de forma dinâmica
  * Mantém a chave da API segura no arquivo environment.ts (não commitado)
