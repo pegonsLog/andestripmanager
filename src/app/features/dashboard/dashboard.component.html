@@ -50,67 +50,55 @@
         <div class="statistics-section">
             <h3 class="font-semibold section-title">Estatísticas</h3>
 
-            <mat-grid-list cols="4" rowHeight="120px" gutterSize="16px" class="statistics-grid">
-                <mat-grid-tile>
-                    <mat-card class="stat-card">
-                        <mat-card-content>
-                            <div class="stat-content">
-                                <mat-icon class="stat-icon primary">map</mat-icon>
-                                <div class="stat-info">
-                                    <span class="stat-number font-bold">{{ (estatisticas$ | async)?.totalViagens || 0
-                                        }}</span>
-                                    <span class="stat-label font-regular">Total de Viagens</span>
-                                </div>
+            <div class="statistics-grid">
+                <mat-card class="stat-card">
+                    <mat-card-content>
+                        <div class="stat-content">
+                            <mat-icon class="stat-icon primary">map</mat-icon>
+                            <div class="stat-info">
+                                <span class="stat-number font-bold">{{ (estatisticas$ | async)?.totalViagens || 0 }}</span>
+                                <span class="stat-label font-regular">Total de Viagens</span>
                             </div>
-                        </mat-card-content>
-                    </mat-card>
-                </mat-grid-tile>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
 
-                <mat-grid-tile>
-                    <mat-card class="stat-card">
-                        <mat-card-content>
-                            <div class="stat-content">
-                                <mat-icon class="stat-icon accent">directions_bike</mat-icon>
-                                <div class="stat-info">
-                                    <span class="stat-number font-bold">{{ (estatisticas$ | async)?.viagensEmAndamento
-                                        || 0 }}</span>
-                                    <span class="stat-label font-regular">Em Andamento</span>
-                                </div>
+                <mat-card class="stat-card">
+                    <mat-card-content>
+                        <div class="stat-content">
+                            <mat-icon class="stat-icon accent">two_wheeler</mat-icon>
+                            <div class="stat-info">
+                                <span class="stat-number font-bold">{{ (estatisticas$ | async)?.viagensEmAndamento || 0 }}</span>
+                                <span class="stat-label font-regular">Em Andamento</span>
                             </div>
-                        </mat-card-content>
-                    </mat-card>
-                </mat-grid-tile>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
 
-                <mat-grid-tile>
-                    <mat-card class="stat-card">
-                        <mat-card-content>
-                            <div class="stat-content">
-                                <mat-icon class="stat-icon warn">route</mat-icon>
-                                <div class="stat-info">
-                                    <span class="stat-number font-bold">{{ formatarDistancia((estatisticas$ |
-                                        async)?.distanciaTotal || 0) }}</span>
-                                    <span class="stat-label font-regular">Distância Total</span>
-                                </div>
+                <mat-card class="stat-card">
+                    <mat-card-content>
+                        <div class="stat-content">
+                            <mat-icon class="stat-icon warn">route</mat-icon>
+                            <div class="stat-info">
+                                <span class="stat-number font-bold">{{ formatarDistancia((estatisticas$ | async)?.distanciaTotal || 0) }}</span>
+                                <span class="stat-label font-regular">Distância Total</span>
                             </div>
-                        </mat-card-content>
-                    </mat-card>
-                </mat-grid-tile>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
 
-                <mat-grid-tile>
-                    <mat-card class="stat-card">
-                        <mat-card-content>
-                            <div class="stat-content">
-                                <mat-icon class="stat-icon success">attach_money</mat-icon>
-                                <div class="stat-info">
-                                    <span class="stat-number font-bold">{{ formatarMoeda((estatisticas$ |
-                                        async)?.custoTotal || 0) }}</span>
-                                    <span class="stat-label font-regular">Custo Total</span>
-                                </div>
+                <mat-card class="stat-card">
+                    <mat-card-content>
+                        <div class="stat-content">
+                            <mat-icon class="stat-icon success">attach_money</mat-icon>
+                            <div class="stat-info">
+                                <span class="stat-number font-bold">{{ formatarMoeda((estatisticas$ | async)?.custoTotal || 0) }}</span>
+                                <span class="stat-label font-regular">Custo Total</span>
                             </div>
-                        </mat-card-content>
-                    </mat-card>
-                </mat-grid-tile>
-            </mat-grid-list>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
         </div>
 
         <!-- Viagens Recentes -->
