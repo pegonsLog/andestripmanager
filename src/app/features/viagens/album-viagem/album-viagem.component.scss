@@ -1,0 +1,446 @@
+.album-container {
+    min-height: 100vh;
+    background: #f5f5f5;
+}
+
+// Barra de ações
+.action-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 16px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+// Loading e erro
+.loading-container, .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 16px;
+    
+    mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+    }
+}
+
+// Conteúdo do álbum
+.album-content {
+    max-width: 900px;
+    margin: 80px auto 40px;
+    padding: 0 20px;
+}
+
+// Páginas do álbum
+.album-page {
+    background: white;
+    padding: 60px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    page-break-after: always;
+}
+
+// CAPA
+.capa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 600px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.capa-border {
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    padding: 60px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.album-title {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 20px;
+    letter-spacing: 2px;
+}
+
+.viagem-nome {
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 30px;
+    color: #fff;
+}
+
+.divider {
+    width: 200px;
+    height: 3px;
+    background: white;
+    margin: 0 auto 30px;
+    border-radius: 2px;
+}
+
+.capa-info {
+    text-align: center;
+    font-size: 15px;
+    line-height: 2;
+    
+    p {
+        margin: 8px 0;
+    }
+}
+
+.capa-descricao {
+    margin-top: 30px;
+    text-align: center;
+    font-style: italic;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+// Títulos
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 30px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #3498db;
+}
+
+// Sumário
+.sumario {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sumario-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 15px;
+    
+    &:hover {
+        background: #e9ecef;
+    }
+}
+
+.sumario-label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.sumario-page {
+    color: #7f8c8d;
+}
+
+// Introdução
+.intro-content {
+    p {
+        margin: 12px 0;
+        line-height: 1.8;
+        font-size: 15px;
+    }
+    
+    .descricao-intro {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-left: 4px solid #3498db;
+        font-style: italic;
+    }
+}
+
+// Dias
+.dia-header {
+    margin-bottom: 20px;
+}
+
+.dia-rota {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    
+    .origem {
+        color: #27ae60;
+        font-weight: 600;
+    }
+    
+    .seta {
+        color: #7f8c8d;
+    }
+    
+    .destino {
+        color: #e74c3c;
+        font-weight: 600;
+    }
+}
+
+.dia-stats {
+    display: flex;
+    gap: 24px;
+    margin: 20px 0;
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: #ebf5fb;
+        border-radius: 6px;
+        
+        mat-icon {
+            color: #3498db;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+        }
+    }
+}
+
+// Subseções
+.subsection {
+    margin: 24px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    
+    h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #5d6d7e;
+        margin: 0 0 12px;
+    }
+    
+    ul {
+        margin: 0;
+        padding-left: 24px;
+        
+        li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+    }
+}
+
+.total-custos {
+    font-size: 18px;
+    font-weight: 700;
+    color: #27ae60;
+    margin: 0;
+}
+
+.diario-texto {
+    font-style: italic;
+    line-height: 1.8;
+    color: #5d6d7e;
+    margin: 0;
+}
+
+// Financeiro
+.financeiro-content {
+    .total-geral {
+        text-align: center;
+        padding: 30px;
+        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        color: white;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        
+        h3 {
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+        
+        .valor-total {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 0;
+        }
+    }
+}
+
+.custos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.custo-item {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 16px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    align-items: center;
+    
+    .custo-data {
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+    
+    .custo-descricao {
+        font-weight: 500;
+    }
+    
+    .custo-valor {
+        font-weight: 700;
+        color: #27ae60;
+        text-align: right;
+    }
+}
+
+// Manutenções
+.manutencoes-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.manutencao-item {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #e67e22;
+}
+
+.manutencao-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    
+    .manutencao-data {
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+    
+    .manutencao-tipo {
+        font-weight: 600;
+        color: #e67e22;
+        text-transform: uppercase;
+        font-size: 12px;
+    }
+}
+
+.manutencao-descricao {
+    margin: 0 0 8px;
+    line-height: 1.6;
+}
+
+.manutencao-custo {
+    margin: 0;
+    font-weight: 700;
+    color: #e74c3c;
+}
+
+// Conclusão
+.conclusao-content {
+    h3 {
+        font-size: 22px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 24px;
+    }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    
+    mat-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 12px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    .stat-label {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+}
+
+.reflexoes {
+    margin: 30px 0;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    
+    h3 {
+        margin: 0 0 16px;
+    }
+    
+    p {
+        line-height: 1.8;
+        margin: 0;
+        font-style: italic;
+    }
+}
+
+.citacao {
+    text-align: center;
+    margin-top: 40px;
+    
+    p {
+        font-size: 18px;
+        font-style: italic;
+        color: #7f8c8d;
+        margin: 0;
+    }
+}
+
+// Estilos de impressão
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .album-content {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .album-page {
+        box-shadow: none;
+        margin: 0;
+        page-break-after: always;
+    }
+}

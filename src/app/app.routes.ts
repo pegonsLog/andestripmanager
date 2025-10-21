@@ -64,6 +64,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/viagens/viagem-detail/viagem-detail.component').then(c => c.ViagemDetailComponent)
             },
             {
+                path: ':id/album',
+                loadComponent: () => import('./features/viagens/album-viagem/album-viagem.component').then(c => c.AlbumViagemComponent)
+            },
+            {
                 path: ':id/editar',
                 loadComponent: () => import('./features/viagens/viagem-form/viagem-form.component').then(c => c.ViagemFormComponent)
             }

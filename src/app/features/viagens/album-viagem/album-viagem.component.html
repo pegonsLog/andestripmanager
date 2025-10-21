@@ -1,0 +1,252 @@
+<div class="album-container">
+    <!-- Barra de ações (oculta na impressão) -->
+    <div class="action-bar no-print">
+        <button mat-raised-button (click)="voltar()">
+            <mat-icon>arrow_back</mat-icon>
+            Voltar
+        </button>
+        <button mat-raised-button color="primary" (click)="imprimir()">
+            <mat-icon>print</mat-icon>
+            Imprimir
+        </button>
+    </div>
+
+    <!-- Loading -->
+    @if (isLoading()) {
+        <div class="loading-container">
+            <mat-spinner></mat-spinner>
+            <p>Carregando álbum...</p>
+        </div>
+    }
+
+    <!-- Erro -->
+    @if (error()) {
+        <div class="error-container">
+            <mat-icon>error</mat-icon>
+            <p>{{ error() }}</p>
+        </div>
+    }
+
+    <!-- Conteúdo do Álbum -->
+    @if (dados(); as album) {
+        <div class="album-content">
+            <!-- CAPA -->
+            <div class="album-page capa">
+                <div class="capa-border">
+                    <div class="capa-content">
+                        <h1 class="album-title">ÁLBUM DE VIAGEM</h1>
+                        <h2 class="viagem-nome">{{ album.viagem.nome }}</h2>
+                        <div class="divider"></div>
+                        <div class="capa-info">
+                            <p><strong>Piloto:</strong> {{ album.viagem.usuarioNome || 'Piloto' }}</p>
+                            <p><strong>Período:</strong> {{ formatarPeriodo(album.viagem.dataInicio, album.viagem.dataFim) }}</p>
+                            <p><strong>Rota:</strong> {{ album.viagem.origem }} - {{ album.viagem.destino }}</p>
+                        </div>
+                        @if (album.viagem.descricao) {
+                            <p class="capa-descricao">{{ album.viagem.descricao }}</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUMÁRIO -->
+            <div class="album-page">
+                <h2 class="section-title">Sumário</h2>
+                <div class="sumario">
+                    <div class="sumario-item">
+                        <span class="sumario-label">Introdução</span>
+                        <span class="sumario-page">1</span>
+                    </div>
+                    <div class="sumario-item">
+                        <span class="sumario-label">Relato Diário</span>
+                        <span class="sumario-page">{{ album.dias.length }} dias</span>
+                    </div>
+                    <div class="sumario-item">
+                        <span class="sumario-label">Resumo Financeiro</span>
+                        <span class="sumario-page">{{ album.custos.length }} registros</span>
+                    </div>
+                    @if (album.manutencoes.length > 0) {
+                        <div class="sumario-item">
+                            <span class="sumario-label">Manutenções Realizadas</span>
+                            <span class="sumario-page">{{ album.manutencoes.length }}</span>
+                        </div>
+                    }
+                    <div class="sumario-item">
+                        <span class="sumario-label">Conclusão e Reflexões</span>
+                        <span class="sumario-page"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTRODUÇÃO -->
+            <div class="album-page">
+                <h2 class="section-title">Introdução</h2>
+                <div class="intro-content">
+                    <p><strong>Nome da Viagem:</strong> {{ album.viagem.nome }}</p>
+                    <p><strong>Origem:</strong> {{ album.viagem.origem }}</p>
+                    <p><strong>Destino:</strong> {{ album.viagem.destino }}</p>
+                    <p><strong>Data de Início:</strong> {{ formatarData(album.viagem.dataInicio) }}</p>
+                    <p><strong>Data de Término:</strong> {{ formatarData(album.viagem.dataFim) }}</p>
+                    @if (album.viagem.descricao) {
+                        <p class="descricao-intro">{{ album.viagem.descricao }}</p>
+                    }
+                </div>
+            </div>
+
+            <!-- RELATO DIÁRIO -->
+            @for (dia of album.dias; track dia.id; let i = $index) {
+                <div class="album-page">
+                    <h2 class="section-title">Dia {{ i + 1 }} - {{ formatarData(dia.data) }}</h2>
+                    
+                    <div class="dia-header">
+                        <div class="dia-rota">
+                            <span class="origem">{{ dia.origem }}</span>
+                            <span class="seta">→</span>
+                            <span class="destino">{{ dia.destino }}</span>
+                        </div>
+                    </div>
+
+                    <div class="dia-stats">
+                        @if (dia.distanciaPercorrida || dia.distanciaPlanejada) {
+                            <div class="stat-item">
+                                <mat-icon>route</mat-icon>
+                                <span>{{ formatarDistancia(dia.distanciaPercorrida || dia.distanciaPlanejada) }}</span>
+                            </div>
+                        }
+                        @if (dia.tempoViagem) {
+                            <div class="stat-item">
+                                <mat-icon>schedule</mat-icon>
+                                <span>{{ formatarTempo(dia.tempoViagem) }}</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Paradas do dia -->
+                    @if (getParadasDoDia(dia.id).length > 0) {
+                        <div class="subsection">
+                            <h3>Paradas e Pontos de Interesse</h3>
+                            <ul>
+                                @for (parada of getParadasDoDia(dia.id); track parada.id) {
+                                    <li>{{ parada.nome }} - {{ parada.descricao || 'Parada registrada' }}</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <!-- Hospedagem do dia -->
+                    @if (getHospedagemDoDia(dia.id); as hospedagem) {
+                        <div class="subsection">
+                            <h3>Hospedagem</h3>
+                            <p>
+                                <strong>{{ hospedagem.nome }}</strong>
+                                @if (hospedagem.endereco) { - {{ hospedagem.endereco }} }
+                                @if (hospedagem.valor) { ({{ formatarMoeda(hospedagem.valor) }}) }
+                            </p>
+                        </div>
+                    }
+
+                    <!-- Custos do dia -->
+                    @if (getCustosDoDia(dia.id).length > 0) {
+                        <div class="subsection">
+                            <h3>Custos do Dia</h3>
+                            <p class="total-custos">
+                                Total: {{ formatarMoeda(getTotalCustosDia(dia.id)) }}
+                            </p>
+                        </div>
+                    }
+
+                    <!-- Diário de bordo -->
+                    @if (dia.diarioBordo || dia.observacoes) {
+                        <div class="subsection">
+                            <h3>Diário de Bordo</h3>
+                            <p class="diario-texto">{{ dia.diarioBordo || dia.observacoes }}</p>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- RESUMO FINANCEIRO -->
+            <div class="album-page">
+                <h2 class="section-title">Resumo Financeiro</h2>
+                
+                @if (album.custos.length > 0) {
+                    <div class="financeiro-content">
+                        <div class="total-geral">
+                            <h3>Total Geral</h3>
+                            <p class="valor-total">{{ formatarMoeda(getTotalCustos()) }}</p>
+                        </div>
+
+                        <div class="custos-lista">
+                            @for (custo of album.custos; track custo.id) {
+                                <div class="custo-item">
+                                    <span class="custo-data">{{ formatarData(custo.data) }}</span>
+                                    <span class="custo-descricao">{{ custo.descricao }}</span>
+                                    <span class="custo-valor">{{ formatarMoeda(custo.valor) }}</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                } @else {
+                    <p>Nenhum custo registrado nesta viagem.</p>
+                }
+            </div>
+
+            <!-- MANUTENÇÕES -->
+            @if (album.manutencoes.length > 0) {
+                <div class="album-page">
+                    <h2 class="section-title">Manutenções Realizadas</h2>
+                    <div class="manutencoes-lista">
+                        @for (manutencao of album.manutencoes; track manutencao.id) {
+                            <div class="manutencao-item">
+                                <div class="manutencao-header">
+                                    <span class="manutencao-data">{{ formatarData(manutencao.data) }}</span>
+                                    <span class="manutencao-tipo">{{ manutencao.tipo }}</span>
+                                </div>
+                                <p class="manutencao-descricao">{{ manutencao.descricao }}</p>
+                                @if (manutencao.custo) {
+                                    <p class="manutencao-custo">Custo: {{ formatarMoeda(manutencao.custo) }}</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- CONCLUSÃO -->
+            <div class="album-page">
+                <h2 class="section-title">Conclusão e Reflexões</h2>
+                <div class="conclusao-content">
+                    <h3>Estatísticas da Viagem</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <mat-icon>calendar_today</mat-icon>
+                            <span class="stat-value">{{ album.dias.length }}</span>
+                            <span class="stat-label">Dias de Viagem</span>
+                        </div>
+                        <div class="stat-card">
+                            <mat-icon>route</mat-icon>
+                            <span class="stat-value">{{ formatarDistancia(getDistanciaTotal()) }}</span>
+                            <span class="stat-label">Distância Total</span>
+                        </div>
+                        <div class="stat-card">
+                            <mat-icon>attach_money</mat-icon>
+                            <span class="stat-value">{{ formatarMoeda(getTotalCustos()) }}</span>
+                            <span class="stat-label">Custo Total</span>
+                        </div>
+                    </div>
+
+                    @if (album.viagem.observacoes) {
+                        <div class="reflexoes">
+                            <h3>Reflexões Finais</h3>
+                            <p>{{ album.viagem.observacoes }}</p>
+                        </div>
+                    }
+
+                    <div class="citacao">
+                        <p>"A vida é uma viagem, aproveite cada curva do caminho."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

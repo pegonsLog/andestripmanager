@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, signal }
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, BehaviorSubject, of } from 'rxjs';
 import { takeUntil, switchMap, catchError } from 'rxjs/operators';
 
@@ -25,6 +25,7 @@ import { MatInputModule } from '@angular/material/input';
 import { Viagem, StatusViagem, DiaViagem, Parada, Hospedagem, Custo } from '../../../models';
 import { Manutencao } from '../../../models/manutencao.interface';
 import { DiarioBordo } from '../../../models/diario-bordo.interface';
+import { AuthService } from '../../../core/services/auth.service';
 import { ViagensService } from '../../../services/viagens.service';
 import { DiasViagemService } from '../../../services/dias-viagem.service';
 import { ParadasService } from '../../../services/paradas.service';
@@ -60,6 +61,7 @@ import { DiaViagemDetailDialogComponent, DiaViagemDetailDialogData } from '../..
     imports: [
         CommonModule,
         FormsModule,
+        RouterLink,
         MatTabsModule,
         MatCardModule,
         MatButtonModule,
@@ -97,6 +99,7 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
     private custosService = inject(CustosService);
     private manutencoesService = inject(ManutencoesService);
     private diarioBordoService = inject(DiarioBordoService);
+    private authService = inject(AuthService);
     private snackBar = inject(MatSnackBar);
     private dialog = inject(MatDialog);
     private destroy$ = new Subject<void>();
@@ -1655,4 +1658,5 @@ export class ViagemDetailComponent implements OnInit, OnDestroy {
         };
         return textos[categoria] || categoria;
     }
+
 }

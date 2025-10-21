@@ -64,6 +64,7 @@
     "@cypress/schematic": "^4.1.1",
     "@types/google.maps": "^3.58.1",
     "@types/jasmine": "~5.1.0",
+    "@types/pdfmake": "^0.2.12",
     "@typescript-eslint/eslint-plugin": "7.11.0",
     "@typescript-eslint/parser": "7.11.0",
     "cypress": "^15.0.0",

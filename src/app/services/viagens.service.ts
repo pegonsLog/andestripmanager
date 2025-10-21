@@ -9,6 +9,7 @@ import { DiasViagemService } from './dias-viagem.service';
 import { ParadasService } from './paradas.service';
 import { HospedagensService } from './hospedagens.service';
 import { CustosService } from './custos.service';
+import { ManutencoesService } from './manutencoes.service';
 
 @Injectable({
     providedIn: 'root'
@@ -22,7 +23,8 @@ export class ViagensService extends BaseFirestoreService<Viagem> {
         private diasViagemService: DiasViagemService,
         private paradasService: ParadasService,
         private hospedagensService: HospedagensService,
-        private custosService: CustosService
+        private custosService: CustosService,
+        private manutencoesService: ManutencoesService
     ) {
         super(firestore);
     }
@@ -505,6 +507,46 @@ export class ViagensService extends BaseFirestoreService<Viagem> {
         } catch (error) {
             console.error(`[ERRO CRÍTICO] Falha durante restauração do backup da viagem ${backup.viagemId}:`, error);
             throw new Error(`Falha crítica no rollback: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+        }
+    }
+
+    /**
+     * Recupera todos os dados completos de uma viagem para geração do álbum
+     * Inclui: viagem, dias, paradas, hospedagens, custos, manutenções e fotos
+     */
+    async recuperarDadosCompletosViagem(viagemId: string): Promise<{
+        viagem: Viagem | undefined;
+        dias: any[];
+        paradas: any[];
+        hospedagens: any[];
+        custos: any[];
+        manutencoes: any[];
+    }> {
+        try {
+            console.log(`[INFO] Recuperando dados completos da viagem ${viagemId} para álbum`);
+
+            const [viagem, dias, paradas, hospedagens, custos, manutencoes] = await Promise.all([
+                this.recuperarPorId(viagemId).toPromise(),
+                this.diasViagemService.recuperarPorOutroParametro('viagemId', viagemId).toPromise(),
+                this.paradasService.recuperarPorOutroParametro('viagemId', viagemId).toPromise(),
+                this.hospedagensService.recuperarPorOutroParametro('viagemId', viagemId).toPromise(),
+                this.custosService.recuperarPorOutroParametro('viagemId', viagemId).toPromise(),
+                this.manutencoesService.recuperarPorViagem(viagemId).toPromise()
+            ]);
+
+            console.log(`[INFO] Dados recuperados: ${(dias || []).length} dias, ${(paradas || []).length} paradas, ${(hospedagens || []).length} hospedagens, ${(custos || []).length} custos, ${(manutencoes || []).length} manutenções`);
+
+            return {
+                viagem,
+                dias: dias || [],
+                paradas: paradas || [],
+                hospedagens: hospedagens || [],
+                custos: custos || [],
+                manutencoes: manutencoes || []
+            };
+        } catch (error) {
+            console.error(`[ERRO] Falha ao recuperar dados completos da viagem ${viagemId}:`, error);
+            throw new Error(`Erro ao carregar dados da viagem: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
         }
     }
 }
