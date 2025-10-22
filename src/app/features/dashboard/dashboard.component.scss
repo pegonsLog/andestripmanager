@@ -73,6 +73,12 @@
       gap: 0.5rem;
     }
 
+    .admin-button {
+      mat-icon {
+        margin-right: 4px;
+      }
+    }
+
     // Garante visibilidade do texto no botão "Nova Viagem"
     .mat-mdc-raised-button.mat-primary {
       background-color: var(--brand-primary) !important;

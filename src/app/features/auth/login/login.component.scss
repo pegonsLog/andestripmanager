@@ -98,62 +98,51 @@
   // Efeito glassmorphism (vidro fosco)
   background: rgba(255, 255, 255, 0.98) !important;
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
   
   // Animação de entrada do card
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInCard 0.8s ease-out 2.2s forwards;
+  animation: slideInCard 0.8s ease-out 2.5s both;
+  
+  @keyframes slideInCard {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-  // Centralizar cabeçalho do card (MatCardHeader)
-  .mat-mdc-card-header {
+  // Forçar centralização do header
+  ::ng-deep mat-card-header {
     display: flex;
     justify-content: center;
-  }
-}
-
-// Animação: card aparecer suavemente
-@keyframes fadeInCard {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+    padding: 0;
   }
 }
 
 .header-content {
   text-align: center;
   padding: 20px 0 5px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .logo {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
+  width: 100%;
 
-  // Exibir o logo do app acima do título
-  &::before {
-    content: "";
+  .logo-image {
+    max-width: 200px;
+    height: auto;
+    object-fit: contain;
     display: block;
-    width: 180px;
-    height: 175px;
-    background: url("/assets/logoAndesTripNoBackground.png") no-repeat center/contain;
-    margin-bottom: 8px;
-  }
-
-  .logo-icon {
-    // Oculta o ícone Material para usar o logo
-    display: none;
-  }
-
-  h1 {
-    // Oculta o texto "Andes Trip Manager"
-    display: none;
+    margin: 0 auto;
   }
 }
 
@@ -237,13 +226,8 @@
     max-width: 100%;
   }
 
-  .logo h1 {
-    font-size: 20px;
-  }
-
-  .logo::before {
-    width: 52px;
-    height: 52px;
+  .logo .logo-image {
+    max-width: 150px;
   }
 
   .login-form {

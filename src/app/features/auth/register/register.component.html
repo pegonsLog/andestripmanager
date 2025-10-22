@@ -3,10 +3,8 @@
         <mat-card-header>
             <div class="header-content">
                 <div class="logo">
-                    <mat-icon class="logo-icon">motorcycle</mat-icon>
-                    <h1>Andes Trip Manager</h1>
+                    <img src="assets/logoAndesTripNoBackground.png" alt="Andes Trip Manager" class="logo-image">
                 </div>
-                <p class="subtitle">Crie sua conta para começar</p>
             </div>
         </mat-card-header>
 
@@ -75,17 +73,13 @@
                         <span *ngIf="!isLoading">Criar conta</span>
                         <span *ngIf="isLoading">Criando conta...</span>
                     </button>
+                    
+                    <button mat-stroked-button type="button" class="cancel-button full-width"
+                        (click)="onCancel()" [disabled]="isLoading">
+                        Cancelar
+                    </button>
                 </div>
             </form>
         </mat-card-content>
-
-        <mat-card-actions class="card-actions">
-            <div class="login-section">
-                <span>Já tem uma conta?</span>
-                <button mat-button color="accent" (click)="onLogin()" [disabled]="isLoading">
-                    Fazer login
-                </button>
-            </div>
-        </mat-card-actions>
     </mat-card>
 </div>

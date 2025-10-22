@@ -350,6 +350,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     /**
+     * Verifica se o usuário é administrador
+     */
+    isAdmin(): boolean {
+        const user = this.authService.getCurrentUser();
+        return user?.email === 'pegons.log@gmail.com';
+    }
+
+    /**
+     * Navega para a página de gerenciamento de usuários
+     */
+    abrirGerenciamentoUsuarios(): void {
+        this.router.navigate(['/admin/usuarios']);
+    }
+
+    /**
      * Retorna a cor do chip baseada no status
      */
     getCorStatus(status: StatusViagem): string {

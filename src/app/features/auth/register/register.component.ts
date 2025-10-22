@@ -84,6 +84,11 @@ export class RegisterComponent implements OnInit {
     async onRegister(): Promise<void> {
         if (this.registerForm.invalid) {
             this.markFormGroupTouched();
+            this.snackBar.open('Por favor, corrija os erros no formulário antes de continuar', 'Fechar', {
+                duration: 4000,
+                panelClass: ['error-snackbar'],
+                verticalPosition: 'top'
+            });
             return;
         }
 
@@ -93,11 +98,16 @@ export class RegisterComponent implements OnInit {
             const formValue = this.registerForm.value;
             const { email, senha, nome, cpf, telefone } = formValue;
 
-            await this.authService.register(email, senha, {
-                nome,
-                cpf: cpf || undefined,
-                telefone: telefone || undefined
-            });
+            // Construir objeto de dados adicionais apenas com campos preenchidos
+            const dadosAdicionais: any = { nome };
+            if (cpf && cpf.trim()) {
+                dadosAdicionais.cpf = cpf;
+            }
+            if (telefone && telefone.trim()) {
+                dadosAdicionais.telefone = telefone;
+            }
+
+            await this.authService.register(email, senha, dadosAdicionais);
 
             this.snackBar.open('Conta criada com sucesso!', 'Fechar', {
                 duration: 3000,
@@ -106,10 +116,21 @@ export class RegisterComponent implements OnInit {
 
             this.router.navigate(['/dashboard']);
         } catch (error: any) {
-            this.snackBar.open(error.message || 'Erro ao criar conta', 'Fechar', {
-                duration: 5000,
-                panelClass: ['error-snackbar']
+            const errorMessage = error.message || 'Erro ao criar conta';
+            const duration = errorMessage.includes('email já está cadastrado') ? 8000 : 5000;
+            
+            this.snackBar.open(errorMessage, 'Fechar', {
+                duration: duration,
+                panelClass: ['error-snackbar'],
+                verticalPosition: 'top'
             });
+
+            // Se for email duplicado, destacar o campo de email
+            if (errorMessage.includes('email já está cadastrado')) {
+                const emailControl = this.registerForm.get('email');
+                emailControl?.setErrors({ emailDuplicado: true });
+                emailControl?.markAsTouched();
+            }
         } finally {
             this.isLoading = false;
         }
@@ -118,6 +139,13 @@ export class RegisterComponent implements OnInit {
    * Navega para login
    */
     onLogin(): void {
+        this.router.navigate(['/auth/login']);
+    }
+
+    /**
+     * Cancela o registro e volta para login
+     */
+    onCancel(): void {
         this.router.navigate(['/auth/login']);
     }
 
@@ -133,6 +161,10 @@ export class RegisterComponent implements OnInit {
 
         if (field?.hasError('email')) {
             return 'Email deve ter um formato válido';
+        }
+
+        if (field?.hasError('emailDuplicado')) {
+            return 'Este email já está cadastrado';
         }
 
         if (field?.hasError('minlength')) {

@@ -1,0 +1,71 @@
+// Regras de Segurança do Firestore para Andes Trip Manager
+// Copie e cole estas regras no Firebase Console > Firestore Database > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Função para verificar se o usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Função para verificar se o usuário é o administrador
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == 'pegons.log@gmail.com';
+    }
+    
+    // Função para verificar se é o próprio usuário
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Regras para a coleção de usuários
+    match /usuarios/{userId} {
+      // Permitir leitura:
+      // - Para o próprio usuário
+      // - Para o administrador (pode ler todos)
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Permitir criação:
+      // - Qualquer usuário autenticado pode criar seu próprio documento
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Permitir atualização:
+      // - O próprio usuário pode atualizar seus dados
+      // - O administrador pode atualizar qualquer usuário
+      allow update: if isOwner(userId) || isAdmin();
+      
+      // Permitir exclusão:
+      // - Apenas o administrador pode deletar usuários
+      allow delete: if isAdmin();
+    }
+    
+    // Regras para a coleção de viagens
+    match /viagens/{viagemId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      
+      // Subcoleções de viagens (dias, hospedagens, etc)
+      match /{document=**} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
+      }
+    }
+    
+    // Regras para a coleção de manutenções
+    match /manutencoes/{manutencaoId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+    }
+    
+    // Regra padrão: negar acesso a qualquer outra coleção não especificada
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

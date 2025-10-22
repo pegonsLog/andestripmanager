@@ -11,16 +11,25 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Usuários - só podem acessar seus próprios dados
-    match /users/{userId} {
-      allow read, write: if isOwner(userId);
-      allow create: if isAuthenticated();
+    // Função auxiliar para verificar se o usuário é administrador
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == 'pegons.log@gmail.com';
     }
 
-    // Usuários (coleção em português) - só podem acessar seus próprios dados
-    match /usuarios/{userId} {
-      allow read, write: if isOwner(userId);
+    // Usuários - só podem acessar seus próprios dados
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
       allow create: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Usuários (coleção em português) - só podem acessar seus próprios dados ou admin pode acessar todos
+    match /usuarios/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     // Viagens - só o proprietário pode acessar

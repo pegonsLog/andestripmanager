@@ -91,17 +91,25 @@ export class AuthService {
         try {
             const userCredential = await createUserWithEmailAndPassword(this.auth, email, senha);
 
-            // Criar documento do usuário no Firestore
-            const usuario: Usuario = {
+            // Criar documento do usuário no Firestore (apenas com campos definidos)
+            const usuario: any = {
                 id: userCredential.user.uid,
                 email: email,
                 nome: dadosUsuario.nome || '',
-                cpf: dadosUsuario.cpf,
-                telefone: dadosUsuario.telefone,
-                motocicleta: dadosUsuario.motocicleta,
                 criadoEm: new Date() as any,
                 atualizadoEm: new Date() as any
             };
+
+            // Adicionar campos opcionais apenas se tiverem valor válido
+            if (dadosUsuario.cpf && dadosUsuario.cpf.trim() !== '') {
+                usuario.cpf = dadosUsuario.cpf;
+            }
+            if (dadosUsuario.telefone && dadosUsuario.telefone.trim() !== '') {
+                usuario.telefone = dadosUsuario.telefone;
+            }
+            if (dadosUsuario.motocicleta) {
+                usuario.motocicleta = dadosUsuario.motocicleta;
+            }
 
             await this.createUserDocument(usuario);
         } catch (error: any) {
@@ -210,8 +218,20 @@ export class AuthService {
     private handleAuthError(error: any): Error {
         let message = 'Erro de autenticação';
 
-        // Log do erro completo para debug
-        console.error('Erro de autenticação completo:', error);
+        // Log apenas de erros inesperados (não logar erros comuns de validação)
+        const expectedErrors = [
+            'auth/email-already-in-use',
+            'auth/invalid-email',
+            'auth/weak-password',
+            'auth/wrong-password',
+            'auth/user-not-found',
+            'auth/invalid-credential',
+            'auth/invalid-login-credentials'
+        ];
+        
+        if (!expectedErrors.includes(error.code)) {
+            console.error('Erro de autenticação:', error);
+        }
 
         switch (error.code) {
             case 'auth/user-not-found':
@@ -227,7 +247,7 @@ export class AuthService {
                 message = 'Credenciais de login inválidas';
                 break;
             case 'auth/email-already-in-use':
-                message = 'Email já está em uso';
+                message = 'Este email já está cadastrado. Por favor, faça login ou use outro email.';
                 break;
             case 'auth/weak-password':
                 message = 'Senha muito fraca';

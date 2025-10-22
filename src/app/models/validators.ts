@@ -6,7 +6,11 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 export function cpfValidator(control: AbstractControl): ValidationErrors | null {
     const cpf = control.value?.replace(/\D/g, '');
 
-    if (!cpf || cpf.length !== 11) {
+    if (!cpf) {
+        return null; // Campo opcional
+    }
+
+    if (cpf.length !== 11) {
         return { cpfInvalido: { message: 'CPF deve ter 11 dígitos' } };
     }
 
