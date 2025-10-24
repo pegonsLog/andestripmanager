@@ -11,7 +11,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AuthService } from '../../../core/services/auth.service';
-import { cpfValidator, telefoneValidator } from '../../../models/validators';
 
 @Component({
     selector: 'app-register',
@@ -56,8 +55,6 @@ export class RegisterComponent implements OnInit {
         this.registerForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(2)]],
             email: ['', [Validators.required, Validators.email]],
-            cpf: ['', [cpfValidator]],
-            telefone: ['', [telefoneValidator]],
             senha: ['', [Validators.required, Validators.minLength(6)]],
             confirmarSenha: ['', [Validators.required]]
         }, { validators: this.passwordMatchValidator });
@@ -96,16 +93,10 @@ export class RegisterComponent implements OnInit {
 
         try {
             const formValue = this.registerForm.value;
-            const { email, senha, nome, cpf, telefone } = formValue;
+            const { email, senha, nome } = formValue;
 
-            // Construir objeto de dados adicionais apenas com campos preenchidos
-            const dadosAdicionais: any = { nome };
-            if (cpf && cpf.trim()) {
-                dadosAdicionais.cpf = cpf;
-            }
-            if (telefone && telefone.trim()) {
-                dadosAdicionais.telefone = telefone;
-            }
+            // Construir objeto de dados adicionais
+            const dadosAdicionais = { nome };
 
             await this.authService.register(email, senha, dadosAdicionais);
 
@@ -118,7 +109,7 @@ export class RegisterComponent implements OnInit {
         } catch (error: any) {
             const errorMessage = error.message || 'Erro ao criar conta';
             const duration = errorMessage.includes('email já está cadastrado') ? 8000 : 5000;
-            
+
             this.snackBar.open(errorMessage, 'Fechar', {
                 duration: duration,
                 panelClass: ['error-snackbar'],
@@ -172,14 +163,6 @@ export class RegisterComponent implements OnInit {
             return `Deve ter pelo menos ${requiredLength} caracteres`;
         }
 
-        if (field?.hasError('cpfInvalido')) {
-            return field.errors?.['cpfInvalido']?.message || 'CPF inválido';
-        }
-
-        if (field?.hasError('telefoneInvalido')) {
-            return field.errors?.['telefoneInvalido']?.message || 'Telefone inválido';
-        }
-
         if (field?.hasError('passwordMismatch')) {
             return 'As senhas não coincidem';
         }
@@ -195,39 +178,5 @@ export class RegisterComponent implements OnInit {
             const control = this.registerForm.get(key);
             control?.markAsTouched();
         });
-    }
-
-    /**
-     * Formata CPF enquanto digita
-     */
-    onCpfInput(event: any): void {
-        let value = event.target.value.replace(/\D/g, '');
-
-        if (value.length <= 11) {
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        }
-
-        this.registerForm.patchValue({ cpf: value });
-    }
-
-    /**
-     * Formata telefone enquanto digita
-     */
-    onTelefoneInput(event: any): void {
-        let value = event.target.value.replace(/\D/g, '');
-
-        if (value.length <= 11) {
-            if (value.length <= 10) {
-                value = value.replace(/(\d{2})(\d)/, '($1) $2');
-                value = value.replace(/(\d{4})(\d)/, '$1-$2');
-            } else {
-                value = value.replace(/(\d{2})(\d)/, '($1) $2');
-                value = value.replace(/(\d{5})(\d)/, '$1-$2');
-            }
-        }
-
-        this.registerForm.patchValue({ telefone: value });
     }
 }

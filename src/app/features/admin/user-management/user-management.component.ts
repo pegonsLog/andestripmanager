@@ -33,7 +33,7 @@ import { Usuario } from '../../../models';
 })
 export class UserManagementComponent implements OnInit {
   users$!: Observable<Usuario[]>;
-  displayedColumns: string[] = ['nome', 'email', 'cpf', 'telefone', 'criadoEm', 'acoes'];
+  displayedColumns: string[] = ['nome', 'email', 'criadoEm', 'acoes'];
   isLoading = false;
 
   constructor(
@@ -41,7 +41,7 @@ export class UserManagementComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -70,7 +70,7 @@ export class UserManagementComponent implements OnInit {
 
     try {
       await this.userManagementService.deleteUser(user.id!);
-      
+
       this.snackBar.open('Usuário removido com sucesso!', 'Fechar', {
         duration: 3000,
         panelClass: ['success-snackbar']
@@ -97,7 +97,7 @@ export class UserManagementComponent implements OnInit {
    */
   formatDate(timestamp: any): string {
     if (!timestamp) return '-';
-    
+
     try {
       const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
       return date.toLocaleDateString('pt-BR');

@@ -26,24 +26,6 @@
                     <mat-error>{{ getErrorMessage('email') }}</mat-error>
                 </mat-form-field>
 
-                <div class="form-row">
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>CPF (opcional)</mat-label>
-                        <input matInput type="text" formControlName="cpf" placeholder="000.000.000-00" maxlength="14"
-                            (input)="onCpfInput($event)" />
-                        <mat-icon matSuffix>badge</mat-icon>
-                        <mat-error>{{ getErrorMessage('cpf') }}</mat-error>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Telefone (opcional)</mat-label>
-                        <input matInput type="tel" formControlName="telefone" placeholder="(00) 00000-0000"
-                            maxlength="15" (input)="onTelefoneInput($event)" />
-                        <mat-icon matSuffix>phone</mat-icon>
-                        <mat-error>{{ getErrorMessage('telefone') }}</mat-error>
-                    </mat-form-field>
-                </div>
-
                 <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Senha</mat-label>
                     <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="senha"
@@ -73,9 +55,9 @@
                         <span *ngIf="!isLoading">Criar conta</span>
                         <span *ngIf="isLoading">Criando conta...</span>
                     </button>
-                    
-                    <button mat-stroked-button type="button" class="cancel-button full-width"
-                        (click)="onCancel()" [disabled]="isLoading">
+
+                    <button mat-stroked-button type="button" class="cancel-button full-width" (click)="onCancel()"
+                        [disabled]="isLoading">
                         Cancelar
                     </button>
                 </div>
